@@ -40,7 +40,11 @@ namespace Invert.uFrame.ECS
 
         public override string Identifier
         {
-            get { return Node.Identifier + ":" + MemberExpression; }
+            get
+            {
+                
+                return Node.Identifier + ":" + MemberExpression;
+            }
             set { }
         }
 
@@ -139,10 +143,11 @@ namespace Invert.uFrame.ECS
                     yield return new ContextVariable(VariableName, item.MemberName)
                     {
                         Source = item as ITypedItem,
-                        Repository = Repository,
+                   
                         Name = item.MemberName,
                         Node = this.Node,
-                        VariableType = item.MemberType
+                        VariableType = item.MemberType,
+                        Repository = Repository,
                     };
                 }
             }
@@ -545,6 +550,7 @@ namespace Invert.uFrame.ECS
         public IRepository Repository { get; set; }
         public string Identifier { get; set; }
         public bool Changed { get; set; }
+        public IEnumerable<string> ForeignKeys { get; private set; }
 
         [JsonProperty]
         public string ForIdentifier { get; set; }

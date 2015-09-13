@@ -25,7 +25,7 @@ namespace Invert.uFrame.ECS {
             get { return GraphItem as ActionNode; }
         }
 
-        protected override void DataObjectChanged()
+        public override void DataObjectChanged()
         {
             base.DataObjectChanged();
             IsBreakpoint = Action.BreakPoint != null;

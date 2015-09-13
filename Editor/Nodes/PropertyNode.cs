@@ -49,18 +49,20 @@ namespace Invert.uFrame.ECS
             get
             {
                 yield return Object;
-                if (Object.Item != null)
-                {
+                //if (Object.Item != null)
+                //{
                     yield return PropertySelection;
-                }
+                //}
                 
             }
         }
 
+        
         public override string Title
         {
             get
             {
+              
                 if (Repository == null) return string.Empty;
 
                 var item = PropertySelection.Item;

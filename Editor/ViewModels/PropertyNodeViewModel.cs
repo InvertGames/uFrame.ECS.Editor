@@ -1,3 +1,5 @@
+using Invert.Core.GraphDesigner;
+
 namespace Invert.uFrame.ECS {
     using System;
     using System.Collections;
@@ -17,7 +19,7 @@ namespace Invert.uFrame.ECS {
             get { yield break; }
         }
 
-        protected override void DataObjectChanged()
+        public override void DataObjectChanged()
         {
             base.DataObjectChanged();
             _name = GraphItem.Title;
@@ -27,6 +29,31 @@ namespace Invert.uFrame.ECS {
         {
             get { return _name; }
             set { base.Name = value; }
+        }
+
+        protected override void CreateContent()
+        {
+            //base.CreateContent();
+            foreach (var item in GraphItem.GraphItems.OfType<GenericSlot>())
+            {
+                var vm = new InputOutputViewModel()
+                {
+                    Name = item.Name,
+                    IsOutput = item is IActionOut,
+                    IsInput = !(item is IActionOut),
+                    DataObject = item,
+                    IsNewLine = true,
+                    DiagramViewModel = DiagramViewModel
+                };
+                ContentItems.Add(vm);
+                if (vm.InputConnector != null)
+                {
+                    vm.InputConnector.Style = ConnectorStyle.Circle;
+                    vm.InputConnector.TintColor = UnityEngine.Color.green;
+                }
+
+            }
+           
         }
     }
 }
