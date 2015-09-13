@@ -1,0 +1,8 @@
+{
+	"Identifier":"ff75c0ab-5e0d-4233-bb40-a1c7bafae358"	, 
+	"Time":"9/2/2015 11:21:11 AM"	, 
+	"Group":"112111"	, 
+	"DataRecordId":"a8d15976-8565-4c4d-b145-7ace9638cf3e"	, 
+	"Type":0	, 
+	"RecordType":"Invert.Core.GraphDesigner.FilterStackItem, Invert.Core.GraphDesigner, Version=1.1.0.0, Culture=neutral, PublicKeyToken=null"	, 
+	"Data":"{\r\n\t\"Identifier\":\"a8d15976-8565-4c4d-b145-7ace9638cf3e\"\t, \r\n\t\"Index\":0}\r\n"}
