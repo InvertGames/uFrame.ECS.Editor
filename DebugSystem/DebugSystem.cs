@@ -6,7 +6,7 @@ using Invert.Common.UI;
 using Invert.Data;
 using Invert.Json;
 using Invert.uFrame.ECS;
-using uFrame.Kernel;
+
 using UnityEditor;
 using UnityEngine;
 
