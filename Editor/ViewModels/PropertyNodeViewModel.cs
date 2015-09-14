@@ -22,7 +22,7 @@ namespace Invert.uFrame.ECS {
         public override void DataObjectChanged()
         {
             base.DataObjectChanged();
-            _name = GraphItem.Title;
+            _name =  GraphItem.Title;
         }
 
         public override string Name
@@ -30,7 +30,7 @@ namespace Invert.uFrame.ECS {
             get { return _name; }
             set { base.Name = value; }
         }
-
+        
         protected override void CreateContent()
         {
             //base.CreateContent();
