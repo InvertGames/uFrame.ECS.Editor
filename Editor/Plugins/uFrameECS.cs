@@ -21,7 +21,9 @@ namespace Invert.uFrame.ECS
         IExecuteCommand<AddSlotInputNodeCommand>,
         IExecuteCommand<NewModuleWorkspace>,
         IQueryPossibleConnections,
-        IExecuteCommand<GroupActionNodes>
+        IExecuteCommand<GroupActionNodes>,
+        IQueryTypes
+
     {
         public override decimal LoadPriority
         {
@@ -30,6 +32,7 @@ namespace Invert.uFrame.ECS
 
         private static Dictionary<string, ActionMetaInfo> _actions;
         private static Dictionary<string, EventMetaInfo> _events;
+        private readonly static HashSet<Type> _types = new HashSet<Type>();
 
         static uFrameECS()
         {
@@ -159,6 +162,8 @@ namespace Invert.uFrame.ECS
                             Type = field.FieldType,
                             Name = field.Name
                         };
+                        if (!SystemTypes.Contains(field.FieldType))
+                            SystemTypes.Add(field.FieldType);
                         fieldMetaInfo.MetaAttributes =
                             field.GetCustomAttributes(typeof(ActionAttribute), true)
                                 .OfType<ActionAttribute>()
@@ -240,7 +245,8 @@ namespace Invert.uFrame.ECS
                                 Type = parameter.ParameterType,
                                 Name = parameter.Name
                             };
-
+                            if (!SystemTypes.Contains(parameter.ParameterType))
+                                SystemTypes.Add(parameter.ParameterType);
                             fieldMetaInfo.MetaAttributes =
                                 method.GetCustomAttributes(typeof(FieldDisplayTypeAttribute), true)
                                     .Cast<FieldDisplayTypeAttribute>()
@@ -266,6 +272,8 @@ namespace Invert.uFrame.ECS
                                 IsReturn = true,
                                 Name = "Result"
                             };
+                            if (!SystemTypes.Contains(method.ReturnType))
+                                SystemTypes.Add(method.ReturnType);
                             result.MetaAttributes =
                                 method.GetCustomAttributes(typeof(FieldDisplayTypeAttribute), true)
                                     .OfType<FieldDisplayTypeAttribute>()
@@ -370,7 +378,8 @@ namespace Invert.uFrame.ECS
                         Attribute = eventType.GetCustomAttributes(typeof(uFrameEventMapping), true).OfType<uFrameEventMapping>().FirstOrDefault(),
                         Name = field.Name
                     };
-
+                    if (!SystemTypes.Contains(field.FieldType))
+                        SystemTypes.Add(field.FieldType);
 
                     eventInfo.Members.Add(fieldMetaInfo);
                 }
@@ -384,6 +393,8 @@ namespace Invert.uFrame.ECS
                         IsProperty = true
                     };
 
+                    if (!SystemTypes.Contains(field.PropertyType))
+                        SystemTypes.Add(field.PropertyType);
 
                     eventInfo.Members.Add(fieldMetaInfo);
                 }
@@ -818,6 +829,12 @@ namespace Invert.uFrame.ECS
         }
 
         public MouseEvent LastMouseEvent { get; set; }
+
+        public static HashSet<Type> SystemTypes
+        {
+            get { return _types; }
+        }
+
         public void Execute(AddSlotInputNodeCommand command)
         {
             //var referenceNode = new VariableReferenceNode()
@@ -891,6 +908,14 @@ namespace Invert.uFrame.ECS
 
                 }
 
+            }
+        }
+
+        public void QueryTypes(List<ITypeInfo> typeInfo)
+        {
+            foreach (var item in SystemTypes)
+            {
+                typeInfo.Add(new SystemTypeInfo(item));
             }
         }
     }

@@ -28,7 +28,7 @@ namespace Invert.uFrame.ECS {
         public TypeSelection ObjectSelector { get; set; }
         public Func<ITypeInfo> VariableTypeSelector { get; set; }
 
-        public override IEnumerable<IDataRecord> GetAllowed()
+        public override IEnumerable<IValueItem> GetAllowed()
         {
             var item = VariableTypeSelector() as ITypeInfo;
             if (item == null) yield break;
@@ -55,7 +55,7 @@ namespace Invert.uFrame.ECS {
 
         public TypeSelection Type
         {
-            get { return this.GetSlot(ref _typeSelection, "Type",_=>_.Filter = () => Repository.AllOf<IDataRecord>().OfType<ITypeInfo>().Where(p=>p.IsEnum).Cast<IDataRecord>()); }
+            get { return this.GetSlot(ref _typeSelection, "Type",_=>_.Filter =i=>i.IsEnum); }
         }
         
         public override string Title
@@ -102,6 +102,7 @@ namespace Invert.uFrame.ECS {
                 var actionIn = this.OutputTo<IActionIn>();
                 if (actionIn != null)
                 {
+                    if (actionIn.Node != this)
                     return actionIn.VariableType;
                 }
                 return Type.Item as ITypeInfo;

@@ -33,6 +33,8 @@ namespace Invert.uFrame.ECS {
             get { return "System.Collections.Generic." + TypeName; }
         }
 
+        public string Namespace { get { return ListType.Namespace; } }
+
         public IEnumerable<IMemberInfo> GetMembers()
         {
             return ListType.GetMembers();
@@ -42,6 +44,12 @@ namespace Invert.uFrame.ECS {
         {
             return ListType.IsAssignableTo(info);
         }
+
+        public string Title { get { return TypeName; } }
+        public string Group { get { return ListType.Namespace; } }
+        public string SearchTag { get{return FullName;} }
+        public string Description { get{return FullName; }set{} }
+        public string Identifier { get{return FullName;} set{} }
     }
     public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem {
  

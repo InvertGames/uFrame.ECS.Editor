@@ -154,7 +154,7 @@ namespace Invert.uFrame.ECS
 
         public PropertyIn ObjectSelector { get; set; }
 
-        public override IEnumerable<IDataRecord> GetAllowed()
+        public override IEnumerable<IValueItem> GetAllowed()
         {
             var item = ObjectSelector.Item;
             if (item == null) yield break;
@@ -171,16 +171,15 @@ namespace Invert.uFrame.ECS
     }
 
 
-    public class TypeSelection : SelectionFor<IClassTypeNode,TypeSelectionValue>, IActionIn
+    public class TypeSelection : SelectionFor<ITypeInfo,TypeSelectionValue>, IActionIn
     {
-        public Func<IEnumerable<IDataRecord>> Filter { get; set; }
-        public override IEnumerable<IDataRecord> GetAllowed()
+        public Func<ITypeInfo, bool> Filter { get; set; }
+        public override IEnumerable<IValueItem> GetAllowed()
         {
-            if (Filter != null)
-            {
-                return Filter();
-            }
-            return Repository.AllOf<IClassTypeNode>().OfType<IDataRecord>();
+
+            var list = new List<ITypeInfo>();
+            InvertApplication.SignalEvent<IQueryTypes>(_=>_.QueryTypes(list));
+            return list.Where(Filter).OfType<IValueItem>();
         }
 
         public ActionFieldInfo ActionFieldInfo { get; set; }

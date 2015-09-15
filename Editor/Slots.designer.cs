@@ -45,9 +45,10 @@ namespace Invert.uFrame.ECS {
                 return false;
             }
         }
-        
-        public override System.Collections.Generic.IEnumerable<Invert.Data.IDataRecord> GetAllowed() {
-            return Repository.AllOf<IExpressionsConnectable>().OfType<IDataRecord>();;
+
+        public override System.Collections.Generic.IEnumerable<IValueItem> GetAllowed()
+        {
+            return Repository.AllOf<IExpressionsConnectable>().OfType<IValueItem>(); ;
         }
     }
     
@@ -81,9 +82,10 @@ namespace Invert.uFrame.ECS {
                 return false;
             }
         }
-        
-        public override System.Collections.Generic.IEnumerable<Invert.Data.IDataRecord> GetAllowed() {
-            return Repository.AllOf<ITimerConnectable>().OfType<IDataRecord>();;
+
+        public override System.Collections.Generic.IEnumerable<IValueItem> GetAllowed()
+        {
+            return Repository.AllOf<ITimerConnectable>().OfType<IValueItem>(); ;
         }
     }
     

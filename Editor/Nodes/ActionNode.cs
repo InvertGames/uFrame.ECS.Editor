@@ -286,7 +286,7 @@ namespace Invert.uFrame.ECS
                 var codeMethodReferenceExpression = new CodeMethodReferenceExpression(
                     new CodeSnippetExpression(this.Meta.Type.FullName),
                     methodInfo.Name);
-                var genericInputVars = this.GraphItems.OfType<TypeSelection>().Where(p => p.ActionFieldInfo.IsGenericArgument && p.Item != null).Select(p => p.Item.Name).ToArray();
+                var genericInputVars = this.GraphItems.OfType<TypeSelection>().Where(p => p.ActionFieldInfo.IsGenericArgument && p.Item != null).Select(p => p.Item.TypeName).ToArray();
                 if (genericInputVars.Length > 0)
                 {
                     codeMethodReferenceExpression = new CodeMethodReferenceExpression(
@@ -743,7 +743,7 @@ namespace Invert.uFrame.ECS
             set { base.Name = value; }
         }
 
-        public override IEnumerable<IDataRecord> GetAllowed()
+        public override IEnumerable<IValueItem> GetAllowed()
         {
             var action = this.Node as IVariableContextProvider;
             if (action != null)
@@ -814,7 +814,7 @@ namespace Invert.uFrame.ECS
         //    set { base.Name = value; }
         //}
 
-        public override IEnumerable<IDataRecord> GetAllowed()
+        public override IEnumerable<IValueItem> GetAllowed()
         {
             var action = this.Node as IVariableContextProvider;
             if (action != null)
@@ -901,7 +901,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public override IEnumerable<IDataRecord> GetAllowed()
+        public override IEnumerable<IValueItem> GetAllowed()
         {
             //var action = this.Node as IVariableContextProvider;
             //if (action != null)

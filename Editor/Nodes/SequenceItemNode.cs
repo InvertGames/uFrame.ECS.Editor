@@ -13,8 +13,9 @@ namespace Invert.uFrame.ECS
     {
     }
 
-    public class SequenceItemNode : SequenceItemNodeBase, ICodeOutput
+    public class SequenceItemNode : SequenceItemNodeBase, ICodeOutput, IDataRecordRemoving
     {
+
         private string _variableName;
 
         public override bool AllowMultipleInputs
@@ -141,5 +142,15 @@ namespace Invert.uFrame.ECS
             }
         }
 
+        public virtual void RecordRemoving(IDataRecord record)
+        {
+            //if (record == this)
+            //{
+            //    foreach (var item in GraphItems)
+            //    {
+            //        Repository.Remove(item);
+            //    }
+            //}
+        }
     }
 }

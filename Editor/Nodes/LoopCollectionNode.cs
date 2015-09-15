@@ -52,6 +52,12 @@ namespace Invert.uFrame.ECS {
         }
 
         public string FullName { get { return Info.FullName; } }
+        public string Namespace { get { return Info.Namespace; } }
+        public string Title { get{return Info.TypeName;} }
+        public string Group { get { return Info.Namespace; } }
+        public string SearchTag { get {return FullName;} }
+        public string Description { get; set; }
+        public string Identifier { get{return FullName;}set{} }
     }
     public class LoopCollectionNode : LoopCollectionNodeBase, IConnectableProvider
     {

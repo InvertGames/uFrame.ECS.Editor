@@ -33,9 +33,9 @@ namespace Invert.uFrame.ECS
             get { return Name; }
         }
 
-        public override IEnumerable<IDataRecord> GetAllowed()
+        public override IEnumerable<IValueItem> GetAllowed()
         {
-            return Repository.AllOf<IMappingsConnectable>().OfType<IDataRecord>();
+            return Repository.AllOf<IMappingsConnectable>().OfType<IValueItem>();
         }
         public override bool AllowInputs
         {
