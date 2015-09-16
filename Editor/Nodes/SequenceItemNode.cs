@@ -118,20 +118,21 @@ namespace Invert.uFrame.ECS
             }
         }
 
+        public static string LastSequenceItemId = string.Empty;
+
+        public virtual void WriteDebugInfo(TemplateContext ctx)
+        {
+            ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
+            LastSequenceItemId = this.Identifier;
+        }
         public virtual void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
-            OutputVariables(ctx);
-            ctx._comment(Name);
-            foreach (var right in this.OutputsTo<SequenceItemNode>())
-            {
-                if (right != null)
-                {
-                    right.WriteCode(visitor, ctx);
-                }
-            }
+    
+            
+
         }
 
-        protected void OutputVariables(TemplateContext ctx)
+        public void OutputVariables(TemplateContext ctx)
         {
             foreach (var item in GraphItems.OfType<IConnectable>())
             {

@@ -8,7 +8,6 @@ using Invert.Core;
 using Invert.Core.GraphDesigner;
 using Invert.Data;
 using Invert.Json;
-using JetBrains.Annotations;
 using uFrame.Attributes;
 using UnityEngine;
 
@@ -271,7 +270,7 @@ namespace Invert.uFrame.ECS
         {
             get { return VariableName; }
         }
-
+        
         public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
             if (this.Meta == null)
@@ -328,7 +327,7 @@ namespace Invert.uFrame.ECS
                     _currentActionInvoker.Parameters.Add(
                         new CodeSnippetExpression(string.Format("()=> {{ System.StartCoroutine({0}()); }}", @out.VariableName)));
                 }
-                ctx._("while (this.DebugInfo(\"{0}\", this) == 1) yield return new WaitForEndOfFrame()", this.Identifier);
+               
                 if (resultOut == null)
                 {
                     ctx.CurrentStatements.Add(_currentActionInvoker);
@@ -363,7 +362,7 @@ namespace Invert.uFrame.ECS
                     if (branchOutput == null) continue;
                     ctx._("{0}.{1} = ()=> {{ System.StartCoroutine({2}()); }}", varStatement.Name, item.Name, item.VariableName);
                 }
-                ctx._("while (this.DebugInfo(\"{0}\", this) == 1) yield return new WaitForEndOfFrame()", this.Identifier);
+            
                 ctx._("{0}.Execute()", varStatement.Name);
 
                 WriteActionOutputs(ctx);
@@ -550,7 +549,11 @@ namespace Invert.uFrame.ECS
         public IRepository Repository { get; set; }
         public string Identifier { get; set; }
         public bool Changed { get; set; }
-        public IEnumerable<string> ForeignKeys { get; private set; }
+
+        public IEnumerable<string> ForeignKeys
+        {
+            get { yield return ForIdentifier; }
+        }
 
         [JsonProperty]
         public string ForIdentifier { get; set; }
@@ -581,22 +584,18 @@ namespace Invert.uFrame.ECS
     {
 
     }
+
+    public class WhileTrueNode : CustomAction
+    {
+        
+    }
+
+
     public class CustomAction : SequenceItemNode, IConnectableProvider
     {
-
-
-        public virtual IEnumerable<IActionIn> GetInputs()
+        public override string Title
         {
-            yield break;
-        }
-        public virtual IEnumerable<IActionOut> GetOutputs()
-        {
-            yield break;
-        }
-
-        public virtual IEnumerable<ActionBranch> GetBranches()
-        {
-            yield break;
+            get { return this.GetType().Name.Replace("Node",""); }
         }
 
         public override IEnumerable<IGraphItem> GraphItems
@@ -605,18 +604,16 @@ namespace Invert.uFrame.ECS
             {
                 if (Repository == null)
                     yield break;
-                foreach (var item in GetInputs())
+
+                foreach (
+                    var item in
+                        this.GetType()
+                            .GetProperties(BindingFlags.Public | BindingFlags.Instance )
+                            .Where(p => p.IsDefined(typeof (FieldDisplayTypeAttribute), true)))
                 {
-                    yield return item;
-                } 
-                foreach (var item in GetBranches())
-                {
-                    yield return item;
+                    yield return item.GetValue(this, null) as IGraphItem;
                 }
-                foreach (var item in GetOutputs())
-                {
-                    yield return item;
-                }
+    
               
             }
         }
@@ -624,6 +621,24 @@ namespace Invert.uFrame.ECS
         public virtual IEnumerable<IConnectable> Connectables
         {
             get { return GraphItems.OfType<IConnectable>(); }
+        }
+    }
+
+    public class CustomActionViewModel : SequenceItemNodeViewModel
+    {
+        public CustomActionViewModel(SequenceItemNode graphItemObject, DiagramViewModel diagramViewModel) : base(graphItemObject, diagramViewModel)
+        {
+
+        }
+        public override bool IsEditable
+        {
+            get { return false; }
+        }
+
+        public override string Name
+        {
+            get { return GraphItem.Title; }
+            set { base.Name = value; }
         }
     }
 
@@ -687,6 +702,57 @@ namespace Invert.uFrame.ECS
         }
     }
 
+    [ActionTitle("Wait For End Of Frame"), uFrameCategory("Yield", "Wait","Timers")]
+    public class YieldWaitForEndOfFrame : CustomAction
+    {
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            ctx._("yield return new UniRx.YieldInstructionCache.WaitForEndOfFrame");
+        }
+    }
+    [ActionTitle("Wait For Fixed Update"), uFrameCategory("Yield", "Wait", "Timers")]
+    public class YieldWaitForFixedUpdate : CustomAction
+    {
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            ctx._("yield return new UniRx.YieldInstructionCache.WaitForFixedUpdate");
+        }
+    }
+    [ActionTitle("Wait For Seconds"), uFrameCategory("Yield", "Wait", "Timers")]
+    public class YieldWaitForSeconds : CustomAction
+    {
+        private ActionIn _seconds;
+
+        public ActionIn Seconds
+        {
+            get { return GetSlot(ref _seconds, "Number", _ =>
+            {
+            
+                _.ActionFieldInfo = new ActionFieldInfo()
+                {
+                    Type = typeof(float),
+                    Name = "Seconds"
+                };
+            }); }
+        }
+
+        public override IEnumerable<IGraphItem> GraphItems
+        {
+            get { yield return Seconds; }
+        }
+
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            ctx._("yield return new UnityEngine.WaitForSeconds({0})",Seconds.VariableName);
+        }
+
+
+
+    }
+
     public class ActionIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn
     {
         private string _variableName;
@@ -716,7 +782,6 @@ namespace Invert.uFrame.ECS
         {
             get
             {
-
                 return _variableName ?? (_variableName = SequenceItem.VariableName + "_" + this.Name);
             }
         }
@@ -934,6 +999,10 @@ namespace Invert.uFrame.ECS
 
     }
 
+    public class VariableOut : ActionOut
+    {
+        
+    }
     public class ActionOut : MultiOutputSlot<IContextVariable>, IActionOut, IContextVariable
     {
         private string _variableName;

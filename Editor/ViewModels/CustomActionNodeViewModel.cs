@@ -10,5 +10,7 @@ namespace Invert.uFrame.ECS {
         public CustomActionNodeViewModel(CustomActionNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
                 base(graphItemObject, diagramViewModel) {
         }
+
+
     }
 }

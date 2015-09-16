@@ -16,6 +16,13 @@ namespace Invert.uFrame.ECS {
         {
             get { return GraphItem as SequenceItemNode; }
         }
+
+
+        public override IEnumerable<string> Tags
+        {
+            get { yield break; }
+        }
+
         protected override void CreateContent()
         {
             foreach (var item in SequenceNode.GraphItems.OfType<IActionIn>())
@@ -26,7 +33,7 @@ namespace Invert.uFrame.ECS {
                     IsOutput = false,
                     IsInput = true,
                     DataObject = item,
-                    IsNewLine = item.ActionFieldInfo == null ? true : item.ActionFieldInfo.DisplayType.IsNewLine,
+                    IsNewLine = item.ActionFieldInfo == null || item.ActionFieldInfo.DisplayType == null ? true : item.ActionFieldInfo.DisplayType.IsNewLine,
                     DiagramViewModel = DiagramViewModel
                 };
                 ContentItems.Add(vm);
@@ -44,7 +51,7 @@ namespace Invert.uFrame.ECS {
                     Name = item.Name,
                     DataObject = item,
                     IsOutput = true,
-                    IsNewLine = item.ActionFieldInfo == null ? true : item.ActionFieldInfo.DisplayType.IsNewLine,
+                    IsNewLine = item.ActionFieldInfo == null || item.ActionFieldInfo.DisplayType == null ? true : item.ActionFieldInfo.DisplayType.IsNewLine,
                     DiagramViewModel = DiagramViewModel
                 };
                 ContentItems.Add(vm);

@@ -22,7 +22,7 @@ namespace Invert.uFrame.ECS
 
         public FieldDisplayTypeAttribute DisplayType
         {
-            get { return _displayType ?? (_displayType = MetaAttributes.OfType<FieldDisplayTypeAttribute>().FirstOrDefault()); }
+            get { return _displayType ?? (_displayType = MetaAttributes == null ? null : MetaAttributes.OfType<FieldDisplayTypeAttribute>().FirstOrDefault()); }
             set { _displayType = value; }
         }
 

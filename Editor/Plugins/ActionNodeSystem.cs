@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Invert.Core;
 using Invert.Core.GraphDesigner;
@@ -50,6 +51,111 @@ namespace Invert.uFrame.ECS
                      }
                 });
 
+            }
+        }
+    }
+
+    public class PickupCommand : Command
+    {
+
+    }
+
+    public class DropCommand : Command
+    {
+
+    }
+    public class CutPasteSystem : DiagramPlugin,
+        IExecuteCommand<PickupCommand>,
+        IExecuteCommand<DropCommand>,
+        IToolbarQuery,
+        IContextMenuQuery
+    {
+        private List<IFilterItem> _copiedNodes;
+
+        [Inject]
+        public WorkspaceService WorkspaceService { get; set; }
+
+
+        public List<IFilterItem> CopiedNodes
+        {
+            get { return _copiedNodes ?? (_copiedNodes = new List<IFilterItem>()); }
+            set { _copiedNodes = value; }
+        }
+
+
+        public IEnumerable<IFilterItem> SelectedNodes
+        {
+            get
+            {
+                if (WorkspaceService == null) yield break;
+                if (WorkspaceService.CurrentWorkspace == null) yield break;
+                if (WorkspaceService.CurrentWorkspace.CurrentGraph == null) yield break;
+
+                foreach (var item in WorkspaceService.CurrentWorkspace.CurrentGraph.CurrentFilter.FilterItems.Where(p => p.Node.IsSelected))
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        public void Execute(PickupCommand command)
+        {
+            CopiedNodes.AddRange(SelectedNodes);
+            Signal<INotify>(_ => _.Notify("Now navigate to the target graph and press paste.", NotificationIcon.Info));
+        }
+
+        public void Execute(DropCommand command)
+        {
+            foreach (var item in CopiedNodes)
+            {
+                item.FilterId = WorkspaceService.CurrentWorkspace.CurrentGraph.CurrentFilter.Identifier;
+            }
+        }
+
+        public void QueryToolbarCommands(ToolbarUI ui)
+        {
+
+            //ui.AddCommand(new ToolbarItem()
+            //{
+            //    Title = "Pickup",
+            //    Command = new PickupCommand(),
+            //    Position = ToolbarPosition.Right,
+            //});
+
+            //if (CopiedNodes.Count > 0)
+            //{
+            //    ui.AddCommand(new ToolbarItem()
+            //    {
+            //        Title = "Drop",
+            //        Command = new DropCommand()
+            //    });
+            //}
+        }
+
+        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, object obj)
+        {
+            var diagram = obj as DiagramViewModel;
+            var node = obj as DiagramNodeViewModel;
+            if (node != null)
+            {
+                ui.AddCommand(new ContextMenuItem()
+                {
+                    Title = "Pickup",
+                    Command = new PickupCommand(),
+         
+                });
+
+            }
+            if (diagram != null)
+            {
+                if (CopiedNodes.Count > 0)
+                {
+                    ui.AddCommand(new ContextMenuItem()
+                    {
+                        Title = "Drop",
+                        Command = new DropCommand()
+                    });
+                }
             }
         }
     }

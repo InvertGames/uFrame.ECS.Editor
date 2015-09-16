@@ -179,6 +179,10 @@ namespace Invert.uFrame.ECS
 
             var list = new List<ITypeInfo>();
             InvertApplication.SignalEvent<IQueryTypes>(_=>_.QueryTypes(list));
+            if (Filter == null)
+            {
+                return list.OfType<IValueItem>();
+            }
             return list.Where(Filter).OfType<IValueItem>();
         }
 

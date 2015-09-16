@@ -25,24 +25,6 @@ namespace Invert.uFrame.ECS
                 VisitHandlerIn(handlerIn);
                 AfterVisitHandlerIn(handlerIn); return;
             }
-            //if (groupNode != null)
-            //{
-            //    BeforeVisitGroup(groupNode);
-            //    VisitGroup(groupNode);
-            //    AfterVisitGroup(groupNode); return;
-            //}
-            //if (setVariableNode != null)
-            //{
-            //    BeforeSetVariableHandler(setVariableNode);
-            //    VisitSetVariable(setVariableNode);
-            //    AfterVisitSetVariable(setVariableNode); return;
-            //}
-            if (handlerNode != null)
-            {
-                BeforeVisitHandler(handlerNode);
-                VisitHandler(handlerNode);
-                AfterVisitHandler(handlerNode); return;
-            }
 
             if (actionNode != null)
             {
@@ -131,12 +113,7 @@ namespace Invert.uFrame.ECS
 
         public virtual void BeforeVisitHandler(ISequenceNode handlerNode)
         {
-            var handler = handlerNode as HandlerNode;
-            if (handler != null)
-                foreach (var item in handler.HandlerInputs)
-                {
-                    Visit(item);
-                }
+            
         }
 
         public virtual void AfterVisitHandler(ISequenceNode handlerNode)

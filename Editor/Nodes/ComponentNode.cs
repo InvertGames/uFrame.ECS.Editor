@@ -133,7 +133,7 @@ namespace Invert.uFrame.ECS {
                 //TypeInfo = typeof(MonoBehaviour)
             };
 
-            foreach (var item in PersistedItems.OfType<IMemberInfo>())
+            foreach (var item in GetMembers())
             {
                 yield return new ContextVariable(input.HandlerPropertyName,item.MemberName)
                 {

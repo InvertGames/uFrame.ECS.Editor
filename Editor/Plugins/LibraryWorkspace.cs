@@ -9,4 +9,12 @@ namespace Invert.uFrame.ECS
             get { return CompilationMode.Always; }
         }
     }
+
+    public class EcsWorkspace : Workspace
+    {
+        public override CompilationMode CompilationMode
+        {
+            get { return CompilationMode.Always; }
+        }
+    }
 }

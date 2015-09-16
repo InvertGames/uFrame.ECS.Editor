@@ -14,10 +14,16 @@ namespace Invert.uFrame.ECS {
         {
             get { return false; }
         }
-
+        
         public override bool AllowMultipleOutputs
         {
             get { return false; }
+        }
+
+        public override bool Value
+        {
+            get { return base.Value; }
+            set { base.Value = value; }
         }
 
         public virtual string GetExpression()

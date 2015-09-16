@@ -36,7 +36,9 @@ namespace Invert.uFrame.ECS
 
         static uFrameECS()
         {
+            
             InvertApplication.TypeAssemblies.Add(typeof(uFrameECS).Assembly);
+            InvertApplication.TypeAssemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies().Where(p => p.FullName.StartsWith("Assembly")));
         }
 
         public override void Initialize(UFrameContainer container)
@@ -50,6 +52,7 @@ namespace Invert.uFrame.ECS
                 Name = "Disposable"
             },"IDisposable");
             container.RegisterGraphItem<HandlerNode, HandlerNodeViewModel, HandlerNodeDrawer>();
+            container.RegisterGraphItem<CustomAction, CustomActionViewModel, SequenceItemNodeDrawer>();
             Handler.AllowAddingInMenu = false;
             Library.HasSubNode<EnumNode>();
             //            ComponentGroup.AllowAddingInMenu = false;
@@ -91,8 +94,12 @@ namespace Invert.uFrame.ECS
             // container.Connectable<ActionOut, ActionIn>(UnityEngine.Color.blue);
             container.Connectable<ActionBranch, SequenceItemNode>();
             container.Connectable<IMappingsConnectable, HandlerIn>();
-            container.AddWorkspaceConfig<LibraryWorkspace>("Library").WithGraph<LibraryGraph>("Library Graph");
-            container.AddWorkspaceConfig<BehaviourWorkspace>("Behaviour").WithGraph<SystemGraph>("System Graph");
+            //container.AddWorkspaceConfig<LibraryWorkspace>("Library").WithGraph<LibraryGraph>("Library Graph");
+            container.AddWorkspaceConfig<EcsWorkspace>("ECS")
+                .WithGraph<LibraryGraph>("Library","Create components, groups, events, custom actions, and more.")
+                .WithGraph<SystemGraph>("System","System defines behaviour for items defines inside a your libraries.")
+                ;
+            //container.AddWorkspaceConfig<BehaviourWorkspace>("Behaviour").WithGraph<SystemGraph>("System Graph");
             EnumValue.Name = "Enum Value";
             //            VariableReference.Name = "Var";
 
@@ -176,7 +183,7 @@ namespace Invert.uFrame.ECS
                 }
                 else
                 {
-                    Container.RegisterRelation(actionType, typeof(ViewModel), typeof(SequenceItemNodeViewModel));
+                    Container.RegisterRelation(actionType, typeof(ViewModel), typeof(CustomActionViewModel));
                     Container.GetNodeConfig(actionType);
                     actionInfo.IsEditorClass = true;
                 }

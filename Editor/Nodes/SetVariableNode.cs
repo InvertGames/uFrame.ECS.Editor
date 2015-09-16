@@ -1,3 +1,5 @@
+using uFrame.Attributes;
+
 namespace Invert.uFrame.ECS {
     using System;
     using System.Collections;
@@ -7,10 +9,8 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
     
     
-    public class SetVariableNode : SetVariableNodeBase {
-        private string _VariableInputSlotId;
+    public class SetVariableNode : CustomAction {
 
-        private string _ValueInputSlotId;
 
         private VariableIn _Variable;
 
@@ -21,42 +21,7 @@ namespace Invert.uFrame.ECS {
             get { return "Set Variable"; }
             set { base.Name = value; }
         }
-
-        [Invert.Json.JsonProperty()]
-        public virtual string VariableInputSlotId
-        {
-            get
-            {
-                if (_VariableInputSlotId == null)
-                {
-                    _VariableInputSlotId = Guid.NewGuid().ToString();
-                }
-                return _VariableInputSlotId;
-            }
-            set
-            {
-                _VariableInputSlotId = value;
-            }
-        }
-
-        [Invert.Json.JsonProperty()]
-        public virtual string ValueInputSlotId
-        {
-            get
-            {
-                if (_ValueInputSlotId == null)
-                {
-                    _ValueInputSlotId = Guid.NewGuid().ToString();
-                }
-                return _ValueInputSlotId;
-            }
-            set
-            {
-                _ValueInputSlotId = value;
-            }
-        }
-
-
+        [In]
         public virtual VariableIn VariableInputSlot
         {
             get
@@ -72,7 +37,7 @@ namespace Invert.uFrame.ECS {
                 return GetSlot(ref _Variable, "Variable", _=>_.DoesAllowInputs = true);
             }
         }
-
+        [In]
         public virtual ValueIn ValueInputSlot
         {
             get
@@ -102,23 +67,24 @@ namespace Invert.uFrame.ECS {
                 errors.AddError(string.Format("Variable types {0} and {1} do not match.", VariableInputSlot.Item.VariableType.FullName, ValueInputSlot.Item.VariableType.FullName),this.Node);
             }
         }
-
+         
         public override IEnumerable<IGraphItem> GraphItems
         {
             get
             {
                 
                 yield return VariableInputSlot;
-                if (VariableInputSlot.Item != null)
-                {
+                //if (VariableInputSlot.Item != null)
+                //{
                     yield return ValueInputSlot;
-                }
+                //}
                 
             }
         }
 
         public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
+            
             var ctxVariable = VariableInputSlot.Item;
             if (ctxVariable == null) return;
 

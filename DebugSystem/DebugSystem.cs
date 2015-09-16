@@ -6,7 +6,6 @@ using Invert.Common.UI;
 using Invert.Data;
 using Invert.Json;
 using Invert.uFrame.ECS;
-
 using UnityEditor;
 using UnityEngine;
 
@@ -22,7 +21,7 @@ namespace Invert.Core.GraphDesigner
     {
         void BreakpointHit();
     }
-    public class DebugSystem : DiagramPlugin, 
+    public class DebugSystem : DiagramPlugin,
         IExecuteCommand<DebugEvent>,
         IExecuteCommand<ContinueCommand>,
         IExecuteCommand<StepCommand>,
@@ -42,14 +41,14 @@ namespace Invert.Core.GraphDesigner
         public void Execute(ToggleBreakpointCommand command)
         {
             if (command.Action.BreakPoint == null)
-                {
-                    var breakPoint =Container.Resolve<IRepository>().Create<Breakpoint>();
-                    breakPoint.ForIdentifier = command.Action.Identifier;
-                }
-                else
-                {
-                    Container.Resolve<IRepository>().Remove(command.Action.BreakPoint);
-                }
+            {
+                var breakPoint = Container.Resolve<IRepository>().Create<Breakpoint>();
+                breakPoint.ForIdentifier = command.Action.Identifier;
+            }
+            else
+            {
+                Container.Resolve<IRepository>().Remove(command.Action.BreakPoint);
+            }
             _breakpoints = null;
         }
 
@@ -65,55 +64,55 @@ namespace Invert.Core.GraphDesigner
                     Command = new ToggleBreakpointCommand()
                     {
                         Action = actionVM.Action,
-                        
+
                     }
                 });
             }
         }
 
-        public ActionNode CurrentBreakpoint { get; set; }
+        public static SequenceItemNode CurrentBreakpoint { get; set; }
         public bool ShouldStep { get; set; }
         public void Execute(DebugEvent command)
         {
-            LastDebugEvent = command;
-            if (CurrentBreakpoint != null && CurrentBreakpoint.Identifier == command.ActionId)
-            {
-                if (ShouldContinue == true)
-                {
-                    command.Result = 0;
-                    CurrentBreakpoint.IsSelected = false;
-                    ShouldContinue = false;
-                    CurrentBreakpoint = null;
-                    return;
-                }
-                command.Result = 1;
-                return;
-            }
+            //LastDebugEvent = command;
+            //if (CurrentBreakpoint != null && CurrentBreakpoint.Identifier == command.ActionId)
+            //{
+            //    if (ShouldContinue == true)
+            //    {
+            //        command.Result = 0;
+            //        CurrentBreakpoint.IsSelected = false;
+            //        ShouldContinue = false;
+            //        CurrentBreakpoint = null;
+            //        return;
+            //    }
+            //    command.Result = 1;
+            //    return;
+            //}
 
-            if (Breakpoints.ContainsKey(command.ActionId))
-            {
-                command.Result = 1;
-                Signal<IBreakpointHit>(_ => _.BreakpointHit());
-                CurrentBreakpoint = Breakpoints[command.ActionId].Action;
-                Execute(new NavigateToNodeCommand()
-                {
-                    Node = CurrentBreakpoint
-                });
+            //if (Breakpoints.ContainsKey(command.ActionId))
+            //{
+            //    command.Result = 1;
+            //    Signal<IBreakpointHit>(_ => _.BreakpointHit());
+            //    CurrentBreakpoint = Breakpoints[command.ActionId].Action;
+            //    Execute(new NavigateToNodeCommand()
+            //    {
+            //        Node = CurrentBreakpoint
+            //    });
 
-            }
-            else if (ShouldStep)
-            {
-                CurrentBreakpoint = Container.Resolve<IRepository>().GetById<ActionNode>(command.ActionId);
-                command.Result = 1;
-                Execute(new NavigateToNodeCommand()
-                {
-                    Node = CurrentBreakpoint
-                });
-                ShouldStep = false;
-            }
+            //}
+            //else if (ShouldStep)
+            //{
+            //    CurrentBreakpoint = Container.Resolve<IRepository>().GetById<ActionNode>(command.ActionId);
+            //    command.Result = 1;
+            //    Execute(new NavigateToNodeCommand()
+            //    {
+            //        Node = CurrentBreakpoint
+            //    });
+            //    ShouldStep = false;
+            //}
         }
 
-        public DebugEvent LastDebugEvent { get; set; }
+        public static DebugInfo LastDebugEvent { get; set; }
 
         public void QueryToolbarCommands(ToolbarUI ui)
         {
@@ -130,19 +129,23 @@ namespace Invert.Core.GraphDesigner
                     Title = "Step"
                 });
             }
-            
+
         }
 
         public bool ShouldContinue;
         public void Execute(ContinueCommand command)
         {
             ShouldContinue = true;
+            ShouldStep = false;
+       
+
         }
 
         public void Execute(StepCommand command)
         {
             ShouldContinue = true;
             ShouldStep = true;
+            LastActionId = LastDebugEvent.ActionId;
         }
 
         public void DrawInspector(Rect rect)
@@ -163,15 +166,129 @@ namespace Invert.Core.GraphDesigner
                             }
                         }
                     }
-                   
+
                 }
             }
         }
+
+        public string LastActionId;
+
+        public void OnActionExecuting(DebugInfo command)
+        {
+
+   
+            // If we are at the breakpoint
+            if (CurrentBreakId != null && CurrentBreakId == command.ActionId)
+            {
+                if (ShouldContinue == true)
+                {
+                    command.Result = 0;
+                    return;
+                }
+                command.Result = 1;
+                return;
+            }
+
+            if (CurrentBreakId != null && CurrentBreakId == command.PreviousId && command.PreviousId != null)
+            {
+                if (ShouldStep)
+                {
+                    CurrentBreakId = command.ActionId;
+                    command.Result = 1;
+                    ShouldContinue = false;
+                    Execute(new NavigateToNodeCommand()
+                    {
+                        Node = Container.Resolve<IRepository>().GetById<SequenceItemNode>(command.ActionId)
+                    });
+             
+                } else
+                if (ShouldContinue)
+                {
+                    ShouldContinue = false;
+                    command.Result = 0;
+                    CurrentBreakId = null;
+                }
+              
+                   
+               
+                return;
+            }
+
+            if (Breakpoints.ContainsKey(command.ActionId))
+            {
+
+
+                CurrentBreakId = command.ActionId;
+                command.Result = 1;
+                Execute(new NavigateToNodeCommand()
+                {
+                    Node = Container.Resolve<IRepository>().GetById<SequenceItemNode>(command.ActionId)
+                });
+             
+
+            }
+
+
+
+
+
+
+            //if (CurrentBreakId == command.ActionId)
+            //{
+            //    if (ShouldContinue)
+            //    {
+            //        command.Result = 0;
+            //    }
+            //    else
+            //    {
+            //        command.Result = 1;
+            //    }
+            //}
+            //else
+            //{
+            //    ShouldContinue = false;
+
+
+
+            //}
+
+
+            LastDebugEvent = command;
+            //if (Breakpoints.ContainsKey(command.ActionId))
+            //{
+            //    command.Result = 1;
+            //    Signal<IBreakpointHit>(_ => _.BreakpointHit());
+            //    CurrentBreakpoint = Breakpoints[command.ActionId].Action;
+            //    Execute(new NavigateToNodeCommand()
+            //    {
+            //        Node = CurrentBreakpoint
+            //    });
+
+            //}
+            //else if (ShouldStep)
+            //{
+            //    if (CurrentBreakpoint != null && command.PreviousId == LastActionId)
+            //    {
+            //        CurrentBreakpoint = Container.Resolve<IRepository>().GetById<ActionNode>(command.ActionId);
+            //        command.Result = 1;
+            //        Execute(new NavigateToNodeCommand()
+            //        {
+            //            Node = CurrentBreakpoint
+            //        });
+            //        ShouldStep = false;
+
+            //    }
+
+            //}
+
+        }
+
+        public static string CurrentBreakId { get; set; }
     }
 
     public class ToggleBreakpointCommand : Command
     {
         public ActionNode Action { get; set; }
     }
-  
+
 }

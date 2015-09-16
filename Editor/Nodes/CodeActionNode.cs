@@ -15,7 +15,10 @@ namespace Invert.uFrame.ECS {
             set { base.MetaType = value; }
         }
 
-
+        public override void Validate(List<ErrorInfo> errors)
+        {
+            //base.Validate(errors);
+        }
     }
     
     public partial interface ICodeActionConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {

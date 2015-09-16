@@ -296,7 +296,7 @@ namespace Invert.uFrame.ECS {
     public partial interface IAllFalseConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
-    public class BoolExpressionNodeBase : Invert.Core.GraphDesigner.GenericNode, IExpressionsConnectable, IGroupConnectable {
+    public class BoolExpressionNodeBase : BoolNode, IExpressionsConnectable, IGroupConnectable {
         
         public override bool AllowMultipleInputs {
             get {

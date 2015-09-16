@@ -1,6 +1,8 @@
 using System.CodeDom;
+using uFrame.Attributes;
 
-namespace Invert.uFrame.ECS {
+namespace Invert.uFrame.ECS
+{
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -53,11 +55,11 @@ namespace Invert.uFrame.ECS {
 
         public string FullName { get { return Info.FullName; } }
         public string Namespace { get { return Info.Namespace; } }
-        public string Title { get{return Info.TypeName;} }
+        public string Title { get { return Info.TypeName; } }
         public string Group { get { return Info.Namespace; } }
-        public string SearchTag { get {return FullName;} }
+        public string SearchTag { get { return FullName; } }
         public string Description { get; set; }
-        public string Identifier { get{return FullName;}set{} }
+        public string Identifier { get { return FullName; } set { } }
     }
     public class LoopCollectionNode : LoopCollectionNodeBase, IConnectableProvider
     {
@@ -69,7 +71,7 @@ namespace Invert.uFrame.ECS {
         {
             yield return Item;
         }
-        
+
         public override string Name
         {
             get { return "Loop Collection"; }
@@ -78,13 +80,16 @@ namespace Invert.uFrame.ECS {
 
         public VariableIn List
         {
-            get { return GetSlot(ref _list, "List", _ =>
+            get
             {
-                _.DoesAllowInputs = true;
-                
-            }); }
+                return GetSlot(ref _list, "List", _ =>
+                    {
+                        _.DoesAllowInputs = true;
+
+                    });
+            }
         }
-      
+
         public ActionBranch Next
         {
             get { return GetSlot(ref _next, "Next"); }
@@ -92,7 +97,8 @@ namespace Invert.uFrame.ECS {
 
         public ActionOut Item
         {
-            get { 
+            get
+            {
                 return GetSlot(ref _item, "Item", _ =>
                 {
                     _.VariableType = new DynamicTypeInfo()
@@ -102,7 +108,7 @@ namespace Invert.uFrame.ECS {
                             return List.Item == null || List.Item.VariableType == null ? null : List.Item.VariableType.InnerType;
                         }
                     };
-                }); 
+                });
             }
         }
 
@@ -111,7 +117,7 @@ namespace Invert.uFrame.ECS {
             base.WriteCode(visitor, ctx);
 
             var loop = new CodeIterationStatement(
-                new CodeSnippetStatement(string.Format("var {0}Index = 0",  Item.VariableName)),
+                new CodeSnippetStatement(string.Format("var {0}Index = 0", Item.VariableName)),
                 new CodeSnippetExpression(string.Format("{0}Index < {1}.Count", Item.VariableName, List.VariableName)),
                 new CodeSnippetStatement(string.Format("{0}Index++", Item.VariableName))
                 );
@@ -149,8 +155,149 @@ namespace Invert.uFrame.ECS {
         }
     }
 
+    public class ListAction : CustomAction
+    {
+
+        private VariableIn _list;
+        [In]
+        public virtual VariableIn List
+        {
+            get
+            {
+                return GetSlot(ref _list, "List", _ =>
+                {
+                    _.DoesAllowInputs = true;
+
+                });
+            }
+        }
 
 
-    public partial interface ILoopCollectionConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+        public override void Validate(List<ErrorInfo> errors)
+        {
+            base.Validate(errors);
+            if (List.Item == null)
+            {
+                errors.AddError("List is required.", this);
+            }
+        }
+
+    }
+
+    public class ListActionWithItem : ListAction
+    {
+        [In]
+        public override VariableIn List
+        {
+            get { return base.List; }
+        }
+        private VariableIn _item;
+
+        [In]
+        public VariableIn Item
+        {
+            get
+            {
+                return GetSlot(ref _item, "Item", _ =>
+                {
+                    _.DoesAllowInputs = true;
+                });
+            }
+        }
+
+        public override void Validate(List<ErrorInfo> errors)
+        {
+            base.Validate(errors);
+            if (Item.Item == null)
+            {
+                errors.AddError("Item is required.", this);
+            }
+        }
+    }
+    [ActionTitle("Add To List"), uFrameCategory("Lists", "Collections")]
+    public class ListAdd : ListActionWithItem
+    {
+
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            ctx._("{0}.Add({1})", List.VariableName, Item.VariableName);
+        }
+
+    }
+    [ActionTitle("Remove From List"), uFrameCategory("Lists", "Collections")]
+    public class ListRemove : ListActionWithItem
+    {
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            ctx._("{0}.Remove({1})", List.VariableName, Item.VariableName);
+        }
+    }
+
+    [ActionTitle("Get List Item"), uFrameCategory("Lists", "Collections")]
+    public class GetListItem : ListAction
+    {
+        private VariableIn _indexVariable;
+        private VariableOut _result;
+
+        [In]
+        public VariableIn IndexVariable
+        {
+            get { return GetSlot(ref _indexVariable, "Index"); }
+        }
+
+        [Out]
+        public VariableOut Result
+        {
+            get
+            {
+                return GetSlot(ref _result, "Result", _ =>
+                {
+                    _.VariableType = new DynamicTypeInfo()
+                    {
+                        GetInfo = () => List.Item == null || List.Item.VariableType == null ? null : List.Item.VariableType.InnerType
+                    };
+                });
+            }
+        }
+
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            ctx._("{0} = {1}[{2}]", Result.VariableName, List.VariableName, IndexVariable.VariableName);
+        }
+    }
+
+    public partial interface ILoopCollectionConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable
+    {
+    }
+
+    [ActionTitle("Get Random List Item"), uFrameCategory("Lists", "Collections")]
+    public class GetRandomListItem : ListAction
+    {
+        private VariableOut _result;
+
+        [Out]
+        public VariableOut Result
+        {
+            get
+            {
+                return GetSlot(ref _result, "Result", _ =>
+                {
+                    _.VariableType = new DynamicTypeInfo()
+                    {
+                        GetInfo = () => List.Item == null || List.Item.VariableType == null ? null : List.Item.VariableType.InnerType
+                    };
+                });
+            }
+        }
+
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+
+            ctx._("{0} = {1}[UnityEngine.Random(0, {1}.Count)]", Result.VariableName, List.VariableName);
+        }
     }
 }

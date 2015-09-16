@@ -8,7 +8,11 @@ namespace Invert.uFrame.ECS {
     
     
     public class HandlerNodeViewModel : HandlerNodeViewModelBase {
-        
+        public override bool IsEditable
+        {
+            get { return true; }
+        }
+
         public HandlerNodeViewModel(HandlerNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
                 base(graphItemObject, diagramViewModel) {
         }

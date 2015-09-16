@@ -18,6 +18,11 @@ namespace Invert.uFrame.ECS
 
     public class HandlerNode : HandlerNodeBase, ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider
     {
+        public override string Title
+        {
+            get { return Name; }
+        }
+
         public override bool AllowMultipleOutputs
         {
             get { return false; }
@@ -219,24 +224,28 @@ namespace Invert.uFrame.ECS
 
         public void Accept(IHandlerNodeVisitor visitor)
         {
-            visitor.Visit(this);
+            foreach (var item in HandlerInputs)
+            {
+                visitor.Visit(item);
+            }
+            visitor.Visit(this.Right);
         }
 
         public virtual string BeginWriteLoop(TemplateContext ctx, IMappingsConnectable connectable)
         {
             // ctx.PushStatements(ctx._if("{0} != null", ContextNode.SystemPropertyName).TrueStatements);
             
-            ctx._("var {0}Items = {1}.GetEnumerator()", connectable.Name, connectable.EnumeratorExpression);
+            ctx._("var {0}Items = {1}", connectable.Name, connectable.EnumeratorExpression);
 
             var iteration = new CodeIterationStatement(
-                new CodeSnippetStatement(string.Empty),
-                new CodeSnippetExpression(string.Format("{0}Items.MoveNext()", connectable.Name)),
-                new CodeSnippetStatement(string.Empty)
+                new CodeSnippetStatement(string.Format("var {0}Index = 0", connectable.Name)),
+                new CodeSnippetExpression(string.Format("{0}Index < {0}Items.Count", connectable.Name)),
+                new CodeSnippetStatement(string.Format("{0}Index++", connectable.Name))
                 );
 
             ctx.CurrentStatements.Add(iteration);
             ctx.PushStatements(iteration.Statements);
-            return connectable.Name + "Items.Current";
+            return string.Format("{0}Items[{0}Index]", connectable.Name);
         }
 
         public virtual void EndWriteLoop(TemplateContext ctx)

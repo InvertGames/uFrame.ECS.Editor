@@ -14,7 +14,7 @@ namespace Invert.uFrame.ECS {
         private bool _value;
 
         [NodeProperty, JsonProperty]
-        public bool Value
+        public virtual bool Value
         {
             get { return _value; }
             set { this.Changed("Value", ref _value, value); }
