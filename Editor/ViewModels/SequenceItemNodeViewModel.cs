@@ -17,6 +17,14 @@ namespace Invert.uFrame.ECS {
             get { return GraphItem as SequenceItemNode; }
         }
 
+        public override void DataObjectChanged()
+        {
+            base.DataObjectChanged();
+            IsBreakpoint = SequenceNode.BreakPoint != null;
+        }
+        public bool IsBreakpoint { get; set; }
+
+
 
         public override IEnumerable<string> Tags
         {

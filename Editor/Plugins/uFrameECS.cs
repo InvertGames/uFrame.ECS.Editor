@@ -866,13 +866,19 @@ namespace Invert.uFrame.ECS
             Execute(createWorkspaceCommand);
 
 
-            var dataGraph = repository.Create<DataGraph>();
-            var systemGraph = repository.Create<SystemGraph>();
+            var dataGraph = new DataGraph();
+            var systemGraph = new SystemGraph();
             dataGraph.Name = command.Name + "Data";
             systemGraph.Name = command.Name + "System";
+
+            repository.Add(dataGraph);
+            repository.Add(systemGraph);
+
             createWorkspaceCommand.Result.AddGraph(dataGraph);
             createWorkspaceCommand.Result.AddGraph(systemGraph);
             createWorkspaceCommand.Result.CurrentGraphId = dataGraph.Identifier;
+
+            
             Execute(new OpenWorkspaceCommand()
             {
                 Workspace = createWorkspaceCommand.Result
@@ -887,7 +893,8 @@ namespace Invert.uFrame.ECS
             GrabDependencies(list, command.Node);
 
             list.Add(command.Node);
-            var groupNode = Container.Resolve<IRepository>().Create<ActionGroupNode>();
+
+            var groupNode = new ActionGroupNode();
             InvertGraphEditor.CurrentDiagramViewModel.AddNode(groupNode, command.Node.FilterLocation.Position);
             foreach (var item in list.OfType<GenericNode>())
             {
@@ -895,7 +902,7 @@ namespace Invert.uFrame.ECS
             }
             groupNode.IsSelected = true;
             groupNode.IsEditing = true;
-
+            Container.Resolve<IRepository>().Add(groupNode);
         }
 
         public void GrabDependencies(List<IDiagramNodeItem> items, GraphNode node)

@@ -41,6 +41,13 @@ namespace Invert.uFrame.ECS {
                 }
             }
 
+
+            var breakpointItemRect = new Rect().WithSize(24, 24).InnerAlignWithUpperRight(Bounds).Translate(16, -16); 
+
+            if(NodeViewModel.IsBreakpoint)
+            platform.DrawImage(breakpointItemRect,"BreakpointIcon",true);
+
+
         }
 
         //public override bool ShowHeader
