@@ -107,14 +107,15 @@ public class UnityInspectors : DiagramPlugin, IDrawUnityInspector
                               
                         //    }
                         //}
-                        if (GUIHelpers.DoToolbarEx("Handlers"))
+                        if (GUIHelpers.DoToolbarEx("uFrame Designer"))
                         foreach (
                            var handlerNode in
                                Repository.All<HandlerNode>()
                                    .Where(p => p.EntityGroup != null && p.EntityGroup.Item != null && p.EntityGroup.Item.SelectComponents.Contains(item)))
                         {
                             EditorGUILayout.BeginHorizontal();
-                            if (GUILayout.Button(handlerNode.Name))
+
+                            if (GUILayout.Button(handlerNode.Name + " >"))
                             {
                                 Execute(new NavigateToNodeCommand()
                                 {
@@ -122,9 +123,10 @@ public class UnityInspectors : DiagramPlugin, IDrawUnityInspector
                                     Select = true
                                 });
                             }
+
                             if (handlerNode.Meta != null && handlerNode.Meta.Dispatcher && component.gameObject.GetComponent(handlerNode.Meta.Type) == null)
                             {
-                                if (GUILayout.Button("Add " + handlerNode.Meta.Type.Name))
+                                if (GUILayout.Button("+ " + handlerNode.Meta.Type.Name))
                                 {
                                     
                                     component.gameObject.AddComponent(handlerNode.Meta.Type);
@@ -132,18 +134,19 @@ public class UnityInspectors : DiagramPlugin, IDrawUnityInspector
                             }
                          
                             EditorGUILayout.EndHorizontal();
+                            if (GUILayout.Button("Edit In Designer"))
+                            {
+                                Execute(new NavigateToNodeCommand()
+                                {
+                                    Node = item,
+                                    Select = true
+                                });
+                            }
                         }
-                       
-                        
+
+                     
                     }
-                    if (GUILayout.Button("Edit In Designer"))
-                    {
-                        Execute(new NavigateToNodeCommand()
-                        {
-                            Node = item,
-                            Select = true
-                        });
-                    }
+                   
                 }
             }
 

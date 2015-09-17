@@ -34,7 +34,7 @@ namespace Invert.uFrame.ECS
 
         public override string Name
         {
-            get { return VariableType + " Variable"; } 
+            get { return VariableType.TypeName + " Variable"; } 
             set { base.Name = value; }
         }
 

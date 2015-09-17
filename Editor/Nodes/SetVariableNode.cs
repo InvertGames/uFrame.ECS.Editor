@@ -26,14 +26,7 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                if (Repository == null)
-                {
-                    return null;
-                }
-                if (_Variable != null)
-                {
-                    return _Variable;
-                }
+
                 return GetSlot(ref _Variable, "Variable", _=>_.DoesAllowInputs = true);
             }
         }
@@ -42,15 +35,11 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                if (Repository == null)
+                return GetSlot(ref _Value, "Value", _ =>
                 {
-                    return null;
-                }
-                if (_Value != null)
-                {
-                    return _Value;
-                } 
-                return GetSlot(ref _Value, "Value", _ => _.DoesAllowInputs = true);
+                    _.DoesAllowInputs = true;
+                    _.Variable = VariableInputSlot;
+                });
             }
         }
 
@@ -101,6 +90,7 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
+                //if (Variable.Item == null) return new SystemTypeInfo(typeof (object));
                 return Variable.VariableType;
                 return base.VariableType;
             }

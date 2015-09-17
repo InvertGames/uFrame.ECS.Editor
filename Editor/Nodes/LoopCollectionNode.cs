@@ -123,7 +123,9 @@ namespace Invert.uFrame.ECS
                 );
 
             loop.Statements._("{0} = {1}[{0}Index]", Item.VariableName, List.VariableName);
-            loop.Statements._("System.StartCoroutine({0}())", Next.VariableName);
+            ctx.PushStatements(loop.Statements);
+            Next.WriteInvoke(ctx);
+            ctx.PopStatements();
             ctx.CurrentStatements.Add(loop);
         }
 
@@ -153,6 +155,72 @@ namespace Invert.uFrame.ECS
 
             }
         }
+    }
+
+    [ActionTitle("Loop Group Items"), uFrameCategory("Loops")]
+    public class LoopGroupNode : CustomAction
+    {
+
+        private TypeSelection _list;
+        private ActionBranch _next;
+        private ActionOut _item;
+
+        [In]
+        public TypeSelection List
+        {
+            get
+            {
+                return GetSlot(ref _list, "Group", _ =>
+                {
+                    _.Filter = info => info is ComponentNode || info is GroupNode;
+                    
+                });
+            }
+        }
+
+        [Out]
+        public ActionBranch Next
+        {
+            get { return GetSlot(ref _next, "Next"); }
+        }
+
+        [In]
+        public ActionOut Item
+        {
+            get
+            {
+                return GetSlot(ref _item, "Item", _ =>
+                {
+                    _.VariableType = new DynamicTypeInfo()
+                    {
+                        GetInfo = () =>
+                        {
+                            return List.Item;
+                        }
+                    };
+                });
+            }
+        }
+
+        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            ctx._("var {0}Components = System.ComponentSystem.RegisterComponent<{1}>().Components",List.VariableName, Item.VariableType.FullName);
+
+            var loop = new CodeIterationStatement(
+                new CodeSnippetStatement(string.Format("var {0}Index = 0", Item.VariableName)),
+                new CodeSnippetExpression(string.Format("{0}Index < {1}Components.Count", Item.VariableName, List.VariableName)),
+                new CodeSnippetStatement(string.Format("{0}Index++", Item.VariableName))
+                );
+
+            loop.Statements._("{0} = {1}Components[{0}Index]", Item.VariableName, List.VariableName);
+            ctx.PushStatements(loop.Statements);
+            Next.WriteInvoke(ctx);
+            ctx.PopStatements();
+            ctx.CurrentStatements.Add(loop);
+        }
+
+  
     }
 
     public class ListAction : CustomAction
@@ -297,7 +365,7 @@ namespace Invert.uFrame.ECS
         {
             base.WriteCode(visitor, ctx);
 
-            ctx._("{0} = {1}[UnityEngine.Random(0, {1}.Count)]", Result.VariableName, List.VariableName);
+            ctx._("{0} = {1}[UnityEngine.Random.Range(0, {1}.Count)]", Result.VariableName, List.VariableName);
         }
     }
 }

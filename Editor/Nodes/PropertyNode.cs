@@ -192,9 +192,9 @@ namespace Invert.uFrame.ECS
         {
             get
             {
-
-                var actionNode = Node as ActionNode;
-                return actionNode.Meta.Type.Name + "_" + Name;
+                
+                var actionNode = Node as SequenceItemNode;
+                return actionNode.VariableName + "_" + Name;
             }
         }
         public ITypeInfo VariableType { get { return new SystemTypeInfo(typeof(Type)); } }

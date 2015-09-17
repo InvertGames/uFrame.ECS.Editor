@@ -1,3 +1,4 @@
+using System.CodeDom;
 using Invert.Core;
 using Invert.Json;
 using UnityEngine;
@@ -127,8 +128,12 @@ namespace Invert.uFrame.ECS
 
         public virtual void WriteDebugInfo(TemplateContext ctx)
         {
-            ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
-            LastSequenceItemId = this.Identifier;
+            if (DebugSystem.IsDebugMode)
+            {
+                ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
+                LastSequenceItemId = this.Identifier;
+            }
+          
         }
         public virtual void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
@@ -143,8 +148,17 @@ namespace Invert.uFrame.ECS
             {
                 var decl = item.InputFrom<VariableNode>();
                 if (decl == null) continue;
-
-                ctx.CurrentDeclaration.Members.Add(decl.GetFieldStatement());
+                var field = decl.GetFieldStatement();
+                bool found = false;
+                foreach (var f in ctx.CurrentDeclaration.Members.OfType<CodeMemberField>())
+                {
+                    if (f.Name == field.Name)
+                    {
+                        found = true;
+                    }
+                }
+                if (!found)
+                ctx.CurrentDeclaration.Members.Add(field);
             }
         }
 

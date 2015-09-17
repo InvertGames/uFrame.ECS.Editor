@@ -95,7 +95,7 @@ namespace Invert.uFrame.ECS
         public virtual string EventType
         {
             get { return Meta.Type.FullName; }
-            set { throw new NotImplementedException(); }
+            set { MetaType = value; }
         }
 
         public virtual IEnumerable<IFilterInput> FilterInputs
@@ -349,12 +349,17 @@ namespace Invert.uFrame.ECS
             ctx.PushStatements(handlerMethod.Statements);
             // Now writing the handler method contents
             var name = "handler";
-            ctx._("var {0} = new {1}()", name, HandlerMethodName);
+            var field = ctx.CurrentDeclaration._private_(HandlerMethodName, HandlerMethodName + "Instance");
+            field.InitExpression = new CodeSnippetExpression(string.Format("new {0}()",HandlerMethodName));
+            
+            ctx._("var {0} = {1}Instance;", name, HandlerMethodName);
             ctx._("{0}.System = this", name);
 
             WriteHandlerSetup(ctx, name, handlerMethod);
-
+            if (DebugSystem.IsDebugMode)
             ctx._("StartCoroutine({0}.Execute())", name);
+            else
+            ctx._("{0}.Execute()", name);
             // End handler method contents
             ctx.PopStatements();
             ctx.CurrentMember = prevMethod;
@@ -455,7 +460,7 @@ namespace Invert.uFrame.ECS
                     hasMappings = true;
                 }
             }
-            if (!hasMappings)
+            if (!hasMappings || (Meta != null && Meta.Dispatcher))
             {
                 yield return EntityGroup;
             }

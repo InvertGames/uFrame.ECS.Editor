@@ -23,6 +23,7 @@ namespace Invert.uFrame.ECS {
             set { _friendlyName = value; }
         }
 
+
         public override string DefaultTypeName
         {
             get { return typeof(int).Name; }

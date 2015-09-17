@@ -25,13 +25,15 @@ namespace Invert.uFrame.ECS
         public void Execute(ChangeHandlerEventCommand command)
         {
             var selectionMenu = new SelectionMenu();
-            foreach (var item in uFrameECS.Events.Select(p =>
+            foreach (var item in uFrameECS.Events)
             {
-                return new SelectionMenuItem(p.Value, () =>
+                var item1 = item;
+                selectionMenu.AddItem(new SelectionMenuItem(item.Value, () =>
                 {
-                    command.Node.EventType = p.Value.Type.FullName;
-                });
-            })) selectionMenu.AddItem(item);
+                    command.Node.MetaType = item1.Value.Type.FullName;
+                }));
+            }
+
 
             Signal<IShowSelectionMenu>(_ => _.ShowSelectionMenu(selectionMenu));
         }
