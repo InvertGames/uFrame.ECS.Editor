@@ -324,8 +324,18 @@ namespace Invert.uFrame.ECS
                 }
                 foreach (var @out in this.GraphItems.OfType<ActionBranch>())
                 {
-                    _currentActionInvoker.Parameters.Add(
-                        new CodeSnippetExpression(string.Format("()=> {{ System.StartCoroutine({0}()); }}", @out.VariableName)));
+                    if (DebugSystem.IsDebugMode)
+                    {
+                        _currentActionInvoker.Parameters.Add(
+                            new CodeSnippetExpression(string.Format("()=> {{ System.StartCoroutine({0}()); }}",
+                                @out.VariableName)));
+                    }
+                    else
+                    {
+                        _currentActionInvoker.Parameters.Add(
+                       new CodeSnippetExpression(string.Format("{0}", @out.VariableName)));
+                    }
+                   
                 }
                
                 if (resultOut == null)
@@ -360,7 +370,10 @@ namespace Invert.uFrame.ECS
                 {
                     var branchOutput = item.OutputTo<SequenceItemNode>();
                     if (branchOutput == null) continue;
+                    if (DebugSystem.IsDebugMode)
                     ctx._("{0}.{1} = ()=> {{ System.StartCoroutine({2}()); }}", varStatement.Name, item.Name, item.VariableName);
+                    else
+                    ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
                 }
             
                 ctx._("{0}.Execute()", varStatement.Name);
@@ -402,7 +415,8 @@ namespace Invert.uFrame.ECS
             get { return _metaType; }
             set
             {
-                _metaType = value;
+                this.Changed("MetaType",ref _metaType,value);
+                
             }
         }
 
@@ -1162,6 +1176,18 @@ namespace Invert.uFrame.ECS
         public IVariableContextProvider Left
         {
             get { return this.Node as SequenceItemNode; }
+        }
+
+        public void WriteInvoke(TemplateContext ctx)
+        {
+            if (DebugSystem.IsDebugMode)
+            {
+                ctx._("System.StartCoroutine({0}())", VariableName);
+            }
+            else
+            {
+                ctx._("{0}()",VariableName);
+            }
         }
     }
 

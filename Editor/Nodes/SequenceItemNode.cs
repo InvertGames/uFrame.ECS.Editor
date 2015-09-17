@@ -128,8 +128,12 @@ namespace Invert.uFrame.ECS
 
         public virtual void WriteDebugInfo(TemplateContext ctx)
         {
-            ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
-            LastSequenceItemId = this.Identifier;
+            if (DebugSystem.IsDebugMode)
+            {
+                ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
+                LastSequenceItemId = this.Identifier;
+            }
+          
         }
         public virtual void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {

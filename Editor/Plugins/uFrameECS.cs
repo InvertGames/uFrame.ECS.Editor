@@ -5,6 +5,7 @@ using Invert.IOC;
 using Invert.Windows;
 using uFrame.Attributes;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Invert.uFrame.ECS
 {
@@ -37,7 +38,8 @@ namespace Invert.uFrame.ECS
         static uFrameECS()
         {
             
-            InvertApplication.TypeAssemblies.Add(typeof(uFrameECS).Assembly);
+            InvertApplication.CachedAssembly(typeof(Button).Assembly);
+            InvertApplication.CachedTypeAssembly(typeof(uFrameECS).Assembly);
             InvertApplication.TypeAssemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies().Where(p => p.FullName.StartsWith("Assembly")));
         }
 
@@ -106,6 +108,19 @@ namespace Invert.uFrame.ECS
             StaticLibraries.Add(typeof(Input));
             StaticLibraries.Add(typeof(Math));
             StaticLibraries.Add(typeof(Mathf));
+            SystemTypes.Add(typeof (UnityEngine.UI.Button));
+            SystemTypes.Add(typeof (UnityEngine.UI.LayoutElement));
+            SystemTypes.Add(typeof (UnityEngine.UI.LayoutGroup));
+            SystemTypes.Add(typeof (UnityEngine.UI.GridLayoutGroup));
+            SystemTypes.Add(typeof (UnityEngine.UI.Text));
+            SystemTypes.Add(typeof (UnityEngine.UI.InputField));
+            SystemTypes.Add(typeof (UnityEngine.UI.Dropdown));
+            SystemTypes.Add(typeof (UnityEngine.UI.ScrollRect));
+            SystemTypes.Add(typeof (UnityEngine.UI.Scrollbar));
+            SystemTypes.Add(typeof (UnityEngine.UI.Outline));
+            SystemTypes.Add(typeof (UnityEngine.UI.Toggle));
+            SystemTypes.Add(typeof (UnityEngine.UI.ToggleGroup));
+            SystemTypes.Add(typeof (UnityEngine.UI.Slider));
             //StaticLibraries.Add(typeof(Vector2));
             //StaticLibraries.Add(typeof(Vector3));
             StaticLibraries.Add(typeof(Physics));

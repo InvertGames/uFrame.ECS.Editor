@@ -132,6 +132,16 @@ namespace Invert.Core.GraphDesigner
                     Title = "Step"
                 });
             }
+            ui.AddCommand(new ToolbarItem()
+            {
+                Title = "Debug Mode",
+                Checked = IsDebugMode,
+                Command = new LambdaCommand("Debug Mode", () =>
+                {
+                    IsDebugMode = !IsDebugMode;
+                }),
+                Position = ToolbarPosition.Right
+            });
 
         }
 
@@ -178,8 +188,6 @@ namespace Invert.Core.GraphDesigner
 
         public void OnActionExecuting(DebugInfo command)
         {
-
-   
             // If we are at the breakpoint
             if (CurrentBreakId != null && CurrentBreakId == command.ActionId)
             {
@@ -287,6 +295,15 @@ namespace Invert.Core.GraphDesigner
         }
 
         public static string CurrentBreakId { get; set; }
+        public static bool IsDebugMode
+        {
+            get
+            {
+                if (InvertGraphEditor.Prefs == null) return false; // Testability
+                return InvertGraphEditor.Prefs.GetBool("UFRAME_DEBUG_MODE", true);
+            }
+            set { InvertGraphEditor.Prefs.SetBool("UFRAME_DEBUG_MODE", value); }
+        }
     }
 
     public class ToggleBreakpointCommand : Command
