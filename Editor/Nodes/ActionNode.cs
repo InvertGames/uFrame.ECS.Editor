@@ -541,7 +541,7 @@ namespace Invert.uFrame.ECS
             }
         }
     }
-    public class Breakpoint : IDataRecord
+    public class Breakpoint : IDataRecord, IItem
     {
         public IRepository Repository { get; set; }
         public string Identifier { get; set; }
@@ -559,6 +559,22 @@ namespace Invert.uFrame.ECS
         {
             get { return Repository.GetSingle<ActionNode>(ForIdentifier); }
         }
+
+        public string Title
+        {
+            get { 
+                
+                if (Action.Meta != null)
+                    return Action.Meta.TitleText;
+                if (Action.Meta != null && Action.Meta.Method != null)
+                    return Action.Meta.Method.Name;
+                return "Unknown";
+            }
+        }
+
+        public string Group { get; private set; }
+        public string SearchTag { get; private set; }
+        public string Description { get; set; }
     }
     public partial interface IActionConnectable : IDiagramNodeItem, IConnectable
     {
