@@ -42,8 +42,11 @@ namespace Invert.Core.GraphDesigner
         {
             if (command.Action.BreakPoint == null)
             {
-                var breakPoint = Container.Resolve<IRepository>().Create<Breakpoint>();
-                breakPoint.ForIdentifier = command.Action.Identifier;
+                var breakPoint = new Breakpoint
+                {
+                    ForIdentifier = command.Action.Identifier
+                };
+                Container.Resolve<IRepository>().Add(breakPoint);
             }
             else
             {

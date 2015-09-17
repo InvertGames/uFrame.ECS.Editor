@@ -513,10 +513,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public Breakpoint BreakPoint
-        {
-            get { return Repository.All<Breakpoint>().FirstOrDefault(p => p.ForIdentifier == this.Identifier); }
-        }
+    
 
 
         public void WriteActionOutputs(TemplateContext _)
