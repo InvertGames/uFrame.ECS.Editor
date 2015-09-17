@@ -89,7 +89,7 @@ namespace Assets.Plugins.Editor.uFrame.ECS.Editor.DebugSystem
         {
             var bps = Repository.All<Breakpoint>();
             Breakpoints = bps.ToList();
-            if(BreakpointsList == null) BreakpointsList= new TreeViewModel();
+            if(BreakpointsList == null)BreakpointsList= new TreeViewModel();
             BreakpointsList.SingleItemIcon = "BreakpointIcon";
             BreakpointsList.Data = Breakpoints.OfType<IItem>().ToList();
             BreakpointsList.Submit = i =>

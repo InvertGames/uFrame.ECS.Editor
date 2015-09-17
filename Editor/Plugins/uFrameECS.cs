@@ -114,7 +114,8 @@ namespace Invert.uFrame.ECS
             SystemTypes.Add(typeof (UnityEngine.UI.GridLayoutGroup));
             SystemTypes.Add(typeof (UnityEngine.UI.Text));
             SystemTypes.Add(typeof (UnityEngine.UI.InputField));
-            SystemTypes.Add(typeof (UnityEngine.UI.Dropdown));
+
+         //   SystemTypes.Add(typeof (UnityEngine.UI.Dropdown));
             SystemTypes.Add(typeof (UnityEngine.UI.ScrollRect));
             SystemTypes.Add(typeof (UnityEngine.UI.Scrollbar));
             SystemTypes.Add(typeof (UnityEngine.UI.Outline));
