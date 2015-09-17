@@ -99,12 +99,8 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                var actionIn = this.OutputTo<IActionIn>();
-                if (actionIn != null)
-                {
-                    if (actionIn.Node != this)
-                    return actionIn.VariableType;
-                }
+             
+               
                 return Type.Item as ITypeInfo;
             }
         }

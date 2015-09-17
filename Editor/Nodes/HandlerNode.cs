@@ -349,7 +349,10 @@ namespace Invert.uFrame.ECS
             ctx.PushStatements(handlerMethod.Statements);
             // Now writing the handler method contents
             var name = "handler";
-            ctx._("var {0} = new {1}()", name, HandlerMethodName);
+            var field = ctx.CurrentDeclaration._private_(HandlerMethodName, HandlerMethodName + "Instance");
+            field.InitExpression = new CodeSnippetExpression(string.Format("new {0}()",HandlerMethodName));
+            
+            ctx._("var {0} = {1}Instance;", name, HandlerMethodName);
             ctx._("{0}.System = this", name);
 
             WriteHandlerSetup(ctx, name, handlerMethod);
