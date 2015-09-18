@@ -1,4 +1,5 @@
 using Invert.Json;
+using uFrame.Attributes;
 
 namespace Invert.uFrame.ECS {
     using System;
@@ -10,6 +11,11 @@ namespace Invert.uFrame.ECS {
     
     public class PropertiesChildItem : PropertiesChildItemBase {
         private string _friendlyName;
+
+        public override Type Type
+        {
+            get { return base.Type ?? typeof(int); }
+        }
 
         [InspectorProperty, JsonProperty]
         public string FriendlyName
@@ -27,6 +33,21 @@ namespace Invert.uFrame.ECS {
         public override string DefaultTypeName
         {
             get { return typeof(int).Name; }
+        }
+
+        [InspectorProperty]
+        public bool IsEntityMapping
+        {
+            get { return this["Mapping"]; }
+            set { this["Mapping"] = value; }
+        }
+
+        public override IEnumerable<Attribute> GetAttributes()
+        {
+            if (IsEntityMapping)
+            {
+                yield return new uFrameEventMapping(this.Name);
+            }
         }
     }
     

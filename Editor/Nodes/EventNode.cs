@@ -9,12 +9,18 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
     
     
-    public class EventNode : EventNodeBase {
+    public class EventNode : EventNodeBase, IEventMetaInfo {
+        public string Category
+        {
+            get
+            {
+                return Namespace;
+            }
+        }
 
-        [InspectorProperty]
         public bool Dispatcher
         {
-            get { return this["Dispatcher"]; }
+            get { return false; }
             set { this["Dispatcher"] = value; }
         }
 
@@ -29,21 +35,24 @@ namespace Invert.uFrame.ECS {
             }
         }
 
-        [InspectorProperty]
-        public bool NeedsMappings
-        {
-            get { return this["NeedsMappings"]; }
-            set { this["NeedsMappings"] = value; }
-        }
+        //[InspectorProperty]
+        //public bool NeedsMappings
+        //{
+        //    get { return this["NeedsMappings"]; }
+        //    set { this["NeedsMappings"] = value; }
+        //}
 
         [InspectorProperty]
         public bool SystemEvent
         {
-            get { return this["SystemEvent"]; }
-            set { this["SystemEvent"] = value; }
+            get { return false; }
+            set {  }
         }
-        [InspectorProperty, JsonProperty]
-        public string SystemEventMethod { get; set; }
+
+        public string SystemEventMethod
+        {
+            get { return null; }
+        }
 
 
     }

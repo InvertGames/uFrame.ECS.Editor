@@ -30,7 +30,7 @@ namespace Invert.uFrame.ECS
                 var item1 = item;
                 selectionMenu.AddItem(new SelectionMenuItem(item.Value, () =>
                 {
-                    command.Node.MetaType = item1.Value.Type.FullName;
+                    command.Node.MetaType = item1.Value.FullName;
                 }));
             }
 

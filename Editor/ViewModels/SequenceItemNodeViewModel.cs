@@ -33,6 +33,11 @@ namespace Invert.uFrame.ECS {
 
         protected override void CreateContent()
         {
+            InputConnectorType = NodeConfig.SourceType;
+            OutputConnectorType = NodeConfig.SourceType;
+            AddPropertyFields();
+            CreateContentByConfiguration(NodeConfig.GraphItemConfigurations, GraphItem);
+
             foreach (var item in SequenceNode.GraphItems.OfType<IActionIn>())
             {
                 var vm = new InputOutputViewModel()
@@ -72,7 +77,7 @@ namespace Invert.uFrame.ECS {
 
 
             }
-            base.CreateContent();
+          
 
 
         }

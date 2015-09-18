@@ -49,20 +49,20 @@ namespace Invert.uFrame.ECS
     
         public override string MappingId
         {
-            get { return EventFieldInfo.Name; }
+            get { return EventFieldInfo.MemberName; }
         }
 
-        public EventFieldInfo EventFieldInfo { get; set; }
+        public IMemberInfo EventFieldInfo { get; set; }
         public override string Title
         {
             get
             {
-                return EventFieldInfo.Title;
+                return EventFieldInfo.MemberName;
             }
         }
         public override string Name
         {
-            get { return EventFieldInfo.Name; }
+            get { return EventFieldInfo.MemberName; }
             set { base.Name = value; }
         }
 

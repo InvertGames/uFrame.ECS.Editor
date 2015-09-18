@@ -13,7 +13,7 @@ namespace Invert.uFrame.ECS {
         private int _variableCount;
 
 
-        [JsonProperty,InspectorProperty]
+        [JsonProperty]//,InspectorProperty]
         public int VariableCount
         {
             get { return _variableCount; }

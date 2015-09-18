@@ -158,6 +158,19 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class CodeActionNodeViewModelBase : ActionNodeViewModel {
+        
+        public CodeActionNodeViewModelBase(CodeActionNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
+                base(graphItemObject, diagramViewModel) {
+        }
+        
+        public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
+            get {
+                return Invert.Core.GraphDesigner.NodeStyle.Normal;
+            }
+        }
+    }
+    
     public class BoolExpressionNodeViewModelBase : Invert.Core.GraphDesigner.GenericNodeViewModel<Invert.Core.GraphDesigner.GenericNode> {
         
         public BoolExpressionNodeViewModelBase(BoolExpressionNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
@@ -518,19 +531,6 @@ namespace Invert.uFrame.ECS {
         public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
             get {
                 return Invert.Core.GraphDesigner.NodeStyle.Minimalistic;
-            }
-        }
-    }
-    
-    public class CodeActionNodeViewModelBase : ActionNodeViewModel {
-        
-        public CodeActionNodeViewModelBase(CodeActionNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
-                base(graphItemObject, diagramViewModel) {
-        }
-        
-        public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
-            get {
-                return Invert.Core.GraphDesigner.NodeStyle.Normal;
             }
         }
     }

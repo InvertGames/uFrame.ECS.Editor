@@ -57,16 +57,16 @@ namespace Invert.Core.GraphDesigner
 
         public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, object obj)
         {
-            var actionVM = obj as ActionNodeViewModel;
+            var actionVM = obj as SequenceItemNodeViewModel;
             if (actionVM != null)
             {
                 ui.AddCommand(new ContextMenuItem()
                 {
                     Title = "Breakpoint",
-                    Checked = actionVM.Action.BreakPoint != null,
+                    Checked = actionVM.SequenceNode.BreakPoint != null,
                     Command = new ToggleBreakpointCommand()
                     {
-                        Action = actionVM.Action,
+                        Action = actionVM.SequenceNode,
 
                     }
                 });
@@ -139,6 +139,10 @@ namespace Invert.Core.GraphDesigner
                 Command = new LambdaCommand("Debug Mode", () =>
                 {
                     IsDebugMode = !IsDebugMode;
+                    InvertApplication.Execute(new SaveAndCompileCommand()
+                    {
+                        ForceCompileAll = true
+                    });
                 }),
                 Position = ToolbarPosition.Right
             });
@@ -194,6 +198,11 @@ namespace Invert.Core.GraphDesigner
                 if (ShouldContinue == true)
                 {
                     command.Result = 0;
+                    if (!ShouldStep)
+                    {
+                        CurrentBreakId = null;
+                    }
+                    
                     return;
                 }
                 command.Result = 1;
@@ -202,6 +211,7 @@ namespace Invert.Core.GraphDesigner
 
             if (CurrentBreakId != null && CurrentBreakId == command.PreviousId && command.PreviousId != null)
             {
+              
                 if (ShouldStep)
                 {
                     CurrentBreakId = command.ActionId;
@@ -308,7 +318,7 @@ namespace Invert.Core.GraphDesigner
 
     public class ToggleBreakpointCommand : Command
     {
-        public ActionNode Action { get; set; }
+        public SequenceItemNode Action { get; set; }
     }
 
 }
