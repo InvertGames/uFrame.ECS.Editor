@@ -124,6 +124,7 @@ namespace Invert.uFrame.ECS
             SystemTypes.Add(typeof (UnityEngine.UI.Toggle));
             SystemTypes.Add(typeof (UnityEngine.UI.ToggleGroup));
             SystemTypes.Add(typeof (UnityEngine.UI.Slider));
+            SystemTypes.Add(typeof (UnityEngine.Transform));
             //StaticLibraries.Add(typeof(Vector2));
             //StaticLibraries.Add(typeof(Vector3));
             StaticLibraries.Add(typeof(Physics));

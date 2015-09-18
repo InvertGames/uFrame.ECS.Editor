@@ -12,6 +12,11 @@ namespace Invert.uFrame.ECS {
     public class PropertiesChildItem : PropertiesChildItemBase {
         private string _friendlyName;
 
+        public override Type Type
+        {
+            get { return base.Type ?? typeof(int); }
+        }
+
         [InspectorProperty, JsonProperty]
         public string FriendlyName
         {

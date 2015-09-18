@@ -585,9 +585,8 @@ namespace Invert.uFrame.ECS
             get { 
                 
                 if (Action.Meta != null)
-                    return Action.Meta.TitleText;
-                if (Action.Meta != null && Action.Meta.Method != null)
-                    return Action.Meta.Method.Name;
+                    return Action.Meta.Title;
+      
                 return "Unknown";
             }
         }
