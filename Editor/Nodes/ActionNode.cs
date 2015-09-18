@@ -236,7 +236,16 @@ namespace Invert.uFrame.ECS
             base.RecordRemoved(record);
          
         }
-        
+
+        public override string Title
+        {
+            get
+            {
+                if (Meta == null) return null;
+                return Meta.Title;
+            }
+        }
+
         public override void Validate(List<ErrorInfo> errors)
         {
             base.Validate(errors);
@@ -563,6 +572,7 @@ namespace Invert.uFrame.ECS
     }
     public class Breakpoint : IDataRecord, IItem
     {
+        private string _forIdentifier;
         public IRepository Repository { get; set; }
         public string Identifier { get; set; }
         public bool Changed { get; set; }
@@ -573,21 +583,23 @@ namespace Invert.uFrame.ECS
         }
 
         [JsonProperty]
-        public string ForIdentifier { get; set; }
-
-        public ActionNode Action
+        public string ForIdentifier
         {
-            get { return Repository.GetSingle<ActionNode>(ForIdentifier); }
+            get { return _forIdentifier; }
+            set { this.Changed("ForIdentifier", ref _forIdentifier, value); }
+        }
+
+        public SequenceItemNode Action
+        {
+            get { return Repository.GetById<SequenceItemNode>(ForIdentifier); }
         }
 
         public string Title
         {
-            get { 
-                
-                if (Action.Meta != null)
-                    return Action.Meta.Title;
-      
-                return "Unknown";
+            get
+            {
+                if (Action == null) return "Unkown";
+                return Action.Title;
             }
         }
 
@@ -629,7 +641,20 @@ namespace Invert.uFrame.ECS
 
         public override string Title
         {
-            get { return _title ?? (_title = this.GetType().GetCustomAttributes(typeof(ActionTitle),true).OfType<ActionTitle>().First().Title); }
+            get
+            {
+                if (_title != null) return _title;
+                var attribute = this.GetType()
+                    .GetCustomAttributes(typeof (ActionTitle), true)
+                    .OfType<ActionTitle>()
+                    .FirstOrDefault();
+                if (attribute != null)
+                {
+                    return _title = attribute.Title;
+                }
+
+                return _title = base.Title;
+            }
         }
 
         public override IEnumerable<IGraphItem> GraphItems
@@ -1151,9 +1176,10 @@ namespace Invert.uFrame.ECS
             {
                 yield return new ContextVariable(parent.VariableName, item.MemberName)
                 {
-                    Repository = parent.Repository,
+                   
                     Node = parent.Node,
-                    VariableType = item.MemberType
+                    VariableType = item.MemberType,
+                    Repository = parent.Repository,
                 };
             }
         }

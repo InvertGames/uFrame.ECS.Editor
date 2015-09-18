@@ -78,9 +78,10 @@ namespace Invert.uFrame.ECS
 
             Library.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<ComponentNode>();
-            System.HasSubNode<ComponentNode>();
+           // System.HasSubNode<ComponentNode>();
             container.RegisterDrawer<ItemViewModel<IContextVariable>, ItemDrawer>();
-            container.AddItemFlag<ComponentsReference>("Multiple", UnityEngine.Color.blue);
+            //container.AddItemFlag<ComponentsReference>("Multiple", UnityEngine.Color.blue);
+            container.AddItemFlag<PropertiesChildItem>("Mapping", UnityEngine.Color.blue);
             container.AddNodeFlag<EventNode>("Dispatcher");
             //System.HasSubNode<EnumNode>();
             container.Connectable<IContextVariable, IActionIn>();

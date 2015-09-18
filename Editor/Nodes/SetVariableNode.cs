@@ -8,7 +8,7 @@ namespace Invert.uFrame.ECS {
     using Invert.Core;
     using Invert.Core.GraphDesigner;
     
-    
+    [ActionTitle("Set Variable"),uFrameCategory("Assign", "Set", "Variables")]
     public class SetVariableNode : CustomAction {
 
 

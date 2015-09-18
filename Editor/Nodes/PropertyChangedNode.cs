@@ -57,7 +57,7 @@ namespace Invert.uFrame.ECS {
                 {
                     return _PropertyIn;
                 }
-                return _PropertyIn ?? (_PropertyIn = new PropertyIn() { Repository = Repository, Node = this, Identifier = PropertyInId });
+                return _PropertyIn ?? (_PropertyIn = new PropertyIn() { Node = this, Identifier = PropertyInId,Repository = Repository, });
             }
         }
 

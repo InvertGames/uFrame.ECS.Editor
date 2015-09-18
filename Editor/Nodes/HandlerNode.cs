@@ -86,9 +86,10 @@ namespace Invert.uFrame.ECS
             {
                 return _entityGroup ?? (_entityGroup = new EntityGroupIn()
                 {
-                    Repository = Repository,
+                  
                     Node = this,
-                    Identifier = this.Identifier + ":" + "Group"
+                    Identifier = this.Identifier + ":" + "Group",
+                    Repository = Repository,
                 });
             }
             set { _entityGroup = value; }

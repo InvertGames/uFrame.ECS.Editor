@@ -112,24 +112,25 @@ namespace Invert.uFrame.ECS {
         {
             yield return new ContextVariable(input.HandlerPropertyName)
             {
-                Repository = this.Repository,
                 Node = this,
                 Source = this,
                 VariableType = this,
+                Repository = this.Repository,
                 //TypeInfo =  typeof(MonoBehaviour)
             };
             yield return new ContextVariable(input.HandlerPropertyName, "EntityId")
             {
-                Repository = this.Repository,
+               
                 Node = this,
                 VariableType = new SystemTypeInfo(typeof(int)),
-
+                Repository = this.Repository,
             };
             yield return new ContextVariable(input.HandlerPropertyName, "Entity")
             {
-                Repository = this.Repository,
+                
                 Node = this,
                 VariableType = new SystemTypeInfo(typeof(MonoBehaviour)),
+                Repository = this.Repository,
                 //TypeInfo = typeof(MonoBehaviour)
             };
 
@@ -137,10 +138,11 @@ namespace Invert.uFrame.ECS {
             {
                 yield return new ContextVariable(input.HandlerPropertyName,item.MemberName)
                 {
-                    Repository = this.Repository,
+                  
                     Node = this,
                     Source = item as ITypedItem,
-                    VariableType = item.MemberType
+                    VariableType = item.MemberType,
+                    Repository = this.Repository,
                 };
             }
         }

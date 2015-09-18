@@ -38,8 +38,8 @@ namespace Invert.uFrame.ECS {
         [InspectorProperty]
         public bool IsEntityMapping
         {
-            get { return this["IsEntityMapping"]; }
-            set { this["IsEntityMapping"] = value; }
+            get { return this["Mapping"]; }
+            set { this["Mapping"] = value; }
         }
 
         public override IEnumerable<Attribute> GetAttributes()

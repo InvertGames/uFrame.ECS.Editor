@@ -21,12 +21,12 @@ namespace Invert.uFrame.ECS {
             {
                 return _ainput ?? (_ainput = new PropertyIn()
                 {
-                    Repository = this.Repository,
+                  
                     Node = this.Node,
                     Name = "A",
                     DoesAllowInputs = true,
-                    Identifier = Identifier + ":" + "A"
-
+                    Identifier = Identifier + ":" + "A",
+                      Repository = this.Repository,
                 });
             }
         }
@@ -45,12 +45,12 @@ namespace Invert.uFrame.ECS {
             {
                 return _binput ?? (_binput = new PropertyIn()
                 {
-                    Repository = this.Repository,
+                   
                     Node = this.Node,
                     Name = "B",
                     DoesAllowInputs = true,
-                    Identifier = Identifier + ":" + "B"
-
+                    Identifier = Identifier + ":" + "B",
+                     Repository = this.Repository,
                 });
             }
         }
