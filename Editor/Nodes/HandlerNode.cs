@@ -1,6 +1,7 @@
 using Invert.Json;
 using System.CodeDom;
 using Invert.Data;
+using uFrame.Attributes;
 using UnityEngine;
 
 namespace Invert.uFrame.ECS
@@ -42,22 +43,23 @@ namespace Invert.uFrame.ECS
         {
             get
             {
-              
+
                 if (Meta == null)
                 {
 
                     return "Event Not Found";
                 }
-                return Meta.Attribute.Title;
+                return Meta.Title;
             }
         }
+
         private EntityGroupIn[] _contextInputs;
         private EntityGroupIn _entityGroup;
         private string _eventIdentifier;
         private EventNode _eventNode;
-        private EventMetaInfo _meta;
+        private IEventMetaInfo _meta;
         private string _metaType;
-        
+
         public override bool AllowInputs
         {
             get
@@ -94,7 +96,7 @@ namespace Invert.uFrame.ECS
 
         public virtual string EventType
         {
-            get { return Meta.Type.FullName; }
+            get { return Meta.FullName; }
             set { MetaType = value; }
         }
 
@@ -174,23 +176,22 @@ namespace Invert.uFrame.ECS
             get { return "EntityId"; }
         }
 
-        public EventMetaInfo Meta
+        public IEventMetaInfo Meta
         {
             get
             {
                 if (string.IsNullOrEmpty(MetaType))
                     return null;
-                if (!uFrameECS.Events.ContainsKey(MetaType))
-                {
-                    InvertApplication.Log(string.Format("{0} type not found.", MetaType));
-                    return null;
-                }
-                return _meta ?? (_meta = uFrameECS.Events[MetaType]);
+      
+
+                if (_meta != null) return _meta;
+
+                return _meta = Repository.GetSingle<EventNode>(MetaType) as IEventMetaInfo ?? (uFrameECS.Events.ContainsKey(MetaType) ? uFrameECS.Events[MetaType] : null);
             }
             set
             {
                 _meta = value;
-                _metaType = value.Type.FullName;
+                _metaType = value.FullName;
             }
         }
 
@@ -208,14 +209,14 @@ namespace Invert.uFrame.ECS
         {
             get { return GetAllContextVariables(); }
         }
-        
+
         public virtual int SetupOrder { get { return 0; } }
         public override void Validate(List<ErrorInfo> errors)
         {
             base.Validate(errors);
-            if (Repository.All<HandlerNode>().Any(p =>p != this && p.Name == Name))
+            if (Repository.All<HandlerNode>().Any(p => p != this && p.Name == Name))
             {
-                errors.AddError("This name is already being used",this, () =>
+                errors.AddError("This name is already being used", this, () =>
                 {
                     Name = Name + Repository.All<HandlerNode>().Count();
                 });
@@ -234,7 +235,7 @@ namespace Invert.uFrame.ECS
         public virtual string BeginWriteLoop(TemplateContext ctx, IMappingsConnectable connectable)
         {
             // ctx.PushStatements(ctx._if("{0} != null", ContextNode.SystemPropertyName).TrueStatements);
-            
+
             ctx._("var {0}Items = {1}", connectable.Name, connectable.EnumeratorExpression);
 
             var iteration = new CodeIterationStatement(
@@ -262,8 +263,8 @@ namespace Invert.uFrame.ECS
                 {
                     Repository = this.Repository,
                     Node = this,
-                    VariableType = new SystemTypeInfo(evtNode.Type),
-                    
+                    VariableType = Meta,
+
                 };
 
                 //foreach (var child in evtNode.Members)
@@ -301,7 +302,7 @@ namespace Invert.uFrame.ECS
                 }
             }
         }
-    
+
         public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
             VariableNode.VariableCount = 0;
@@ -312,25 +313,25 @@ namespace Invert.uFrame.ECS
 
         public virtual void WriteEventSubscription(TemplateContext ctx, CodeMemberMethod filterMethod, CodeMemberMethod handlerMethod)
         {
-            if (Meta != null && !Meta.SystemEvent && Meta.CodeWriter != null)
+
+            if (!IsSystemEvent)
             {
-                Meta.CodeWriter.WriteSetupMethod(this, ctx, handlerMethod);
+                ctx._("this.OnEvent<{0}>().Subscribe(_=>{{ {1}(_); }}).DisposeWith(this)", EventType,
+                    HandlerFilterMethodName);
             }
             else
             {
-                if (!IsSystemEvent)
-                {
-                    ctx._("this.OnEvent<{0}>().Subscribe(_=>{{ {1}(_); }}).DisposeWith(this)", EventType,
-                        HandlerFilterMethodName);
-                }
-                else
+                var meta = Meta as EventMetaInfo;
+                if (meta != null)
                 {
                     ctx.CurrentDeclaration.BaseTypes.Add(EventType);
-                    var method = Meta.Type.MethodFromTypeMethod(Meta.SystemEventMethod, false);
+                    var method = meta.SystemType.MethodFromTypeMethod(Meta.SystemEventMethod, false);
                     method._("{0}()", filterMethod.Name);
                     ctx.CurrentDeclaration.Members.Add(method);
                 }
+
             }
+
         }
 
         public virtual CodeMemberMethod WriteHandler(TemplateContext ctx)
@@ -350,16 +351,16 @@ namespace Invert.uFrame.ECS
             // Now writing the handler method contents
             var name = "handler";
             var field = ctx.CurrentDeclaration._private_(HandlerMethodName, HandlerMethodName + "Instance");
-            field.InitExpression = new CodeSnippetExpression(string.Format("new {0}()",HandlerMethodName));
-            
+            field.InitExpression = new CodeSnippetExpression(string.Format("new {0}()", HandlerMethodName));
+
             ctx._("var {0} = {1}Instance;", name, HandlerMethodName);
             ctx._("{0}.System = this", name);
 
             WriteHandlerSetup(ctx, name, handlerMethod);
             if (DebugSystem.IsDebugMode)
-            ctx._("StartCoroutine({0}.Execute())", name);
+                ctx._("StartCoroutine({0}.Execute())", name);
             else
-            ctx._("{0}.Execute()", name);
+                ctx._("{0}.Execute()", name);
             // End handler method contents
             ctx.PopStatements();
             ctx.CurrentMember = prevMethod;
@@ -375,54 +376,48 @@ namespace Invert.uFrame.ECS
 
             ctx.PushStatements(handlerFilterMethod.Statements);
 
-            if (Meta != null && Meta.CodeWriter != null)
+
+            if (!IsLoop)
             {
                 var handlerInvoker = new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), HandlerMethodName);
-                Meta.CodeWriter.WriteFilterMethod(this, ctx, handlerFilterMethod, handlerInvoker);
+                //
+
+                if (!IsSystemEvent)
+                    handlerInvoker.Parameters.Add(new CodeSnippetExpression("data"));
+
+                foreach (var item in FilterInputs)
+                {
+                    var filter = item.FilterNode;
+                    if (filter == null) continue;
+
+                    handlerInvoker.Parameters.Add(new CodeSnippetExpression(filter.GetContextItemName(item.Name)));
+
+                    ctx._("var {0} = {1}", filter.GetContextItemName(item.Name),
+                        filter.MatchAndSelect("data." + item.MappingId));
+                    ctx._if("{0} == null", filter.GetContextItemName(item.Name)).TrueStatements._("return");
+                }
+                WriteHandlerInvoker(handlerInvoker, handlerFilterMethod);
+                ctx.CurrentStatements.Add(handlerInvoker);
             }
             else
             {
-                if (!IsLoop)
+                var handlerInvoker = new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), HandlerMethodName);
+                if (!IsSystemEvent)
+                    handlerInvoker.Parameters.Add(new CodeSnippetExpression("data"));
+                if (this.EntityGroup.Item != null)
                 {
-                    var handlerInvoker = new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), HandlerMethodName);
-                    //
-
-                    if (!IsSystemEvent)
-                        handlerInvoker.Parameters.Add(new CodeSnippetExpression("data"));
-
-                    foreach (var item in FilterInputs)
-                    {
-                        var filter = item.FilterNode;
-                        if (filter == null) continue;
-
-                        handlerInvoker.Parameters.Add(new CodeSnippetExpression(filter.GetContextItemName(item.Name)));
-
-                        ctx._("var {0} = {1}", filter.GetContextItemName(item.Name),
-                            filter.MatchAndSelect("data." + item.MappingId));
-                        ctx._if("{0} == null", filter.GetContextItemName(item.Name)).TrueStatements._("return");
-                    }
-                    WriteHandlerInvoker(handlerInvoker, handlerFilterMethod);
+                    var item = this.BeginWriteLoop(ctx, this.EntityGroup.Item);
+                    handlerInvoker.Parameters.Add(new CodeSnippetExpression(item));
                     ctx.CurrentStatements.Add(handlerInvoker);
+                    this.EndWriteLoop(ctx);
                 }
                 else
                 {
-                    var handlerInvoker = new CodeMethodInvokeExpression(new CodeThisReferenceExpression(), HandlerMethodName);
-                    if (!IsSystemEvent)
-                            handlerInvoker.Parameters.Add(new CodeSnippetExpression("data"));
-                    if (this.EntityGroup.Item != null)
-                    {
-                        var item = this.BeginWriteLoop(ctx, this.EntityGroup.Item);
-                        handlerInvoker.Parameters.Add(new CodeSnippetExpression(item));
-                        ctx.CurrentStatements.Add(handlerInvoker);
-                        this.EndWriteLoop(ctx);
-                    }
-                    else
-                    {
-                        ctx.CurrentStatements.Add(handlerInvoker);
-                    }
-                  
+                    ctx.CurrentStatements.Add(handlerInvoker);
                 }
+
             }
+
 
             ctx.PopStatements();
             return handlerFilterMethod;
@@ -445,27 +440,27 @@ namespace Invert.uFrame.ECS
             var meta = Meta;
             if (meta != null)
             {
-                foreach (var item in Meta.Members)
+                foreach (var item in Meta.GetMembers())
                 {
-                    if (item.Type != typeof(int)) continue;
+                    if (!item.HasAttribute<uFrameEventMapping>()) continue;
                     var variableIn = new HandlerIn()
                     {
                         Repository = Repository,
                         EventFieldInfo = item,
                         Node = this,
-                        Identifier = this.Identifier + ":" + meta.Type.Name + ":" + item.Name
+                        Identifier = this.Identifier + ":" + item.MemberName
                     };
                     yield return variableIn;
-                    if (item.Name != "EntityId")
-                    hasMappings = true;
+                    if (item.MemberName != "EntityId")
+                        hasMappings = true;
                 }
             }
-            if (!hasMappings || (Meta != null && Meta.Dispatcher))
+            if (!hasMappings)
             {
                 yield return EntityGroup;
             }
         }
-        
+
         private void WriteEnsureDispatchers(TemplateContext ctx)
         {
             foreach (var item in FilterInputs)
@@ -474,7 +469,7 @@ namespace Invert.uFrame.ECS
                 if (filter == null) continue;
                 if (Meta.Dispatcher)
                 {
-                    ctx._("EnsureDispatcherOnComponents<{0}>( {1} )", Meta.Type.Name, filter.DispatcherTypesExpression());
+                    ctx._("EnsureDispatcherOnComponents<{0}>( {1} )", Meta.TypeName, filter.DispatcherTypesExpression());
                 }
             }
         }
@@ -495,7 +490,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-      
+
         private int _variableCount;
 
 
@@ -503,7 +498,7 @@ namespace Invert.uFrame.ECS
         public int VariableCount
         {
             get { return _variableCount; }
-            set { this.Changed("VariableCount",ref _variableCount, value); }
+            set { this.Changed("VariableCount", ref _variableCount, value); }
         }
 
         public string GetNewVariableName(string prefix)

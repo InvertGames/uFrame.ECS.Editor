@@ -41,6 +41,8 @@ namespace Invert.uFrame.ECS {
         
         private Invert.Core.GraphDesigner.NodeConfig<AllFalseNode> _AllFalse;
         
+        private Invert.Core.GraphDesigner.NodeConfig<CodeActionNode> _CodeAction;
+        
         private Invert.Core.GraphDesigner.NodeConfig<BoolExpressionNode> _BoolExpression;
         
         private Invert.Core.GraphDesigner.NodeConfig<FloatNode> _Float;
@@ -96,8 +98,6 @@ namespace Invert.uFrame.ECS {
         private Invert.Core.GraphDesigner.NodeConfig<AnyTrueNode> _AnyTrue;
         
         private Invert.Core.GraphDesigner.NodeConfig<SequenceItemNode> _SequenceItem;
-        
-        private Invert.Core.GraphDesigner.NodeConfig<CodeActionNode> _CodeAction;
         
         public Invert.Core.GraphDesigner.NodeConfig<CustomActionNode> CustomAction {
             get {
@@ -195,6 +195,15 @@ namespace Invert.uFrame.ECS {
             }
             set {
                 _AllFalse = value;
+            }
+        }
+        
+        public Invert.Core.GraphDesigner.NodeConfig<CodeActionNode> CodeAction {
+            get {
+                return _CodeAction;
+            }
+            set {
+                _CodeAction = value;
             }
         }
         
@@ -450,15 +459,6 @@ namespace Invert.uFrame.ECS {
             }
         }
         
-        public Invert.Core.GraphDesigner.NodeConfig<CodeActionNode> CodeAction {
-            get {
-                return _CodeAction;
-            }
-            set {
-                _CodeAction = value;
-            }
-        }
-        
         public virtual Invert.Core.GraphDesigner.SelectTypeCommand GetOutputsSelectionCommand() {
             return new SelectTypeCommand() { IncludePrimitives = true, AllowNone = false };
         }
@@ -508,10 +508,17 @@ namespace Invert.uFrame.ECS {
             Bool.Color(NodeColor.Purple);
             Module = container.AddGraph<ModuleGraph, ModuleNode>("ModuleGraph");
             Module.Color(NodeColor.Black);
+            Module.HasSubNode<ComponentNode>();
+            Module.HasSubNode<SystemNode>();
+            Module.HasSubNode<EventNode>();
+            Module.HasSubNode<CustomActionNode>();
+            Module.HasSubNode<GroupNode>();
             StopTimer = container.AddNode<StopTimerNode,StopTimerNodeViewModel,StopTimerNodeDrawer>("StopTimer");
             StopTimer.Color(NodeColor.Gray);
             AllFalse = container.AddNode<AllFalseNode,AllFalseNodeViewModel,AllFalseNodeDrawer>("AllFalse");
             AllFalse.Color(NodeColor.Orange);
+            CodeAction = container.AddNode<CodeActionNode,CodeActionNodeViewModel,CodeActionNodeDrawer>("CodeAction");
+            CodeAction.Color(NodeColor.Green);
             BoolExpression = container.AddNode<BoolExpressionNode,BoolExpressionNodeViewModel,BoolExpressionNodeDrawer>("BoolExpression");
             BoolExpression.Color(NodeColor.Gray);
             Float = container.AddNode<FloatNode,FloatNodeViewModel,FloatNodeDrawer>("Float");
@@ -579,6 +586,7 @@ namespace Invert.uFrame.ECS {
             Handler.HasSubNode<ComponentNode>();
             Handler.HasSubNode<LoopCollectionNode>();
             Handler.HasSubNode<IntNode>();
+            Handler.HasSubNode<CodeActionNode>();
             Handler.HasSubNode<PropertyNode>();
             Handler.HasSubNode<EnumValueNode>();
             Handler.HasSubNode<Vector2Node>();
@@ -587,7 +595,6 @@ namespace Invert.uFrame.ECS {
             Handler.HasSubNode<SequenceItemNode>();
             Handler.HasSubNode<Vector3Node>();
             Handler.HasSubNode<StringNode>();
-            Handler.HasSubNode<CodeActionNode>();
             System = container.AddGraph<SystemGraph, SystemNode>("SystemGraph");
             System.Color(NodeColor.Blue);
             System.HasSubNode<PropertyChangedNode>();
@@ -604,8 +611,6 @@ namespace Invert.uFrame.ECS {
             AnyTrue.Color(NodeColor.Orange);
             SequenceItem = container.AddNode<SequenceItemNode,SequenceItemNodeViewModel,SequenceItemNodeDrawer>("SequenceItem");
             SequenceItem.Color(NodeColor.Green);
-            CodeAction = container.AddNode<CodeActionNode,CodeActionNodeViewModel,CodeActionNodeDrawer>("CodeAction");
-            CodeAction.Color(NodeColor.Green);
             container.Connectable<BoolExpressionNode,Expressions>();
             container.Connectable<BoolExpressionNode,GroupNode>();
             container.Connectable<ComponentNode,RequireReference>();

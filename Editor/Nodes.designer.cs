@@ -296,7 +296,25 @@ namespace Invert.uFrame.ECS {
     public partial interface IAllFalseConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
-    public class BoolExpressionNodeBase : BoolNode, IExpressionsConnectable, IGroupConnectable {
+    public class CodeActionNodeBase : ActionNode {
+        
+        public override bool AllowMultipleInputs {
+            get {
+                return true;
+            }
+        }
+        
+        public override bool AllowMultipleOutputs {
+            get {
+                return true;
+            }
+        }
+    }
+    
+    public partial interface ICodeActionConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+    }
+    
+    public class BoolExpressionNodeBase : Invert.Core.GraphDesigner.GenericNode, IExpressionsConnectable, IGroupConnectable {
         
         public override bool AllowMultipleInputs {
             get {
@@ -991,23 +1009,5 @@ namespace Invert.uFrame.ECS {
     }
     
     public partial interface ISequenceItemConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
-    }
-    
-    public class CodeActionNodeBase : ActionNode {
-        
-        public override bool AllowMultipleInputs {
-            get {
-                return true;
-            }
-        }
-        
-        public override bool AllowMultipleOutputs {
-            get {
-                return true;
-            }
-        }
-    }
-    
-    public partial interface ICodeActionConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
 }

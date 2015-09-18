@@ -6,17 +6,24 @@ using uFrame.Attributes;
 
 namespace Invert.uFrame.ECS
 {
-    public class EventMetaInfo : IItem
+    public interface IEventMetaInfo : IItem, ITypeInfo
+    {
+        string Category { get; }
+        bool Dispatcher { get; }
+        bool SystemEvent { get; }
+        string SystemEventMethod { get; }
+    }
+
+    public class EventMetaInfo : SystemTypeInfo, IEventMetaInfo
     {
         private List<EventFieldInfo> _members;
         private uFrameCategory _categoryAttribute;
 
-        public Type Type { get; set; }
         public uFrameEvent Attribute { get; set; }
 
         public uFrameCategory CategoryAttribute
         {
-            get { return _categoryAttribute ?? (_categoryAttribute = Type.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault()); }
+            get { return _categoryAttribute ?? (_categoryAttribute = SystemType.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault()); }
             set { _categoryAttribute = value; }
         }
 
@@ -41,11 +48,11 @@ namespace Invert.uFrame.ECS
             get { return Attribute is SystemUFrameEvent; }
         }
 
-        public List<EventFieldInfo> Members
-        {
-            get { return _members ?? (_members = new List<EventFieldInfo>()); }
-            set { _members = value; }
-        }
+        //public List<EventFieldInfo> Members
+        //{
+        //    get { return _members ?? (_members = new List<EventFieldInfo>()); }
+        //    set { _members = value; }
+        //}
 
         public string SystemEventMethod
         {
@@ -54,30 +61,21 @@ namespace Invert.uFrame.ECS
 
         public IHandlerCodeWriter CodeWriter { get; set; }
 
-        public string Title
+        public override string Title
         {
             get
             {
                 if (SystemEvent) return (Attribute as SystemUFrameEvent).Title;
-                return Type.Name;
+                return SystemType.Name;
             }
         }
 
-        public string Group
+        public EventMetaInfo(Type systemType) : base(systemType)
         {
-            get { return Category; }
         }
 
-        public string SearchTag
+        public EventMetaInfo(Type systemType, ITypeInfo other) : base(systemType, other)
         {
-            get { return Title + Category; }
         }
-
-        public string Description
-        {
-            get { return ""; }
-            set { }
-        }
-
     }
 }

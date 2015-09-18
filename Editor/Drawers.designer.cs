@@ -93,6 +93,13 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class CodeActionNodeDrawerBase : GenericNodeDrawer<CodeActionNode,CodeActionNodeViewModel> {
+        
+        public CodeActionNodeDrawerBase(CodeActionNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
     public class BoolExpressionNodeDrawerBase : GenericNodeDrawer<BoolExpressionNode,BoolExpressionNodeViewModel> {
         
         public BoolExpressionNodeDrawerBase(BoolExpressionNodeViewModel viewModel) : 
@@ -285,13 +292,6 @@ namespace Invert.uFrame.ECS {
     public class SequenceItemNodeDrawerBase : GenericNodeDrawer<SequenceItemNode,SequenceItemNodeViewModel> {
         
         public SequenceItemNodeDrawerBase(SequenceItemNodeViewModel viewModel) : 
-                base(viewModel) {
-        }
-    }
-    
-    public class CodeActionNodeDrawerBase : GenericNodeDrawer<CodeActionNode,CodeActionNodeViewModel> {
-        
-        public CodeActionNodeDrawerBase(CodeActionNodeViewModel viewModel) : 
                 base(viewModel) {
         }
     }

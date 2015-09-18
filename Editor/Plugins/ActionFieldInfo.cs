@@ -1,10 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using uFrame.Attributes;
 
 namespace Invert.uFrame.ECS
 {
-    public class ActionFieldInfo
+    public interface IActionFieldInfo : IMemberInfo
+    {
+        string Name { get;  }
+        bool IsGenericArgument { get;  }
+        bool IsReturn { get; }
+        bool IsByRef { get;  }
+        FieldDisplayTypeAttribute DisplayType { get; }
+        bool IsBranch { get; }
+    }
+
+    public class ActionFieldInfo : IActionFieldInfo
     {
         public string Name
         {
@@ -17,7 +28,7 @@ namespace Invert.uFrame.ECS
         }
         private FieldDisplayTypeAttribute _displayType;
         private string _name;
-        public Type Type { get; set; }
+        
         public ActionAttribute[] MetaAttributes { get; set; }
 
         public FieldDisplayTypeAttribute DisplayType
@@ -26,7 +37,19 @@ namespace Invert.uFrame.ECS
             set { _displayType = value; }
         }
 
+        public bool IsBranch { get; set; }
+
         public bool IsGenericArgument { get; set; }
         public bool IsReturn { get; set; }
+        public bool IsByRef { get; set; }
+
+
+        public string MemberName { get; set; }
+        public ITypeInfo MemberType { get; set; }
+        public IEnumerable<Attribute> GetAttributes()
+        {
+           return MetaAttributes;
+        }
+
     }
 }

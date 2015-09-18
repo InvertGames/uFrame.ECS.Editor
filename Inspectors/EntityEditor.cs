@@ -123,13 +123,13 @@ public class UnityInspectors : DiagramPlugin, IDrawUnityInspector
                                     Select = true
                                 });
                             }
-
-                            if (handlerNode.Meta != null && handlerNode.Meta.Dispatcher && component.gameObject.GetComponent(handlerNode.Meta.Type) == null)
+                            var meta = handlerNode.Meta as EventMetaInfo;
+                            if (meta != null && meta.Dispatcher && component.gameObject.GetComponent(meta.SystemType) == null)
                             {
-                                if (GUILayout.Button("+ " + handlerNode.Meta.Type.Name))
+                                if (GUILayout.Button("+ " + meta.SystemType.Name))
                                 {
                                     
-                                    component.gameObject.AddComponent(handlerNode.Meta.Type);
+                                    component.gameObject.AddComponent(meta.SystemType);
                                 }
                             }
                          

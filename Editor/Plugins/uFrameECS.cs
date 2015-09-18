@@ -71,12 +71,14 @@ namespace Invert.uFrame.ECS
             Action.NodeColor.Literal = NodeColor.Green;
             //System.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<TypeReferenceNode>();
+            Module.HasSubNode<EnumNode>();
             Group.HasSubNode<EnumValueNode>();
             //System.HasSubNode<ComponentNode>();
             // System.HasSubNode<ContextNode>(); 
 
             Library.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<ComponentNode>();
+            System.HasSubNode<ComponentNode>();
             container.RegisterDrawer<ItemViewModel<IContextVariable>, ItemDrawer>();
             container.AddItemFlag<ComponentsReference>("Multiple", UnityEngine.Color.blue);
             container.AddNodeFlag<EventNode>("Dispatcher");
@@ -100,6 +102,7 @@ namespace Invert.uFrame.ECS
             container.AddWorkspaceConfig<EcsWorkspace>("ECS")
                 .WithGraph<LibraryGraph>("Library","Create components, groups, events, custom actions, and more.")
                 .WithGraph<SystemGraph>("System","System defines behaviour for items defines inside a your libraries.")
+                .WithGraph<ModuleGraph>("Module","A module graph allows you to comprise library items and system as a single graph.")
                 ;
             //container.AddWorkspaceConfig<BehaviourWorkspace>("Behaviour").WithGraph<SystemGraph>("System Graph");
             EnumValue.Name = "Enum Value";
@@ -114,7 +117,7 @@ namespace Invert.uFrame.ECS
             SystemTypes.Add(typeof (UnityEngine.UI.GridLayoutGroup));
             SystemTypes.Add(typeof (UnityEngine.UI.Text));
             SystemTypes.Add(typeof (UnityEngine.UI.InputField));
-            SystemTypes.Add(typeof (UnityEngine.UI.Dropdown));
+            //SystemTypes.Add(typeof (UnityEngine.UI.Dropdown));
             SystemTypes.Add(typeof (UnityEngine.UI.ScrollRect));
             SystemTypes.Add(typeof (UnityEngine.UI.Scrollbar));
             SystemTypes.Add(typeof (UnityEngine.UI.Outline));
@@ -167,11 +170,7 @@ namespace Invert.uFrame.ECS
             {
 
                 if (Actions.ContainsKey(actionType.FullName)) continue;
-                var actionInfo = new ActionMetaInfo()
-                {
-                    Type = actionType,
-
-                };
+                var actionInfo = new ActionMetaInfo(actionType);
                 actionInfo.MetaAttributes =
                     actionType.GetCustomAttributes(typeof(ActionMetaAttribute), true).OfType<ActionMetaAttribute>().ToArray();
                 var fields = actionType.GetFields(BindingFlags.Instance | BindingFlags.Public);
@@ -181,8 +180,10 @@ namespace Invert.uFrame.ECS
                     {
                         var fieldMetaInfo = new ActionFieldInfo()
                         {
-                            Type = field.FieldType,
-                            Name = field.Name
+                            MemberType = new SystemTypeInfo(field.FieldType),
+                            Name = field.Name,
+                            IsBranch = field.FieldType == typeof(Action),
+                            MemberName = field.Name
                         };
                         if (!SystemTypes.Contains(field.FieldType))
                             SystemTypes.Add(field.FieldType);
@@ -219,7 +220,7 @@ namespace Invert.uFrame.ECS
             {
                 foreach (
                     var type in
-                        assembly.GetTypes()
+                        assembly.GetTypes() 
                             .Where(p => p.IsSealed && p.IsDefined(typeof(ActionLibrary), true) || StaticLibraries.Contains(p)))
                 {
 
@@ -229,9 +230,8 @@ namespace Invert.uFrame.ECS
                     {
                         if (method.Name.StartsWith("get_")) continue;
                         if (method.Name.StartsWith("set_")) continue;
-                        var actionInfo = new ActionMetaInfo()
+                        var actionInfo = new ActionMethodMetaInfo(type)
                         {
-                            Type = type,
                             Category = category,
                             Method = method,
                         };
@@ -245,27 +245,31 @@ namespace Invert.uFrame.ECS
                         {
                             actionInfo.Category = new uFrameCategory(type.Name);
                         }
-                        var genericArguments = method.GetGenericArguments();
+                        //var genericArguments = method.GetGenericArguments();
                         var vars = method.GetParameters();
 
-                        foreach (var item in genericArguments)
-                        {
-                            var fieldMetaInfo = new ActionFieldInfo()
-                            {
-                                Type = item.GetGenericParameterConstraints().FirstOrDefault(),
-                                Name = item.Name,
-                                DisplayType = new In(item.Name, item.Name),
-                                IsGenericArgument = true
-                            };
-                            actionInfo.ActionFields.Add(fieldMetaInfo);
-                        }
+                        //foreach (var item in genericArguments)
+                        //{
+                        //    var fieldMetaInfo = new ActionFieldInfo()
+                        //    {
+                        //        MemberType = new SystemTypeInfo(item.GetGenericParameterConstraints()[0]),
+                        //        Name = item.Name,
+                        //        DisplayType = new In(item.Name, item.Name),
+                        //        IsGenericArgument = true,
+                             
+                        //    };
+                        //    actionInfo.ActionFields.Add(fieldMetaInfo);
+                        //}
 
                         foreach (var parameter in vars)
                         {
                             var fieldMetaInfo = new ActionFieldInfo()
                             {
-                                Type = parameter.ParameterType,
-                                Name = parameter.Name
+                                MemberType = new SystemTypeInfo(parameter.ParameterType),
+                                Name = parameter.Name,
+                                IsBranch = parameter.ParameterType == typeof(Action),
+                                MemberName = parameter.Name,
+                                IsByRef = parameter.ParameterType.IsByRef
                             };
                             if (!SystemTypes.Contains(parameter.ParameterType))
                                 SystemTypes.Add(parameter.ParameterType);
@@ -290,9 +294,10 @@ namespace Invert.uFrame.ECS
                         {
                             var result = new ActionFieldInfo()
                             {
-                                Type = method.ReturnType,
+                                MemberType = new SystemTypeInfo(method.ReturnType),
                                 IsReturn = true,
-                                Name = "Result"
+                                Name = "Result",
+                                MemberName = "Result"
                             };
                             if (!SystemTypes.Contains(method.ReturnType))
                                 SystemTypes.Add(method.ReturnType);
@@ -379,47 +384,46 @@ namespace Invert.uFrame.ECS
             foreach (var eventType in EventTypes)
             {
                 if (Events.ContainsKey(eventType.FullName)) continue;
-                var eventInfo = new EventMetaInfo()
-                {
-                    Type = eventType,
-                    CodeWriter = CodeWriters.FirstOrDefault(p => p.For == eventType)
+                var eventInfo = new EventMetaInfo(eventType)
+                {                    
+                 
                 };
 
                 eventInfo.Attribute =
                     eventType.GetCustomAttributes(typeof(uFrameEvent), true).OfType<uFrameEvent>().FirstOrDefault();
 
-                var fields = eventType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
-                var properties = eventType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                //var fields = eventType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
+                //var properties = eventType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
 
 
-                foreach (var field in fields)
-                {
-                    var fieldMetaInfo = new EventFieldInfo()
-                    {
-                        Type = field.FieldType,
-                        Attribute = eventType.GetCustomAttributes(typeof(uFrameEventMapping), true).OfType<uFrameEventMapping>().FirstOrDefault(),
-                        Name = field.Name
-                    };
-                    if (!SystemTypes.Contains(field.FieldType))
-                        SystemTypes.Add(field.FieldType);
+                //foreach (var field in fields)
+                //{
+                //    var fieldMetaInfo = new EventFieldInfo()
+                //    {
+                //        Type = field.FieldType,
+                //        Attribute = eventType.GetCustomAttributes(typeof(uFrameEventMapping), true).OfType<uFrameEventMapping>().FirstOrDefault(),
+                //        Name = field.Name
+                //    };
+                //    if (!SystemTypes.Contains(field.FieldType))
+                //        SystemTypes.Add(field.FieldType);
 
-                    eventInfo.Members.Add(fieldMetaInfo);
-                }
-                foreach (var field in properties)
-                {
-                    var fieldMetaInfo = new EventFieldInfo()
-                    {
-                        Type = field.PropertyType,
-                        Name = field.Name,
-                        Attribute = eventType.GetCustomAttributes(typeof(uFrameEventMapping), true).OfType<uFrameEventMapping>().FirstOrDefault(),
-                        IsProperty = true
-                    };
+                //    eventInfo.Members.Add(fieldMetaInfo);
+                //}
+                //foreach (var field in properties)
+                //{
+                //    var fieldMetaInfo = new EventFieldInfo()
+                //    {
+                //        Type = field.PropertyType,
+                //        Name = field.Name,
+                //        Attribute = eventType.GetCustomAttributes(typeof(uFrameEventMapping), true).OfType<uFrameEventMapping>().FirstOrDefault(),
+                //        IsProperty = true
+                //    };
 
-                    if (!SystemTypes.Contains(field.PropertyType))
-                        SystemTypes.Add(field.PropertyType);
+                //    if (!SystemTypes.Contains(field.PropertyType))
+                //        SystemTypes.Add(field.PropertyType);
 
-                    eventInfo.Members.Add(fieldMetaInfo);
-                }
+                //    eventInfo.Members.Add(fieldMetaInfo);
+                //}
                 Events.Add(eventType.FullName, eventInfo);
             }
         }
@@ -429,7 +433,7 @@ namespace Invert.uFrame.ECS
             foreach (var item in Events)
             {
                 var item1 = item;
-                var qa = new QuickAddItem(item.Value.Type.Namespace, item.Value.Attribute.Title, _ =>
+                var qa = new QuickAddItem(item.Value.Namespace, item.Value.Attribute.Title, _ =>
                 {
                     var eventNode = new HandlerNode()
                     {
@@ -595,7 +599,20 @@ namespace Invert.uFrame.ECS
                 };
 
                 menu.AddItem(category);
-
+                foreach (var item in currentGraph.Repository.All<EventNode>())
+                {
+                    var item1 = item;
+                    var qa = new SelectionMenuItem(item, () =>
+                    {
+                        var eventNode = new HandlerNode()
+                        {
+                            MetaType = item1.Identifier,
+                            Name = systemNode.Name + item1.Name
+                        };
+                        InvertGraphEditor.CurrentDiagramViewModel.AddNode(eventNode, LastMouseEvent != null ? LastMouseEvent.MousePosition : new Vector2(0, 0));
+                    });
+                    menu.AddItem(qa, category);
+                }
                 foreach (var item in Events)
                 {
                     var item1 = item;
@@ -669,16 +686,16 @@ namespace Invert.uFrame.ECS
             GetActionsMenu(menu, _ =>
             {
                 SequenceItemNode node = null;
-                if (_.IsEditorClass)
+                var type = _ as ActionMetaInfo;
+                if (type != null && type.IsEditorClass)
                 {
-                    node = Activator.CreateInstance(_.Type) as SequenceItemNode;
+                    node = Activator.CreateInstance(type.SystemType) as SequenceItemNode;
                 }
                 else
                 { 
-                    var actionInfo = _ as ActionMetaInfo;
                     node = new ActionNode
                     {
-                        Meta = actionInfo,
+                        Meta = _,
                     };
                     //node.Name = "";
                 }
@@ -689,8 +706,16 @@ namespace Invert.uFrame.ECS
             });
         }
 
-        private static void GetActionsMenu(SelectionMenu menu, Action<ActionMetaInfo> onSelect)
+        private void GetActionsMenu(SelectionMenu menu, Action<IActionMetaInfo> onSelect)
         {
+            foreach (var action in this.Container.Resolve<IRepository>().All<CustomActionNode>())
+            {
+                var action1 = action;
+                menu.AddItem(new SelectionMenuItem(action, () =>
+                {
+                    onSelect(action1);
+                }));
+            }
             var _categoryTitles = uFrameECS.Actions
                 .Where(_ => _.Value.Category != null)
                 .SelectMany(_ => _.Value.Category.Title)
@@ -756,12 +781,22 @@ namespace Invert.uFrame.ECS
                 menu.Items.Clear();
                 GetActionsMenu(menu, _ =>
                 {
-                    var actionInfo = _ as ActionMetaInfo;
-                    var node = new ActionNode
+                    SequenceItemNode node = null;
+                    var type = _ as ActionMetaInfo;
+                    if (type != null && type.IsEditorClass)
                     {
-                        Meta = actionInfo,
-                        Graph = diagramViewModel.GraphData,
-                    };
+                        node = Activator.CreateInstance(type.SystemType) as SequenceItemNode;
+                    }
+                    else
+                    {
+                       
+                        node = new ActionNode
+                        {
+                            Meta = _,
+                        };
+                        //node.Name = "";
+                    }
+                    node.Graph = diagramViewModel.GraphData;
                     diagramViewModel.AddNode(node, mousePosition);
                     diagramViewModel.GraphData.AddConnection(startConnector.ConnectorFor.DataObject as IConnectable, node);
                     node.IsSelected = true;
@@ -783,7 +818,7 @@ namespace Invert.uFrame.ECS
             foreach (var item in Actions)
             {
 
-                var qaItem = new QuickAccessItem(item.Value.CategoryPath.FirstOrDefault() ?? string.Empty, item.Value.TitleText, item.Value.TitleText, _ =>
+                var qaItem = new QuickAccessItem(item.Value.CategoryPath.FirstOrDefault() ?? string.Empty, item.Value.Title, item.Value.Title, _ =>
                 {
                     var actionInfo = _ as ActionMetaInfo;
                     var node = new ActionNode()

@@ -186,7 +186,7 @@ namespace Invert.uFrame.ECS
             return list.Where(Filter).OfType<IValueItem>();
         }
 
-        public ActionFieldInfo ActionFieldInfo { get; set; }
+        public IActionFieldInfo ActionFieldInfo { get; set; }
        
         public string VariableName
         {

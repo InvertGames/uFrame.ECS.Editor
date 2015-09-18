@@ -172,5 +172,57 @@ namespace Invert.uFrame.ECS
             //    }
             //}
         }
+
+        public void WriteActionInputs(TemplateContext _)
+        {
+            foreach (var output in this.GraphItems.OfType<IActionIn>())
+            {
+                WriteActionInput(_, output);
+            }
+        }
+
+        private void WriteActionInput(TemplateContext _, IActionIn output)
+        {
+            if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsReturn) return;
+            _._("{0} = {1}.{2}", output.VariableName, VariableName, output.Name);
+            var variableReference = output.InputFrom<IContextVariable>();
+            if (variableReference != null)
+                _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(variableReference.VariableName),
+                    new CodeSnippetExpression(output.VariableName)));
+
+            //var actionIn = output.OutputTo<IActionIn>();
+            //if (actionIn != null)
+            //{
+            //    _.CurrentStatements.Add(new CodeAssignStatement(
+            //             new CodeSnippetExpression(output.VariableName), new CodeSnippetExpression(actionIn.VariableName)
+               
+            //        ));
+            //}
+        }
+
+        public void WriteActionOutputs(TemplateContext _)
+        {
+            foreach (var output in this.GraphItems.OfType<ActionOut>())
+            {
+                WriteActionOutput(_, output);
+            }
+        }
+
+        private void WriteActionOutput(TemplateContext _, IActionOut output)
+        {
+            if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsReturn) return;
+            _._("{0} = {1}.{2}", output.VariableName, VariableName, output.Name);
+            var variableReference = output.OutputTo<IContextVariable>();
+            if (variableReference != null)
+                _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(variableReference.VariableName),
+                    new CodeSnippetExpression(output.VariableName)));
+            var actionIn = output.OutputTo<IActionIn>();
+            if (actionIn != null)
+            {
+                _.CurrentStatements.Add(new CodeAssignStatement(
+                    new CodeSnippetExpression(actionIn.VariableName),
+                    new CodeSnippetExpression(output.VariableName)));
+            }
+        }
     }
 }

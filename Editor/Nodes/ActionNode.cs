@@ -230,7 +230,13 @@ namespace Invert.uFrame.ECS
         string GetNewVariableName(string prefix);
     }
     public class ActionNode : ActionNodeBase, ICodeOutput, IConnectableProvider
-    { 
+    {
+        public override void RecordRemoved(IDataRecord record)
+        {
+            base.RecordRemoved(record);
+         
+        }
+        
         public override void Validate(List<ErrorInfo> errors)
         {
             base.Validate(errors);
@@ -279,20 +285,23 @@ namespace Invert.uFrame.ECS
                 return;
             }
             ctx._comment("Visit {0}", this.Meta.FullName);
-            var methodInfo = this.Meta.Method;
+
+
+
+            var methodInfo = Meta as ActionMethodMetaInfo;
             if (methodInfo != null)
             {
                 var codeMethodReferenceExpression = new CodeMethodReferenceExpression(
-                    new CodeSnippetExpression(this.Meta.Type.FullName),
-                    methodInfo.Name);
-                var genericInputVars = this.GraphItems.OfType<TypeSelection>().Where(p => p.ActionFieldInfo.IsGenericArgument && p.Item != null).Select(p => p.Item.TypeName).ToArray();
-                if (genericInputVars.Length > 0)
-                {
-                    codeMethodReferenceExpression = new CodeMethodReferenceExpression(
-                       new CodeSnippetExpression(this.Meta.Type.FullName),
-                       string.Format("{0}<{1}>", methodInfo.Name, string.Join(",", genericInputVars)));
+                    new CodeSnippetExpression(methodInfo.SystemType.FullName),
+                    methodInfo.Method.Name);
+                //var genericInputVars = this.GraphItems.OfType<TypeSelection>().Where(p => p.ActionFieldInfo.IsGenericArgument && p.Item != null).Select(p => p.Item.TypeName).ToArray();
+                //if (genericInputVars.Length > 0)
+                //{
+                //    codeMethodReferenceExpression = new CodeMethodReferenceExpression(
+                //       new CodeSnippetExpression(this.Meta.FullName),
+                //       string.Format("{0}<{1}>", methodInfo.TypeName, string.Join(",", genericInputVars)));
 
-                }
+                //}
                 var _currentActionInvoker =
                     new CodeMethodInvokeExpression(
                         codeMethodReferenceExpression);
@@ -306,7 +315,7 @@ namespace Invert.uFrame.ECS
                     else
                     {
                         _currentActionInvoker.Parameters.Add(
-                            new CodeSnippetExpression((input.ActionFieldInfo.Type.IsByRef ? "ref " : string.Empty) + string.Format("{0}", input.VariableName)));
+                            new CodeSnippetExpression((input.ActionFieldInfo.IsByRef ? "ref " : string.Empty) + string.Format("{0}", input.VariableName)));
                     }
 
                 }
@@ -352,8 +361,8 @@ namespace Invert.uFrame.ECS
             }
             else
             {
-                var varStatement = ctx.CurrentDeclaration._private_(this.Meta.Type, this.VarName);
-                varStatement.InitExpression = new CodeObjectCreateExpression(this.Meta.Type);
+                var varStatement = ctx.CurrentDeclaration._private_(this.Meta.FullName, this.VarName);
+                varStatement.InitExpression = new CodeObjectCreateExpression(this.Meta.FullName);
 
                 foreach (var item in this.GraphItems.OfType<ActionIn>())
                 {
@@ -383,24 +392,21 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        private ActionMetaInfo _meta;
+        private IActionMetaInfo _meta;
         private string _metaType;
         private IActionIn[] _inputVars;
         private IActionOut[] _outputVars;
 
 
-        public ActionMetaInfo Meta
+        public IActionMetaInfo Meta
         {
             get
             {
                 if (string.IsNullOrEmpty(MetaType))
                     return null;
-                if (!uFrameECS.Actions.ContainsKey(MetaType))
-                {
-                    //InvertApplication.LogError(string.Format("{0} action was not found in graph {1}.", MetaType, this.Graph.Name));
-                    return null;
-                }
-                return _meta ?? (_meta = uFrameECS.Actions[MetaType]);
+
+                if (_meta != null) return _meta;
+                return _meta = (uFrameECS.Actions.ContainsKey(MetaType) ? uFrameECS.Actions[MetaType] : Repository.All<CustomActionNode>().FirstOrDefault(p=>p.FullName == MetaType) as IActionMetaInfo);
             }
             set
             {
@@ -451,7 +457,7 @@ namespace Invert.uFrame.ECS
                 //    yield return variableIn;
                 //}
 
-                foreach (var item in Meta.ActionFields.Where(p => p.DisplayType is In))
+                foreach (var item in Meta.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is In))
                 {
                     IActionIn variableIn;
 
@@ -459,7 +465,7 @@ namespace Invert.uFrame.ECS
                     variableIn.Node = this;
                     variableIn.Repository = Repository;
                     variableIn.ActionFieldInfo = item;
-                    variableIn.Identifier = this.Identifier + ":" + meta.Type.Name + ":" + item.Name;
+                    variableIn.Identifier = this.Identifier + ":" + item.MemberName;
                     yield return variableIn;
                 }
             }
@@ -472,24 +478,24 @@ namespace Invert.uFrame.ECS
             set { _outputVars = value; }
         }
 
-        public IEnumerable<IActionOut> GetOutsWithType<TType>()
-        {
-            return OutputVars.Where(p => p.ActionFieldInfo.Type.IsAssignableFrom(typeof(TType)));
-        }
+        //public IEnumerable<IActionOut> GetOutsWithType<TType>()
+        //{
+        //    return OutputVars.Where(p => p.ActionFieldInfo.MemberType.IsAssignableFrom(typeof(TType)));
+        //}
 
-        public IEnumerable<IActionIn> GetInsWithType<TType>()
-        {
-            return InputVars.Where(p => p.ActionFieldInfo.Type.IsAssignableFrom(typeof(TType)));
-        }
+        //public IEnumerable<IActionIn> GetInsWithType<TType>()
+        //{
+        //    return InputVars.Where(p => p.ActionFieldInfo.Type.IsAssignableFrom(typeof(TType)));
+        //}
 
         private IEnumerable<IActionOut> GetOutputVars()
         {
             var meta = Meta;
             if (meta != null)
             {
-                foreach (var item in Meta.ActionFields.Where(p => p.DisplayType is Out))
+                foreach (var item in Meta.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out))
                 {
-                    if (item.Type == typeof(Action))
+                    if (item.IsBranch)
                     {
                         var variableOut = new ActionBranch()
                         {
@@ -580,7 +586,7 @@ namespace Invert.uFrame.ECS
 
     public interface IActionItem : IDiagramNodeItem
     {
-        ActionFieldInfo ActionFieldInfo { get; set; }
+        IActionFieldInfo ActionFieldInfo { get; set; }
         string VariableName { get; }
         ITypeInfo VariableType { get; }
 
@@ -604,9 +610,11 @@ namespace Invert.uFrame.ECS
 
     public class CustomAction : SequenceItemNode, IConnectableProvider
     {
+        private string _title;
+
         public override string Title
         {
-            get { return this.GetType().Name.Replace("Node",""); }
+            get { return _title ?? (_title = this.GetType().GetCustomAttributes(typeof(ActionTitle),true).OfType<ActionTitle>().First().Title); }
         }
 
         public override IEnumerable<IGraphItem> GraphItems
@@ -641,6 +649,7 @@ namespace Invert.uFrame.ECS
         {
 
         }
+
         public override bool IsEditable
         {
             get { return false; }
@@ -743,7 +752,7 @@ namespace Invert.uFrame.ECS
             
                 _.ActionFieldInfo = new ActionFieldInfo()
                 {
-                    Type = typeof(float),
+                    MemberType = new SystemTypeInfo(typeof(float)),
                     Name = "Seconds"
                 };
             }); }
@@ -783,7 +792,7 @@ namespace Invert.uFrame.ECS
             return true;
         }
 
-        public ActionFieldInfo ActionFieldInfo { get; set; }
+        public IActionFieldInfo ActionFieldInfo { get; set; }
 
         public SequenceItemNode SequenceItem
         {
@@ -803,7 +812,7 @@ namespace Invert.uFrame.ECS
             {
                 if (ActionFieldInfo != null)
                 {
-                    return new SystemTypeInfo(ActionFieldInfo.Type);
+                    return ActionFieldInfo.MemberType;
                 }
                 return new SystemTypeInfo(typeof(object));
                 //var item = Item;
@@ -858,7 +867,7 @@ namespace Invert.uFrame.ECS
             get { return Node.Filter as IVariableContextProvider; }
         }
 
-        public ActionFieldInfo ActionFieldInfo { get; set; }
+        public IActionFieldInfo ActionFieldInfo { get; set; }
 
         public string VariableName
         {
@@ -920,6 +929,8 @@ namespace Invert.uFrame.ECS
     public class VariableIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn
     {
         public bool DoesAllowInputs;
+        private ITypeInfo _variableType;
+
         public override bool AllowInputs
         {
             get { return DoesAllowInputs; }
@@ -936,7 +947,7 @@ namespace Invert.uFrame.ECS
             get { return Node.Filter as IVariableContextProvider; }
         }
 
-        public ActionFieldInfo ActionFieldInfo { get; set; }
+        public IActionFieldInfo ActionFieldInfo { get; set; }
         public override string ItemDisplayName(IContextVariable item)
         {
             return base.ItemDisplayName(item);
@@ -959,7 +970,7 @@ namespace Invert.uFrame.ECS
                 var item = Item;
                 if (item == null)
                 {
-                    return "...";
+                    return string.Format("default({0})", VariableType.FullName);
                 }
                 return item.VariableName;
             }
@@ -969,14 +980,18 @@ namespace Invert.uFrame.ECS
         {
             get
             {
-
+                if (_variableType != null)
+                {
+                    return _variableType;
+                }
                 var item = Item;
                 if (item == null)
                     return new SystemTypeInfo(typeof(object));
-                return Item.VariableType;
+                return _variableType ?? (_variableType = Item.VariableType);
             }
+            set { _variableType = value; }
         }
-
+        
         public override IEnumerable<IValueItem> GetAllowed()
         {
             //var action = this.Node as IVariableContextProvider;
@@ -1034,7 +1049,7 @@ namespace Invert.uFrame.ECS
             return base.CanOutputTo(input);
         }
 
-        public ActionFieldInfo ActionFieldInfo { get; set; }
+        public IActionFieldInfo ActionFieldInfo { get; set; }
         public override string Name
         {
             get
@@ -1075,25 +1090,27 @@ namespace Invert.uFrame.ECS
         {
             get
             {
+
                 if (_variableType != null)
                     return _variableType;
-                if (ActionFieldInfo.Type.IsGenericParameter)
-                {
-                    var typeSelection = this.Node.GraphItems.OfType<TypeSelection>()
-                        .FirstOrDefault(
-                            p =>
-                                p.ActionFieldInfo.IsGenericArgument &&
-                                p.ActionFieldInfo.Name == ActionFieldInfo.Type.Name);
-                    if (typeSelection != null)
-                    {
-                        var item = typeSelection.Item as ITypeInfo;
-                        if (item != null)
-                        {
-                            return _variableType = item;
-                        }
-                    }
-                }
-                return _variableType = new SystemTypeInfo(ActionFieldInfo.Type);
+
+                //if (ActionFieldInfo.MemberType.IsGenericParameter)
+                //{
+                //    var typeSelection = this.Node.GraphItems.OfType<TypeSelection>()
+                //        .FirstOrDefault(
+                //            p =>
+                //                p.ActionFieldInfo.IsGenericArgument &&
+                //                p.ActionFieldInfo.Name == ActionFieldInfo.Type.Name);
+                //    if (typeSelection != null)
+                //    {
+                //        var item = typeSelection.Item as ITypeInfo;
+                //        if (item != null)
+                //        {
+                //            return _variableType = item;
+                //        }
+                //    }
+                //}
+                return _variableType = ActionFieldInfo.MemberType;
 
             }
             set { _variableType = value; }
@@ -1145,7 +1162,7 @@ namespace Invert.uFrame.ECS
                 return _varName ?? (_varName = SequenceItem.VariableName + "_" + this.Name);
             }
         }
-        public ActionFieldInfo ActionFieldInfo { get; set; }
+        public IActionFieldInfo ActionFieldInfo { get; set; }
         public override string Name
         {
             get

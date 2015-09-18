@@ -30,16 +30,7 @@ namespace Invert.uFrame.ECS {
             get
             {
                 yield break;
-                if (Action.Meta == null)
-                {
-                    yield return "Action Not Found";
-                    yield break;
-                }
-                if (Action.Meta.Method != null)
-                {
-                    yield break;
-                }
-                yield return Action.Meta.TitleText;
+              
             }
         }
 
@@ -67,11 +58,8 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                if (Action.Meta != null)
-                    return Action.Meta.TitleText;
-                if (Action.Meta != null && Action.Meta.Method != null)
-                    return Action.Meta.Method.Name;
-                return base.Name;
+                if (Action.Meta == null) return Action.MetaType + "Not Found";
+                return Action.Meta.Title;
             }
             set { base.Name = value; }
         }

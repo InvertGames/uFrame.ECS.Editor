@@ -7,78 +7,72 @@ using uFrame.Attributes;
 
 namespace Invert.uFrame.ECS
 {
-    public class ActionMetaInfo : IItem
+    public interface IActionMetaInfo : ITypeInfo
+    {
+        IEnumerable<string> CategoryPath { get; }
+        bool IsEditorClass { get; set; }
+        uFrameCategory Category { get; set; }
+    }
+
+    public class ActionMetaInfo : SystemTypeInfo, IItem, IActionMetaInfo
     {
         private ActionDescription _description;
         private ActionTitle _title;
         private List<ActionFieldInfo> _actionFields;
         private uFrameCategory _category;
-        private string _searchTag;
-        public Type Type { get; set; }
-        public MethodInfo Method { get; set; }
-        public ActionTitle Title
+
+   
+        public ActionTitle TitleAttribute
         {
             get { return _title ?? (_title = MetaAttributes.OfType<ActionTitle>().FirstOrDefault()); }
             set { _title = value; }
         }
 
-        public string Group { get; private set; }
-
-        public string SearchTag
-        {
-            get { return _searchTag ?? (_searchTag = TitleText + string.Join(" ", CategoryPath.ToArray())); }
-        }
-
         string IItem.Description { get; set; }
 
-        public string FullName
+        //public virtual string TitleText 
+        //{
+        //    get
+        //    {
+        //        if (TitleAttribute == null)
+        //            return SystemType.Name;
+
+        //        return TitleAttribute.Title;
+        //    }
+        //}
+
+        //public string DescriptionText
+        //{
+        //    get
+        //    {
+        //        if (Description == null)
+        //        {
+        //            return "No Description Specified";
+        //        }
+        //        return Description.Description;
+        //    }
+        //}
+        
+        public override string Title
         {
             get
             {
-                if (Method == null)
-                    return Type.FullName;
-                return Type.FullName + "." + Method.Name;
-            }
-        }
-        public string TitleText
-        {
-            get
-            {
-                if (Title == null && Method != null)
-                    return Type.Name + " " + Method.Name;
+                if (TitleAttribute == null)
+                    return SystemType.Name;
 
-                if (Title == null)
-                    return Type.Name;
-
-                return Title.Title;
+                return TitleAttribute.Title;
             }
         }
 
-        public string DescriptionText
-        {
-            get
-            {
-                if (Description == null)
-                {
-                    return "No Description Specified";
-                }
-                return Description.Description;
-            }
-        }
 
-        string IItem.Title
-        {
-            get { return TitleText; }
-        }
-
-        public ActionDescription Description
+        public ActionDescription DescriptionAttribute
         {
             get { return _description ?? (_description = MetaAttributes.OfType<ActionDescription>().FirstOrDefault()); }
             set { _description = value; }
         }
         public uFrameCategory Category
         {
-            get { return _category ?? (_category = Type.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault()); }
+            get { return _category ?? (_category = SystemType.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault()); }
             set { _category = value; }
         }
 
@@ -104,5 +98,42 @@ namespace Invert.uFrame.ECS
 
         public ActionMetaAttribute[] MetaAttributes { get; set; }
         public bool IsEditorClass { get; set; }
+
+        public ActionMetaInfo(Type systemType) : base(systemType)
+        {
+        }
+
+        public ActionMetaInfo(Type systemType, ITypeInfo other) : base(systemType, other)
+        {
+        }
+
+        public override IEnumerable<IMemberInfo> GetMembers()
+        {
+            return ActionFields.OfType<IMemberInfo>();
+        }
+    }
+
+    public class ActionMethodMetaInfo : ActionMetaInfo
+    {
+        public MethodInfo Method { get; set; }
+        
+        public override string Title
+        {
+            get { return Method.Name; }
+        }
+
+        public override string FullName
+        {
+            get { return base.FullName + "." + Method.Name; }
+        }
+        
+        //public MethodInfo Method { get; set; }
+        public ActionMethodMetaInfo(Type systemType) : base(systemType)
+        {
+        }
+
+        public ActionMethodMetaInfo(Type systemType, ITypeInfo other) : base(systemType, other)
+        {
+        }
     }
 }
