@@ -1,6 +1,5 @@
 using Invert.Data;
 using Invert.Json;
-using uFrame.ECS;
 using UnityEngine;
 
 namespace Invert.uFrame.ECS {
@@ -88,7 +87,7 @@ namespace Invert.uFrame.ECS {
             {
             
                 Node = this,
-                VariableType = new SystemTypeInfo(typeof(Entity)),
+                VariableType = new SystemTypeInfo(uFrameECS.EntityComponentType),
                 Repository = this.Repository,
                 //TypeInfo = typeof(MonoBehaviour)
             };

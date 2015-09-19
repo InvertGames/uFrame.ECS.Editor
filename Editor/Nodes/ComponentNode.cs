@@ -1,4 +1,4 @@
-using uFrame.ECS;
+
 using UnityEngine;
 
 namespace Invert.uFrame.ECS {
@@ -109,13 +109,14 @@ namespace Invert.uFrame.ECS {
             return base.IsAssignableTo(info);
         }
 
+       
         public IEnumerable<IContextVariable> GetVariables(IFilterInput input)
         {
             yield return new ContextVariable(input.HandlerPropertyName)
             {
                 Node = this,
                 Source = this,
-                VariableType = new SystemTypeInfo(typeof(EcsComponent),this),
+                VariableType = new SystemTypeInfo(uFrameECS.EcsComponentType, this),
                 Repository = this.Repository,
                 //TypeInfo =  typeof(MonoBehaviour)
             };
@@ -130,7 +131,7 @@ namespace Invert.uFrame.ECS {
             {
                 
                 Node = this,
-                VariableType = new SystemTypeInfo(typeof(Entity)),
+                VariableType = new SystemTypeInfo(uFrameECS.EntityComponentType),
                 Repository = this.Repository,
                 //TypeInfo = typeof(MonoBehaviour)
             };

@@ -42,7 +42,16 @@ namespace Invert.uFrame.ECS
             InvertApplication.CachedTypeAssembly(typeof(uFrameECS).Assembly);
             InvertApplication.TypeAssemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies().Where(p => p.FullName.StartsWith("Assembly")));
         }
-
+        public static Type EcsComponentType
+        {
+            get;
+            set;
+        }
+        public static Type EntityComponentType
+        {
+            get;
+            set;
+        }
         public override void Initialize(UFrameContainer container)
         {
             base.Initialize(container);
