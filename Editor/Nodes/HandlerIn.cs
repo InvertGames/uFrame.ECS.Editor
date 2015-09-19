@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Invert.Core.GraphDesigner;
 using Invert.Data;
+using uFrame.Attributes;
 
 namespace Invert.uFrame.ECS
 {
@@ -46,7 +47,8 @@ namespace Invert.uFrame.ECS
 
     public class HandlerIn : EntityGroupIn, IFilterInput
     {
-    
+        private uFrameEventMapping _uFrameEventMapping;
+
         public override string MappingId
         {
             get { return EventFieldInfo.MemberName; }
@@ -57,12 +59,16 @@ namespace Invert.uFrame.ECS
         {
             get
             {
+                if (UFrameEventMapping != null)
+                {
+                    return UFrameEventMapping.Title;
+                }
                 return EventFieldInfo.MemberName;
             }
         }
         public override string Name
         {
-            get { return EventFieldInfo.MemberName; }
+            get { return Title; }
             set { base.Name = value; }
         }
 
@@ -71,6 +77,11 @@ namespace Invert.uFrame.ECS
             get { return Name; }
         }
 
+        public uFrameEventMapping UFrameEventMapping
+        {
+            get { return _uFrameEventMapping ?? (_uFrameEventMapping = EventFieldInfo.GetAttribute<uFrameEventMapping>()); }
+            set { _uFrameEventMapping = value; }
+        }
     }
 
     public class HandlerInValue : InputSelectionValue

@@ -444,16 +444,19 @@ namespace Invert.uFrame.ECS
                 foreach (var item in Meta.GetMembers())
                 {
                     if (!item.HasAttribute<uFrameEventMapping>()) continue;
+                
+
                     var variableIn = new HandlerIn()
                     {
                         Repository = Repository,
                         EventFieldInfo = item,
                         Node = this,
-                        Identifier = this.Identifier + ":" + item.MemberName
+                        Identifier = this.Identifier + ":" + item.MemberName,
+                        
                     };
                     yield return variableIn;
-                    if (item.MemberName != "EntityId")
-                        hasMappings = true;
+                    //if (item.MemberName != "EntityId")
+                    hasMappings = true;
                 }
             }
             if (!hasMappings)
