@@ -415,7 +415,15 @@ namespace Invert.uFrame.ECS
                     return null;
 
                 if (_meta != null) return _meta;
-                return _meta = (uFrameECS.Actions.ContainsKey(MetaType) ? uFrameECS.Actions[MetaType] : Repository.All<CustomActionNode>().FirstOrDefault(p=>p.FullName == MetaType) as IActionMetaInfo);
+
+                var item = Repository.All<CustomActionNode>().FirstOrDefault(p => p.FullName == MetaType);
+
+                if (item != null)
+                {
+                    return _meta = item;
+                }
+                if (!uFrameECS.Actions.ContainsKey(MetaType)) return null;
+                return _meta =  uFrameECS.Actions[MetaType];
             }
             set
             {

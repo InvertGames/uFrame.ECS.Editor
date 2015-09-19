@@ -1,3 +1,4 @@
+using uFrame.ECS;
 using UnityEngine;
 
 namespace Invert.uFrame.ECS {
@@ -114,7 +115,7 @@ namespace Invert.uFrame.ECS {
             {
                 Node = this,
                 Source = this,
-                VariableType = this,
+                VariableType = new SystemTypeInfo(typeof(EcsComponent),this),
                 Repository = this.Repository,
                 //TypeInfo =  typeof(MonoBehaviour)
             };
@@ -129,7 +130,7 @@ namespace Invert.uFrame.ECS {
             {
                 
                 Node = this,
-                VariableType = new SystemTypeInfo(typeof(MonoBehaviour)),
+                VariableType = new SystemTypeInfo(typeof(Entity)),
                 Repository = this.Repository,
                 //TypeInfo = typeof(MonoBehaviour)
             };

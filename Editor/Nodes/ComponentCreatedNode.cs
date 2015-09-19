@@ -14,13 +14,14 @@ namespace Invert.uFrame.ECS {
         {
             get { return 1; }
         }
+        
         public override bool CanGenerate { get { return true; } }
         public override string DisplayName
         {
             get
             {
                 if (Repository != null && EntityGroup != null && EntityGroup.Item != null)
-                    return string.Format("{0} Component Created", EntityGroup.Item.Name);
+                    return string.Format("{0} Component Created", Name);
                 return "Component Created";
             }
         }
@@ -28,18 +29,18 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                if (Repository != null && EntityGroup != null && EntityGroup.Item != null)
-                    return string.Format("{0}ComponentCreated", EntityGroup.Item.Name);
-                return "ComponentCreated";
+       
+                    return string.Format("{0}ComponentCreated", Name);
+   
             }
         }
         public override string HandlerFilterMethodName
         {
             get
             {
-                if (Repository != null && EntityGroup != null && EntityGroup.Item != null)
-                    return string.Format("{0}ComponentCreatedFilter", EntityGroup.Item.Name);
-                return "ComponentCreatedFilter";
+            
+                    return string.Format("{0}ComponentCreatedFilter", Name);
+     
             }
         }
         public override string EventType

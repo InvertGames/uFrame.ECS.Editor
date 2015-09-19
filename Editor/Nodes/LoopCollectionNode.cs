@@ -199,7 +199,7 @@ namespace Invert.uFrame.ECS
                     {
                         GetInfo = () =>
                         {
-                            return List.Item;
+                            return new SystemTypeInfo(typeof(MonoBehaviour), List.Item);
                         }
                     };
                 });
@@ -209,7 +209,7 @@ namespace Invert.uFrame.ECS
         public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
-            ctx._("var {0}Components = System.ComponentSystem.RegisterComponent<{1}>().Components", List.VariableName, Item.VariableType.FullName);
+            ctx._("var {0}Components = System.ComponentSystem.RegisterComponent<{1}>().Components", List.VariableName, List.Item.FullName);
 
             var loop = new CodeIterationStatement(
                 new CodeSnippetStatement(string.Format("var {0}Index = 0", Item.VariableName)),

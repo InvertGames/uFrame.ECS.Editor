@@ -7,11 +7,12 @@ namespace Invert.uFrame.ECS {
     using System.Linq;
     using Invert.Core;
     using Invert.Core.GraphDesigner;
-    
+    using Invert.Data;
     
     public class PropertyChangedNode : PropertyChangedNodeBase, ISequenceNode, ISetupCodeWriter {
         private PropertyIn _PropertyIn;
         private string _PropertyInId;
+        private bool _immediate;
 
         public override bool CanGenerate { get { return true; } }
         //public override string Name
@@ -27,6 +28,13 @@ namespace Invert.uFrame.ECS {
         public IContextVariable SourceProperty
         {
             get { return  PropertyIn.Item; }
+        }
+
+        [Invert.Json.JsonProperty, InspectorProperty]
+        public virtual bool Immediate
+        {
+            get { return _immediate; }
+            set { this.Changed("Immediate", ref _immediate, value); }
         }
 
         [Invert.Json.JsonProperty()]
@@ -122,8 +130,16 @@ namespace Invert.uFrame.ECS {
             var relatedTypeProperty = SourceProperty.Source;
             filterMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.RelatedTypeName, "value"));
             handlerMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.RelatedTypeName, "value"));
-
-            ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3})", EventType, relatedTypeProperty.RelatedTypeName, SourceProperty.Name, filterMethod.Name);
+            if (Immediate)
+            {
+                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3}, Group=>{2})", 
+                    EventType, relatedTypeProperty.RelatedTypeName, SourceProperty.Name, filterMethod.Name);
+            }
+            else
+            {
+                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3})", EventType, relatedTypeProperty.RelatedTypeName, SourceProperty.Name, filterMethod.Name);
+            }
+            
         }
 
         public override bool IsLoop
