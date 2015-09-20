@@ -87,6 +87,7 @@ namespace Assets.Plugins.Editor.uFrame.ECS.Editor.DebugSystem
 
         private void UpdateBreakpoints()
         {
+            if (Repository == null) return;
             var bps = Repository.All<Breakpoint>();
             Breakpoints = bps.ToList();
             if(BreakpointsList == null)BreakpointsList= new TreeViewModel();

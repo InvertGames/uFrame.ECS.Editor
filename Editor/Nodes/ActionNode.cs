@@ -229,12 +229,17 @@ namespace Invert.uFrame.ECS
     {
         string GetNewVariableName(string prefix);
     }
-    public class ActionNode : ActionNodeBase, ICodeOutput, IConnectableProvider
+    public class ActionNode : ActionNodeBase, ICodeOutput, IConnectableProvider, IDataRecordInserted, IDataRecordPropertyChanged
     {
+        
         public override void RecordRemoved(IDataRecord record)
         {
             base.RecordRemoved(record);
-         
+            if (record is InputsChildItem || record is OutputsChildItem || record is BranchesChildItem)
+            {
+                _inputVars = null;
+                _outputVars = null;
+            }
         }
 
         public override string Title
@@ -575,6 +580,24 @@ namespace Invert.uFrame.ECS
                 _.CurrentStatements.Add(new CodeAssignStatement(
                     new CodeSnippetExpression(actionIn.VariableName),
                     new CodeSnippetExpression(output.VariableName)));
+            }
+        }
+
+        public void RecordInserted(IDataRecord record)
+        {
+            if (record is InputsChildItem || record is OutputsChildItem || record is BranchesChildItem)
+            {
+                _inputVars = null;
+                _outputVars = null;
+            }
+        }
+
+        public void PropertyChanged(IDataRecord record, string name, object previousValue, object nextValue)
+        {
+            if (record is InputsChildItem || record is OutputsChildItem || record is BranchesChildItem)
+            {
+                _inputVars = null;
+                _outputVars = null;
             }
         }
     }

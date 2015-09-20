@@ -27,8 +27,8 @@ namespace Invert.Core.GraphDesigner
         IExecuteCommand<StepCommand>,
         IExecuteCommand<ToggleBreakpointCommand>,
         IContextMenuQuery,
-        IToolbarQuery,
-        IDrawInspector
+        IToolbarQuery //,
+        //IDrawInspector
     {
         private Dictionary<string, Breakpoint> _breakpoints;
 

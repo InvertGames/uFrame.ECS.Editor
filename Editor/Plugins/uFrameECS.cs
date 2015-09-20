@@ -227,7 +227,7 @@ namespace Invert.uFrame.ECS
 
         private static void LoadActionLibrary()
         {
-            foreach (var assembly in InvertApplication.CachedAssemblies)
+            foreach (var assembly in InvertApplication.CachedAssemblies.Concat(InvertApplication.TypeAssemblies))
             {
                 foreach (
                     var type in

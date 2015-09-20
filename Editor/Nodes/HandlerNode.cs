@@ -202,7 +202,8 @@ namespace Invert.uFrame.ECS
             get { return _metaType; }
             set
             {
-                _metaType = value;
+                _meta = null;
+                this.Changed("MetaType",ref _metaType, value);
             }
         }
 

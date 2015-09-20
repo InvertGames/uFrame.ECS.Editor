@@ -17,7 +17,7 @@ namespace Invert.uFrame.ECS {
             get { return base.Type ?? typeof(int); }
         }
 
-        [InspectorProperty, JsonProperty]
+        [JsonProperty]
         public string FriendlyName
         {
             get
@@ -36,7 +36,7 @@ namespace Invert.uFrame.ECS {
         }
 
         [InspectorProperty]
-        public bool IsEntityMapping
+        public bool Mapping
         {
             get { return this["Mapping"]; }
             set { this["Mapping"] = value; }
@@ -44,7 +44,7 @@ namespace Invert.uFrame.ECS {
 
         public override IEnumerable<Attribute> GetAttributes()
         {
-            if (IsEntityMapping)
+            if (Mapping)
             {
                 yield return new uFrameEventMapping(this.Name);
             }
