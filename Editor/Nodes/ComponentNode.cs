@@ -1,4 +1,5 @@
 
+using Invert.Json;
 using UnityEngine;
 
 namespace Invert.uFrame.ECS {
@@ -148,6 +149,9 @@ namespace Invert.uFrame.ECS {
                 };
             }
         }
+
+        [InspectorProperty, JsonProperty]
+        public string CustomIcon { get; set; }
 
         public string SystemPropertyName
         {

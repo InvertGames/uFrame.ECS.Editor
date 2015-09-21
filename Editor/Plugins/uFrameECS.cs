@@ -939,11 +939,12 @@ namespace Invert.uFrame.ECS
             createWorkspaceCommand.Result.AddGraph(systemGraph);
             createWorkspaceCommand.Result.CurrentGraphId = dataGraph.Identifier;
 
-            
             Execute(new OpenWorkspaceCommand()
             {
                 Workspace = createWorkspaceCommand.Result
             });
+
+
 
         }
 
