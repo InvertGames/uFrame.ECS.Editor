@@ -49,6 +49,7 @@ namespace Invert.uFrame.ECS
 
                     return "Event Not Found";
                 }
+             
                 return Meta.Title;
             }
         }
@@ -123,7 +124,11 @@ namespace Invert.uFrame.ECS
             get
             {
                 foreach (var item in HandlerInputs)
+                {
+
                     yield return item;
+                    
+                }
 
                 foreach (var item in this.PersistedItems)
                     yield return item;

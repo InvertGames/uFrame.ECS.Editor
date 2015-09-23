@@ -46,6 +46,7 @@ namespace Invert.uFrame.ECS
                 ui.AddCommand(new ContextMenuItem()
                 {
                     Title = "Change Event",
+                    Group = "Events",
                     Command =
                      new ChangeHandlerEventCommand()
                      {
@@ -143,6 +144,7 @@ namespace Invert.uFrame.ECS
                 ui.AddCommand(new ContextMenuItem()
                 {
                     Title = "Pickup",
+                    Group="CopyPaste",
                     Command = new PickupCommand(),
          
                 });
@@ -155,6 +157,7 @@ namespace Invert.uFrame.ECS
                     ui.AddCommand(new ContextMenuItem()
                     {
                         Title = "Drop",
+                        Group = "CopyPaste",
                         Command = new DropCommand()
                     });
                 }

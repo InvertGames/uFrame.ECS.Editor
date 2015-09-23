@@ -793,56 +793,56 @@ namespace Invert.uFrame.ECS
         }
     }
 
-    [ActionTitle("Wait For End Of Frame"), uFrameCategory("Yield", "Wait","Timers")]
-    public class YieldWaitForEndOfFrame : CustomAction
-    {
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
-        {
-            base.WriteCode(visitor, ctx);
-            ctx._("yield return new UniRx.YieldInstructionCache.WaitForEndOfFrame");
-        }
-    }
-    [ActionTitle("Wait For Fixed Update"), uFrameCategory("Yield", "Wait", "Timers")]
-    public class YieldWaitForFixedUpdate : CustomAction
-    {
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
-        {
-            base.WriteCode(visitor, ctx);
-            ctx._("yield return new UniRx.YieldInstructionCache.WaitForFixedUpdate");
-        }
-    }
-    [ActionTitle("Wait For Seconds"), uFrameCategory("Yield", "Wait", "Timers")]
-    public class YieldWaitForSeconds : CustomAction
-    {
-        private ActionIn _seconds;
+    //[ActionTitle("Wait For End Of Frame"), uFrameCategory("Yield", "Wait","Timers")]
+    //public class YieldWaitForEndOfFrame : CustomAction
+    //{
+    //    public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+    //    {
+    //        base.WriteCode(visitor, ctx);
+    //        ctx._("yield return new UniRx.YieldInstructionCache.WaitForEndOfFrame");
+    //    }
+    //}
+    //[ActionTitle("Wait For Fixed Update"), uFrameCategory("Yield", "Wait", "Timers")]
+    //public class YieldWaitForFixedUpdate : CustomAction
+    //{
+    //    public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+    //    {
+    //        base.WriteCode(visitor, ctx);
+    //        ctx._("yield return new UniRx.YieldInstructionCache.WaitForFixedUpdate");
+    //    }
+    //}
+    //[ActionTitle("Wait For Seconds"), uFrameCategory("Yield", "Wait", "Timers")]
+    //public class YieldWaitForSeconds : CustomAction
+    //{
+    //    private ActionIn _seconds;
 
-        public ActionIn Seconds
-        {
-            get { return GetSlot(ref _seconds, "Number", _ =>
-            {
+    //    public ActionIn Seconds
+    //    {
+    //        get { return GetSlot(ref _seconds, "Number", _ =>
+    //        {
             
-                _.ActionFieldInfo = new ActionFieldInfo()
-                {
-                    MemberType = new SystemTypeInfo(typeof(float)),
-                    Name = "Seconds"
-                };
-            }); }
-        }
+    //            _.ActionFieldInfo = new ActionFieldInfo()
+    //            {
+    //                MemberType = new SystemTypeInfo(typeof(float)),
+    //                Name = "Seconds"
+    //            };
+    //        }); }
+    //    }
 
-        public override IEnumerable<IGraphItem> GraphItems
-        {
-            get { yield return Seconds; }
-        }
+    //    public override IEnumerable<IGraphItem> GraphItems
+    //    {
+    //        get { yield return Seconds; }
+    //    }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
-        {
-            base.WriteCode(visitor, ctx);
-            ctx._("yield return new UnityEngine.WaitForSeconds({0})",Seconds.VariableName);
-        }
+    //    public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+    //    {
+    //        base.WriteCode(visitor, ctx);
+    //        ctx._("yield return new UnityEngine.WaitForSeconds({0})",Seconds.VariableName);
+    //    }
 
 
 
-    }
+    //}
 
     public class ActionIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn
     {

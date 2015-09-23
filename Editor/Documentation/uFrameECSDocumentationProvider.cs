@@ -4,8 +4,7 @@ namespace Invert.uFrame.ECS {
     using System.Collections.Generic;
     using System.Linq;
     using Invert.Core.GraphDesigner;
-    
-    
-    //public class uFrameECSDocumentationProvider : uFrameECSDocumentationProviderBase {
-    //}
+
+
+  
 }

@@ -1,3 +1,4 @@
+using Invert.Core;
 using Invert.Core.GraphDesigner;
 
 namespace Invert.uFrame.ECS {
@@ -38,10 +39,10 @@ namespace Invert.uFrame.ECS {
 
         protected override void CreateContent()
         {
-           
+            var inputs = Handler.HandlerInputs;
             if (IsVisible(SectionVisibility.WhenNodeIsNotFilter))
             {
-                var inputs = Handler.HandlerInputs;
+
                 //if (inputs.Length > 0)
                 //    ContentItems.Add(new GenericItemHeaderViewModel()
                 //    {
@@ -49,9 +50,9 @@ namespace Invert.uFrame.ECS {
                 //        DiagramViewModel = DiagramViewModel,
                 //        IsNewLine = true,
                 //    });
-           
-         
-                
+
+
+
                 foreach (var item in inputs)
                 {
                     var vm = new InputOutputViewModel()
@@ -64,6 +65,79 @@ namespace Invert.uFrame.ECS {
                         AllowSelection = true
                     };
                     ContentItems.Add(vm);
+
+
+                }
+            }
+            else
+            {
+                foreach (var handlerIn in inputs)
+                {
+                    var handlerItem = handlerIn.Item;
+                    if (handlerItem != null)
+                    {
+                        foreach (var component in handlerItem.SelectComponents)
+                        {
+                            var component1 = component;
+
+                            ContentItems.Add(new GenericItemHeaderViewModel()
+                            {
+                                Name = component.Name,
+                                IsBig = true,
+                                IsNewLine = true,
+                                NodeViewModel = this,
+                            });
+                            //ContentItems.Add(new GenericItemHeaderViewModel()
+                            //{
+                            //    Name = component.Name,
+                            //    DataObject = component,
+                            //    IsNewLine = true
+                            //});
+                            ContentItems.Add(new GenericItemHeaderViewModel()
+                            {
+                                Name = "Properties",
+                                IsNewLine = true,
+                                NodeViewModel = this,
+                                //DataObject = component,
+                                AddCommand = new LambdaCommand("", () =>
+                                {
+                                    var item = new PropertiesChildItem() { Node = component1 };
+                                    DiagramViewModel.CurrentRepository.Add(item);
+                                    item.Name = item.Repository.GetUniqueName("Collection");
+                                    item.IsEditing = true;
+                                    DataObjectChanged();
+                                })
+                                
+                            });
+                            foreach (var property in component.Properties)
+                            {
+                                ContentItems.Add(new ScaffoldNodeTypedChildItem<PropertiesChildItem>.ViewModel(property,this));
+                            }
+                            
+                            ContentItems.Add(new GenericItemHeaderViewModel()
+                            {
+                                Name = "Collections",
+                                IsNewLine = true,
+                                NodeViewModel = this,
+                                //DataObject = component,
+                                AddCommand = new LambdaCommand("", () =>
+                                {
+                                    var item = new CollectionsChildItem {Node = component1};
+                                    DiagramViewModel.CurrentRepository.Add(item);
+                                    item.Name = item.Repository.GetUniqueName("Collection");
+                                    item.IsEditing = true;
+                                    DataObjectChanged();
+                                })
+
+                            });
+                            foreach (var property in component.Collections)
+                            {
+                                ContentItems.Add(new ScaffoldNodeTypedChildItem<CollectionsChildItem>.ViewModel(property, this));
+
+                            }
+
+                        }
+                    }
                 }
             }
             base.CreateContent();
