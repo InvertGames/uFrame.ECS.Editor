@@ -53,6 +53,9 @@ namespace Invert.uFrame.ECS
             get;
             set;
         }
+
+       
+
         public override void Initialize(UFrameContainer container)
         {
             base.Initialize(container);
@@ -486,6 +489,16 @@ namespace Invert.uFrame.ECS
             if (handlerVM != null)
             {
                 var handler = handlerVM.Handler;
+                ui.AddCommand(new ContextMenuItem()
+                {
+                    Title = "Code Handler",
+                    Checked = handler.CodeHandler,
+                    Command = new LambdaCommand(
+                        "Toggle Code Handler", 
+                        () => {
+                            handler.CodeHandler = !handler.CodeHandler;
+                        })
+                });
                 foreach (var handlerIn in handler.HandlerInputs)
                 {
                     if (handlerIn.Item != null)
@@ -879,8 +892,21 @@ namespace Invert.uFrame.ECS
                 {
 
                 }
+                var handlerVM = d.DrawersAtMouse.First().ViewModelObject as HandlerNodeViewModel;
+                if (handlerVM != null)
+                {
+                    if (handlerVM.Handler.CodeHandler)
+                    {
+                        var config = InvertGraphEditor.Container.Resolve<IGraphConfiguration>();
+                        var fileGenerators = InvertGraphEditor.GetAllFileGenerators(config, new[] { handlerVM.DataObject as IDataRecord }).ToArray();
+                        var editableGenerator = fileGenerators.FirstOrDefault(p => p.Generators.Any(x => !x.AlwaysRegenerate));
+                        if (editableGenerator != null)
+                            InvertGraphEditor.Platform.OpenScriptFile(editableGenerator.AssetPath);
+                    }
+                }
 
             }
+
 
         }
 

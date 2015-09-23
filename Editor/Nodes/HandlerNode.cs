@@ -119,6 +119,13 @@ namespace Invert.uFrame.ECS
             get { return this.InputFrom<IMappingsConnectable>(); }
         }
 
+        [JsonProperty, InspectorProperty]
+        public bool CodeHandler
+        {
+            get { return _codeHandler; }
+            set { this.Changed("CodeHandler", ref _codeHandler, value); }
+        }
+
         public override IEnumerable<IGraphItem> GraphItems
         {
             get
@@ -502,6 +509,7 @@ namespace Invert.uFrame.ECS
 
 
         private int _variableCount;
+        private bool _codeHandler;
 
 
         [JsonProperty]
