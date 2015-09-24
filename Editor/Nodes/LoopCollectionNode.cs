@@ -370,7 +370,7 @@ namespace Invert.uFrame.ECS
             {
                 return GetSlot(ref _component, "Event", _ =>
                 {
-                    _.Filter = info => info is EventNode;
+                    _.Filter = info => info is EventNode || info.IsAssignableTo(new SystemTypeInfo(typeof(uFrameEvent)));
                 });
             }
         }

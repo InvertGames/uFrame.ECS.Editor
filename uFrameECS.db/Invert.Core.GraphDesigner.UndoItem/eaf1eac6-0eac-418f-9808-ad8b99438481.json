@@ -1,0 +1,8 @@
+{
+	"Identifier":"eaf1eac6-0eac-418f-9808-ad8b99438481"	, 
+	"Time":"9/20/2015 10:31:26 AM"	, 
+	"Group":103126	, 
+	"DataRecordId":"19ac0fae-d4b2-47d5-b4fb-495cc8662578"	, 
+	"Type":1	, 
+	"RecordType":"PluginGraphData, Assembly-CSharp-Editor-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"	, 
+	"Data":"{\r\n\t\"IsDirty\":true\t, \r\n\t\"Identifier\":\"19ac0fae-d4b2-47d5-b4fb-495cc8662578\"\t, \r\n\t\"RootFilterId\":\"aa55b31c-6c95-4eb4-aae6-d75673182b54\"\t, \r\n\t\"Expanded\":false}\r\n"}

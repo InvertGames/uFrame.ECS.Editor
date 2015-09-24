@@ -1,0 +1,8 @@
+{
+	"Identifier":"888bc03d-6a05-4643-b7f9-14dc950f89b3"	, 
+	"Time":"9/20/2015 10:31:24 AM"	, 
+	"Group":103124	, 
+	"DataRecordId":"2ff2bd2c-3a62-4816-8d5f-b8be4eab5733"	, 
+	"Type":1	, 
+	"RecordType":"ShellNodeConfig, Assembly-CSharp-Editor-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"	, 
+	"Data":"{\r\n\t\"Color\":0\t, \r\n\t\"NodeStyle\":0\t, \r\n\t\"Inheritable\":false\t, \r\n\t\"IsClass\":false\t, \r\n\t\"Row\":0\t, \r\n\t\"Column\":0\t, \r\n\t\"Visibility\":0\t, \r\n\t\"Name\":\"NewShellNodeConfig\"\t, \r\n\t\"GraphId\":\"19ac0fae-d4b2-47d5-b4fb-495cc8662578\"\t, \r\n\t\"Identifier\":\"2ff2bd2c-3a62-4816-8d5f-b8be4eab5733\"\t, \r\n\t\"Expanded\":false}\r\n"}

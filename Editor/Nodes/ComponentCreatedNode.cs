@@ -21,7 +21,7 @@ namespace Invert.uFrame.ECS {
             get
             {
                 if (Repository != null && EntityGroup != null && EntityGroup.Item != null)
-                    return string.Format("{0} Component Created", Name);
+                    return string.Format("{0} Component Created", EntityGroup.Item.Name);
                 return "Component Created";
             }
         }

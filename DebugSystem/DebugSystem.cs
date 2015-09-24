@@ -63,6 +63,7 @@ namespace Invert.Core.GraphDesigner
                 ui.AddCommand(new ContextMenuItem()
                 {
                     Title = "Breakpoint",
+                    Group = "Debug",
                     Checked = actionVM.SequenceNode.BreakPoint != null,
                     Command = new ToggleBreakpointCommand()
                     {

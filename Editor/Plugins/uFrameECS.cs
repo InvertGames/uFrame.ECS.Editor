@@ -23,7 +23,8 @@ namespace Invert.uFrame.ECS
         IExecuteCommand<NewModuleWorkspace>,
         IQueryPossibleConnections,
         IExecuteCommand<GroupActionNodes>,
-        IQueryTypes
+        IQueryTypes,
+        IDocumentationProvider
 
     {
         public override decimal LoadPriority
@@ -52,6 +53,9 @@ namespace Invert.uFrame.ECS
             get;
             set;
         }
+
+       
+
         public override void Initialize(UFrameContainer container)
         {
             base.Initialize(container);
@@ -62,6 +66,7 @@ namespace Invert.uFrame.ECS
                 Label = "Disposable",
                 Name = "Disposable"
             },"IDisposable");
+            container.RegisterInstance<IDocumentationProvider>(this, "ECS");
             container.RegisterGraphItem<HandlerNode, HandlerNodeViewModel, HandlerNodeDrawer>();
             container.RegisterGraphItem<CustomAction, CustomActionViewModel, SequenceItemNodeDrawer>();
             Handler.AllowAddingInMenu = false;
@@ -477,13 +482,23 @@ namespace Invert.uFrame.ECS
 
             if (obj is InputOutputViewModel)
             {
-                ui.AddSeparator();
+            
                 QuerySlotMenu(ui, (InputOutputViewModel)obj);
             }
             var handlerVM = obj as HandlerNodeViewModel;
             if (handlerVM != null)
             {
                 var handler = handlerVM.Handler;
+                ui.AddCommand(new ContextMenuItem()
+                {
+                    Title = "Code Handler",
+                    Checked = handler.CodeHandler,
+                    Command = new LambdaCommand(
+                        "Toggle Code Handler", 
+                        () => {
+                            handler.CodeHandler = !handler.CodeHandler;
+                        })
+                });
                 foreach (var handlerIn in handler.HandlerInputs)
                 {
                     if (handlerIn.Item != null)
@@ -491,6 +506,7 @@ namespace Invert.uFrame.ECS
                         ui.AddCommand(new ContextMenuItem()
                         {
                             Title = "Navigate To " + handlerIn.Item.Name,
+                            Group = "Navigation",
                             Command = new NavigateToNodeCommand()
                             {
                                 Node = handlerIn.Item as IDiagramNode
@@ -531,6 +547,7 @@ namespace Invert.uFrame.ECS
                             ui.AddCommand(new ContextMenuItem()
                             {
                                 Title = item1.ShortName + "/" + child1.ShortName,
+                                Group = "Variables",
                                 Command = new LambdaCommand("Add Variable",
                                     () =>
                                     {
@@ -546,7 +563,7 @@ namespace Invert.uFrame.ECS
                             });
                         }
                     }
-                    ui.AddSeparator();
+                  
                 }
             }
 
@@ -556,20 +573,20 @@ namespace Invert.uFrame.ECS
         private void QuerySlotMenu(ContextMenuUI ui, InputOutputViewModel slot)
         {
 
-            ui.AddCommand(new ContextMenuItem()
-            {
-                Title = "Test",
-                Command = new LambdaCommand("test", () =>
-                {
+            //ui.AddCommand(new ContextMenuItem()
+            //{
+            //    Title = "Test",
+            //    Command = new LambdaCommand("test", () =>
+            //    {
 
-                    var variableIn = slot.DataObject as VariableIn;
-                    foreach (var item in variableIn.Inputs)
-                    {
-                        InvertApplication.Log(item.Input.Title);
-                        InvertApplication.Log(item.Output.Title);
-                    }
-                })
-            });
+            //        var variableIn = slot.DataObject as VariableIn;
+            //        foreach (var item in variableIn.Inputs)
+            //        {
+            //            InvertApplication.Log(item.Input.Title);
+            //            InvertApplication.Log(item.Output.Title);
+            //        }
+            //    })
+            //});
 
         }
 
@@ -615,13 +632,14 @@ namespace Invert.uFrame.ECS
                     var item1 = item;
                     var qa = new SelectionMenuItem(item, () =>
                     {
+                        
                         var eventNode = new HandlerNode()
                         {
                             MetaType = item1.Identifier,
                             Name = systemNode.Name + item1.Name
                         };
                         InvertGraphEditor.CurrentDiagramViewModel.AddNode(eventNode, LastMouseEvent != null ? LastMouseEvent.MousePosition : new Vector2(0, 0));
-                    });
+                    }) {Group = "Handlers"};
                     menu.AddItem(qa, category);
                 }
                 foreach (var item in Events)
@@ -874,8 +892,21 @@ namespace Invert.uFrame.ECS
                 {
 
                 }
+                var handlerVM = d.DrawersAtMouse.First().ViewModelObject as HandlerNodeViewModel;
+                if (handlerVM != null)
+                {
+                    if (handlerVM.Handler.CodeHandler)
+                    {
+                        var config = InvertGraphEditor.Container.Resolve<IGraphConfiguration>();
+                        var fileGenerators = InvertGraphEditor.GetAllFileGenerators(config, new[] { handlerVM.DataObject as IDataRecord }).ToArray();
+                        var editableGenerator = fileGenerators.FirstOrDefault(p => p.Generators.Any(x => !x.AlwaysRegenerate));
+                        if (editableGenerator != null)
+                            InvertGraphEditor.Platform.OpenScriptFile(editableGenerator.AssetPath);
+                    }
+                }
 
             }
+
 
         }
 
@@ -992,6 +1023,75 @@ namespace Invert.uFrame.ECS
             foreach (var item in SystemTypes)
             {
                 typeInfo.Add(new SystemTypeInfo(item));
+            }
+            foreach (var item in Events)
+            {
+                typeInfo.Add(item.Value);
+            }
+        }
+
+        public void GetDocumentation(IDocumentationBuilder node)
+        {
+            
+        }
+
+        public void GetPages(List<DocumentationPage> rootPages)
+        {
+            foreach (var item in Actions)
+            {
+                rootPages.Add(new ActionPage() {MetaInfo = item.Value});
+            }
+        }
+    }
+
+    public class uFrameECSPage : DocumentationPage
+    {
+        
+    }
+    public class ActionPage : DocumentationPage
+    {
+        public IActionMetaInfo MetaInfo { get; set; }
+
+        public override string Name
+        {
+            get { return MetaInfo.Title; }
+        }
+
+        public override void GetContent(IDocumentationBuilder _)
+        {
+            base.GetContent(_);
+           
+            _.Title3(string.Join(",",MetaInfo.CategoryPath.ToArray()));
+            
+            _.Break();
+            _.Title2("Inputs");
+            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p=>p.DisplayType is In))
+            {
+                _.Title3(item.Name);
+                PrintDescription(_, item);
+            }
+            _.Break();
+            _.Title2("Outputs");
+            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out && !p.MemberType.IsAssignableTo(new SystemTypeInfo(typeof(Action)))))
+            {
+                _.Title3(item.Name);
+                PrintDescription(_, item);
+            }
+            _.Break();
+            _.Title2("Branches");
+            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out && p.MemberType.IsAssignableTo(new SystemTypeInfo(typeof(Action)))))
+            {
+                _.Title3(item.Name);
+                PrintDescription(_, item);
+            }
+        }
+
+        private static void PrintDescription(IDocumentationBuilder _, IActionFieldInfo item)
+        {
+            var actionDescription = item.GetAttribute<ActionDescription>();
+            if (actionDescription != null)
+            {
+                _.Paragraph(actionDescription.Description);
             }
         }
     }

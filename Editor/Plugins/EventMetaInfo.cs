@@ -66,6 +66,10 @@ namespace Invert.uFrame.ECS
             get
             {
                 if (SystemEvent) return (Attribute as SystemUFrameEvent).Title;
+                if (Attribute != null)
+                {
+                    return Attribute.Title;
+                }
                 return SystemType.Name;
             }
         }

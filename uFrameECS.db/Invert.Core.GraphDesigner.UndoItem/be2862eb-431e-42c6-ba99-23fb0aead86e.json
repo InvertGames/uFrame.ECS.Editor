@@ -1,0 +1,8 @@
+{
+	"Identifier":"be2862eb-431e-42c6-ba99-23fb0aead86e"	, 
+	"Time":"9/20/2015 10:30:46 AM"	, 
+	"Group":103046	, 
+	"DataRecordId":"b3e0679e-ccac-4140-ab60-1b62e3520832"	, 
+	"Type":2	, 
+	"RecordType":"PluginDesigner+ArchitectWorkspace, Assembly-CSharp-Editor-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"	, 
+	"Data":"{\r\n\t\"Identifier\":\"b3e0679e-ccac-4140-ab60-1b62e3520832\"\t, \r\n\t\"Name\":\"EcsPlugin\"\t, \r\n\t\"CurrentGraphId\":\"5f0e4e63-96ee-4a23-b1e3-4cfce292bfaf\"}\r\n"}
