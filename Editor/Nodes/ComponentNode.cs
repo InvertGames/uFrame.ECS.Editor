@@ -1,4 +1,5 @@
 
+using Invert.Data;
 using Invert.Json;
 using UnityEngine;
 
@@ -54,7 +55,8 @@ namespace Invert.uFrame.ECS {
         public string Identifier { get{return FullName;} set{} }
     }
     public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem {
- 
+        private string _customIcon;
+
 
         public IEnumerable<ComponentNode> WithAnyComponents
         {
@@ -151,7 +153,14 @@ namespace Invert.uFrame.ECS {
         }
 
         [InspectorProperty, JsonProperty]
-        public string CustomIcon { get; set; }
+        public virtual string CustomIcon
+        {
+            get { return _customIcon; }
+            set
+            {
+                this.Changed("CustomIcon",ref _customIcon,value);
+            }
+        }
 
         public string SystemPropertyName
         {
