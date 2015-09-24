@@ -13,6 +13,26 @@ namespace Invert.uFrame.ECS {
                 base(graphItemObject, diagramViewModel) {
         }
 
+
+        public override string IconName
+        {
+            get
+            {
+                return ComponentNode != null && !string.IsNullOrEmpty(ComponentNode.CustomIcon)
+                    ? ComponentNode.CustomIcon
+                    : base.IconName;
+            }
+        }
+
+        public ComponentNode ComponentNode
+        {
+            get
+            {
+                return DataObject as ComponentNode;
+            }
+        }
+
+
         public override NodeColor Color
         {
             get
