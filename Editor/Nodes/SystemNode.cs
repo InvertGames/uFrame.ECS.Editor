@@ -40,11 +40,22 @@ namespace Invert.uFrame.ECS {
         {
             get { return base.Components; }
         }
+        public override void Validate(List<ErrorInfo> errors)
+        {
 
+            base.Validate(errors);
+
+            if (Repository.AllOf<SystemNode>().Any(p => p != this && p.Name == this.Name))
+            {
+                errors.AddError(string.Format("The name {0} is already taken", this.Name), this);
+            }
+        }
+        
         public IEnumerable<HandlerNode> EventHandlers
         {
             get
             {
+                
                 return this.FilterNodes.OfType<HandlerNode>().OrderBy(p=>p.SetupOrder);
             }
         }

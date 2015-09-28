@@ -98,6 +98,16 @@ namespace Invert.uFrame.ECS {
         //{
             
         //}
+        public override void Validate(List<ErrorInfo> errors)
+        {
+            
+            base.Validate(errors);
+
+            if (Repository.AllOf<ComponentNode>().Any(p => p != this && p.Name == this.Name))
+            {
+                errors.AddError(string.Format("The name {0} is already taken", this.Name), this);
+            }
+        }
         
         public override bool IsAssignableTo(ITypeInfo info)
         {

@@ -1,3 +1,4 @@
+using Invert.Core;
 using Invert.Data;
 using Invert.Json;
 
@@ -22,6 +23,19 @@ namespace Invert.uFrame.ECS {
         public string GetNewVariableName(string prefix)
         {
             return string.Format("{0}{1}", prefix, VariableCount++);
+        }
+
+        public override IEnumerable<IItem> Children
+        {
+            get
+            {
+                foreach (var item in NodeItems)
+                {
+                    if (item is SystemNode) yield return item;
+                    if (item is ComponentNode) yield return item;
+                    
+                }
+            }
         }
     }
 }
