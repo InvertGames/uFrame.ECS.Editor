@@ -737,6 +737,21 @@ namespace Invert.uFrame.ECS
 
         private void GetActionsMenu(SelectionMenu menu, Action<IActionMetaInfo> onSelect)
         {
+
+            foreach (var item in uFrameECS.Actions)
+            {
+                var item1 = item;
+                if (item.Value.Category == null) continue;
+
+                var category = menu.CreateCategoryIfNotExist(item.Value.CategoryPath.ToArray());
+                category.Add(new SelectionMenuItem(item.Value, () =>
+                {
+                    onSelect(item1.Value);
+                }));
+
+
+            }
+
             foreach (var action in this.Container.Resolve<IRepository>().All<CustomActionNode>())
             {
                 var action1 = action;
@@ -745,30 +760,30 @@ namespace Invert.uFrame.ECS
                     onSelect(action1);
                 }));
             }
-            var _categoryTitles = uFrameECS.Actions
-                .Where(_ => _.Value.Category != null)
-                .SelectMany(_ => _.Value.Category.Title)
-                .Distinct();
+            //var _categoryTitles = uFrameECS.Actions
+            //    .Where(_ => _.Value.Category != null)
+            //    .SelectMany(_ => _.Value.Category.Title)
+            //    .Distinct();
 
-            foreach (var categoryTitle in _categoryTitles)
-            {
-                var category = new SelectionMenuCategory()
-                {
-                    Title = categoryTitle
-                };
-                menu.AddItem(category);
-                var title = categoryTitle;
+            //foreach (var categoryTitle in _categoryTitles)
+            //{
+            //    var category = new SelectionMenuCategory()
+            //    {
+            //        Title = categoryTitle
+            //    };
+            //    menu.AddItem(category);
+            //    var title = categoryTitle;
 
-                foreach (
-                    var action in uFrameECS.Actions.Values.Where(_ => _.Category != null && _.Category.Title.Contains(title)))
-                {
-                    var action1 = action;
-                    menu.AddItem(new SelectionMenuItem(action, () =>
-                    {
-                        onSelect(action1);
-                    }), category);
-                }
-            }
+            //    foreach (
+            //        var action in uFrameECS.Actions.Values.Where(_ => _.Category != null && _.Category.Title.Contains(title)))
+            //    {
+            //        var action1 = action;
+            //        menu.AddItem(new SelectionMenuItem(action, () =>
+            //        {
+            //            onSelect(action1);
+            //        }), category);
+            //    }
+            //}
             foreach (
                 var action in uFrameECS.Actions.Values.Where(_ => _.Category == null))
             {

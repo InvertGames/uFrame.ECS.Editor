@@ -102,7 +102,13 @@ namespace Invert.uFrame.ECS {
         {
             
             base.Validate(errors);
-
+            foreach (var item in PersistedItems)
+            {
+                if (string.IsNullOrEmpty(item.Name))
+                {
+                    errors.AddError("All items must have a name.", this);
+                }
+            }
             if (Repository.AllOf<ComponentNode>().Any(p => p != this && p.Name == this.Name))
             {
                 errors.AddError(string.Format("The name {0} is already taken", this.Name), this);

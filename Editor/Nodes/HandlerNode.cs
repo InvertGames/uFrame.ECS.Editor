@@ -371,7 +371,7 @@ namespace Invert.uFrame.ECS
             ctx._("{0}.System = this", name);
 
             WriteHandlerSetup(ctx, name, handlerMethod);
-            if (DebugSystem.IsDebugMode)
+            if (DebugSystem.IsDebugMode && !this.CodeHandler)
                 ctx._("StartCoroutine({0}.Execute())", name);
             else
                 ctx._("{0}.Execute()", name);
