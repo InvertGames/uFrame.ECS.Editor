@@ -7,9 +7,10 @@ namespace Invert.uFrame.ECS {
     using System.Linq;
     using Invert.Core;
     using Invert.Core.GraphDesigner;
-    
-    
-    public class EventNode : EventNodeBase, IEventMetaInfo {
+
+
+    public class EventNode : EventNodeBase, IEventMetaInfo, IDemoVersionLimit
+    {
         public string Category
         {
             get

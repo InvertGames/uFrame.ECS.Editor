@@ -54,7 +54,7 @@ namespace Invert.uFrame.ECS {
         public string Description { get{return FullName; }set{} }
         public string Identifier { get{return FullName;} set{} }
     }
-    public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem {
+    public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem, IDemoVersionLimit {
         private string _customIcon;
 
 

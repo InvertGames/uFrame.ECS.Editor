@@ -93,6 +93,8 @@ namespace Invert.uFrame.ECS
             get { return Graph as IVariableNameProvider; }
         }
 
+        public virtual bool IsAsync { get { return false; } }
+
         public IEnumerable<IContextVariable> GetAllContextVariables()
         {
             var left = Left;
@@ -130,7 +132,7 @@ namespace Invert.uFrame.ECS
         {
             if (DebugSystem.IsDebugMode)
             {
-                ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
+                ctx._("this.DebugInfo2(\"{0}\",\"{1}\", this)", LastSequenceItemId, this.Identifier);
                 LastSequenceItemId = this.Identifier;
             }
           

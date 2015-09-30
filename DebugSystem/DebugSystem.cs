@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Invert.Common.UI;
+using Invert.Core.GraphDesigner.Unity;
 using Invert.Data;
 using Invert.Json;
 using Invert.uFrame.ECS;
@@ -30,6 +31,9 @@ namespace Invert.Core.GraphDesigner
         IToolbarQuery //,
         //IDrawInspector
     {
+
+        
+
         private Dictionary<string, Breakpoint> _breakpoints;
 
         public Dictionary<string, Breakpoint> Breakpoints
@@ -159,6 +163,19 @@ namespace Invert.Core.GraphDesigner
 
         }
 
+        public override bool Enabled
+        {
+            get
+            {
+#if DEMO
+                return false;
+#endif
+                return base.Enabled;
+
+            }
+            set { base.Enabled = value; }
+        }
+
         public void Execute(StepCommand command)
         {
             ShouldContinue = true;
@@ -190,6 +207,20 @@ namespace Invert.Core.GraphDesigner
         }
 
         public string LastActionId;
+
+        //public void OnActionExecuting(DebugInfo command)
+        //{
+        //    if (Breakpoints.ContainsKey(command.ActionId))
+        //    {
+        //        while (!ShouldContinue)
+        //        {
+        //            ElementsDesigner.Instance.Repaint();
+        //            EditorApplication.Step();
+                    
+                  
+        //        }
+        //    }
+        //}
 
         public void OnActionExecuting(DebugInfo command)
         {

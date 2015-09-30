@@ -231,7 +231,11 @@ namespace Invert.uFrame.ECS
     }
     public class ActionNode : ActionNodeBase, ICodeOutput, IConnectableProvider, IDataRecordInserted, IDataRecordPropertyChanged
     {
-        
+        public override bool IsAsync
+        {
+            get { return Meta.IsAsync; }
+        }
+
         public override void RecordRemoved(IDataRecord record)
         {
             base.RecordRemoved(record);
