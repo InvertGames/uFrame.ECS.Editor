@@ -17,7 +17,7 @@ namespace Invert.uFrame.ECS
         IEnumerable<IMappingsConnectable> GetSystemGroups();
     }
 
-    public class HandlerNode : HandlerNodeBase, ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider
+    public class HandlerNode : HandlerNodeBase, ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider, IDemoVersionLimit
     {
         public override string Title
         {
@@ -29,6 +29,10 @@ namespace Invert.uFrame.ECS
             get { return false; }
         }
 
+        public bool IsAsync
+        {
+            get { return FilterNodes.OfType<SequenceItemNode>().Any(p => p.IsAsync); }
+        }
         public override bool AllowExternalNodes
         {
             get { return false; }
@@ -364,10 +368,17 @@ namespace Invert.uFrame.ECS
             ctx.PushStatements(handlerMethod.Statements);
             // Now writing the handler method contents
             var name = "handler";
-            var field = ctx.CurrentDeclaration._private_(HandlerMethodName, HandlerMethodName + "Instance");
-            field.InitExpression = new CodeSnippetExpression(string.Format("new {0}()", HandlerMethodName));
-
-            ctx._("var {0} = {1}Instance;", name, HandlerMethodName);
+            if (IsAsync)
+            {
+                ctx._("var {0} = new {1}()", name, HandlerMethodName);
+            }
+            else
+            {
+                var field = ctx.CurrentDeclaration._private_(HandlerMethodName, HandlerMethodName + "Instance");
+                field.InitExpression = new CodeSnippetExpression(string.Format("new {0}()", HandlerMethodName));
+                ctx._("var {0} = {1}Instance", name, HandlerMethodName);
+                
+            }
             ctx._("{0}.System = this", name);
 
             WriteHandlerSetup(ctx, name, handlerMethod);

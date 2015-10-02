@@ -8,10 +8,12 @@ namespace Invert.uFrame.ECS {
     using System.Linq;
     using Invert.Core;
     using Invert.Core.GraphDesigner;
-    
-    
-    public class CustomActionNode : CustomActionNodeBase, IActionMetaInfo {
+    using Invert.Data;
+
+    public class CustomActionNode : CustomActionNodeBase, IActionMetaInfo, IDemoVersionLimit
+    {
         private uFrameCategory _category;
+        private bool _isAsync;
 
         [JsonProperty,InspectorProperty]
         public string ActionTitle { get; set; }
@@ -31,6 +33,13 @@ namespace Invert.uFrame.ECS {
         {
             get { return _category ?? (_category = new uFrameCategory(Graph.Name)); }
             set { _category = value; }
+        }
+
+        [InspectorProperty, JsonProperty]
+        public bool IsAsync
+        {
+            get { return _isAsync; }
+            set { this.Changed("IsAsync", ref _isAsync, value); }
         }
     }
     

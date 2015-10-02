@@ -12,6 +12,7 @@ namespace Invert.uFrame.ECS
         IEnumerable<string> CategoryPath { get; }
         bool IsEditorClass { get; set; }
         uFrameCategory Category { get; set; }
+        bool IsAsync { get; }
     }
 
     public class ActionMetaInfo : SystemTypeInfo, IItem, IActionMetaInfo
@@ -74,6 +75,15 @@ namespace Invert.uFrame.ECS
         {
             get { return _category ?? (_category = SystemType.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault()); }
             set { _category = value; }
+        }
+
+        public bool IsAsync
+        {
+            get
+            {
+                if (MetaAttributes == null) return false;
+                return MetaAttributes.OfType<AsyncAction>().Any();
+            }
         }
 
         public IEnumerable<string> CategoryPath

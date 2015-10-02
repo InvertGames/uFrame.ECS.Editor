@@ -93,6 +93,8 @@ namespace Invert.uFrame.ECS
             get { return Graph as IVariableNameProvider; }
         }
 
+        public virtual bool IsAsync { get { return false; } }
+
         public IEnumerable<IContextVariable> GetAllContextVariables()
         {
             var left = Left;

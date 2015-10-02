@@ -16,7 +16,8 @@ namespace Invert.uFrame.ECS {
         IMappingsConnectable, 
         IHandlerConnectable, 
         IVariableContextProvider,
-        IVariableNameProvider
+        IVariableNameProvider,
+        IDemoVersionLimit
     
     {
         
