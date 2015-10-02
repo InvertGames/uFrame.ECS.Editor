@@ -516,6 +516,31 @@ namespace Invert.uFrame.ECS
                 }
             }
 
+            var seqVM = obj as SequenceItemNodeViewModel;
+
+            if (seqVM != null)
+            {
+                var node = seqVM.SequenceNode as PublishEventNode;
+                if (node != null)
+                {
+                    var evtNode = node.SelectedEvent;
+                    if (evtNode != null)
+                    {
+                        ui.AddCommand(new ContextMenuItem()
+                        {
+                            Title = "Go To Definition",
+                            Group = "Navigation",
+                            Command = new NavigateToNodeCommand()
+                            {
+                                Node = evtNode
+                            }
+                        });
+                    }
+                }
+            }
+            
+            
+
             //var nodeViewModel = obj as SequenceItemNodeViewModel;
             //if (nodeViewModel != null)
             //{
