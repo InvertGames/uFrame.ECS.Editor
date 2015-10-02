@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Invert.Common;
 using Invert.Core;
@@ -124,7 +125,20 @@ public class ActionExplorerUISystem : DiagramPlugin, IQueryDesignerWindowModalCo
 
                 if (!string.IsNullOrEmpty(_searchCriterial))
                 {
-                    ActionsViewModel.Predicate = i => i.Title.Contains(_searchCriterial);
+                    ActionsViewModel.Predicate = i =>
+                    {
+                        if (string.IsNullOrEmpty(i.Title)) return false;
+
+                        if (
+                            CultureInfo.CurrentCulture.CompareInfo.IndexOf(i.Title, _searchCriterial,
+                                CompareOptions.IgnoreCase) != -1) return true;
+
+                        if (!string.IsNullOrEmpty(i.SearchTag) &&
+                            CultureInfo.CurrentCulture.CompareInfo.IndexOf(i.SearchTag, _searchCriterial,
+                                CompareOptions.IgnoreCase) != -1) return true;
+
+                        return false;
+                    };
                 }
                 else
                 {
