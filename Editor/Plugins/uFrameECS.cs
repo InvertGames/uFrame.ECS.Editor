@@ -477,9 +477,9 @@ namespace Invert.uFrame.ECS
             set { _actions = value; }
         }
 
-        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, object obj)
+        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, params object[] objs)
         {
-
+            var obj = objs.FirstOrDefault();
             if (obj is InputOutputViewModel)
             {
             

@@ -59,9 +59,9 @@ namespace Invert.Core.GraphDesigner
             _breakpoints = null;
         }
 
-        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, object obj)
+        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, params object[] obj)
         {
-            var actionVM = obj as SequenceItemNodeViewModel;
+            var actionVM = obj.FirstOrDefault() as SequenceItemNodeViewModel;
             if (actionVM != null)
             {
                 ui.AddCommand(new ContextMenuItem()

@@ -132,7 +132,7 @@ namespace Invert.uFrame.ECS
         {
             if (DebugSystem.IsDebugMode)
             {
-                ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this)) yield return null", LastSequenceItemId, this.Identifier);
+                ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
                 LastSequenceItemId = this.Identifier;
             }
           

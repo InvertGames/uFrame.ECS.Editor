@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Invert.Core;
 using Invert.Core.GraphDesigner;
 using Invert.IOC;
+using Invert.Json;
+using UnityEditor;
+using UnityEngine;
 
 namespace Invert.uFrame.ECS
 {
@@ -38,9 +42,9 @@ namespace Invert.uFrame.ECS
             Signal<IShowSelectionMenu>(_ => _.ShowSelectionMenu(selectionMenu));
         }
 
-        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, object obj)
+        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, params object[] obj)
         {
-            var handlerVM = obj as HandlerNodeViewModel;
+            var handlerVM = obj.FirstOrDefault() as HandlerNodeViewModel;
             if (handlerVM != null)
             {
                 ui.AddCommand(new ContextMenuItem()
@@ -70,6 +74,7 @@ namespace Invert.uFrame.ECS
     public class CutPasteSystem : DiagramPlugin,
         IExecuteCommand<PickupCommand>,
         IExecuteCommand<DropCommand>,
+        IExecuteCommand<PasteCommand>,
         IToolbarQuery,
         IContextMenuQuery
     {
@@ -103,6 +108,7 @@ namespace Invert.uFrame.ECS
 
         public void Execute(PickupCommand command)
         {
+            CopiedNodes.Clear();
             CopiedNodes.AddRange(SelectedNodes);
             Signal<INotify>(_ => _.Notify("Now navigate to the target graph and press paste.", NotificationIcon.Info));
         }
@@ -135,10 +141,10 @@ namespace Invert.uFrame.ECS
             //}
         }
 
-        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, object obj)
+        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, params object[] obj)
         {
-            var diagram = obj as DiagramViewModel;
-            var node = obj as DiagramNodeViewModel;
+            var diagram = obj.FirstOrDefault() as DiagramViewModel;
+            var node = obj.FirstOrDefault() as DiagramNodeViewModel;
             if (node != null)
             {
                 ui.AddCommand(new ContextMenuItem()
@@ -148,20 +154,89 @@ namespace Invert.uFrame.ECS
                     Command = new PickupCommand(),
          
                 });
+                ui.AddCommand(new ContextMenuItem()
+                {
+                    Title = "Copy",
+                    Group = "CopyPaste",
+                    Command = new PickupCommand(),
 
+                });
+           
             }
             if (diagram != null)
             {
                 if (CopiedNodes.Count > 0)
                 {
+                    //ui.AddCommand(new ContextMenuItem()
+                    //{
+                    //    Title = "Drop",
+                    //    Group = "CopyPaste",
+                    //    Command = new DropCommand()
+                    //});
                     ui.AddCommand(new ContextMenuItem()
                     {
-                        Title = "Drop",
+                        Title = "Paste",
                         Group = "CopyPaste",
-                        Command = new DropCommand()
+                        Command = new PasteCommand() { Position =evt.MouseDownPosition }
+                        
                     });
                 }
+              
             }
         }
+        
+        public void Execute(PasteCommand command)
+        {
+            var copiedNodes = CopiedNodes.ToArray();
+            foreach (var item in copiedNodes)
+            {
+                var filter = item as IGraphFilter;
+                if (filter != null)
+                {
+                    CopiedNodes.AddRange(filter.FilterItems.Where(p => p.Node != item));
+                }
+            } 
+            var offset = command.Position - CopiedNodes.Last().Position;
+            foreach (var item in CopiedNodes)
+            {
+                
+                var node = item.Node;
+                var repository = node.Repository;
+                var nodeJson = InvertJsonExtensions.SerializeObject(node);
+                var copiedNode = InvertJsonExtensions.DeserializeObject(node.GetType(), nodeJson) as GraphNode;
+                copiedNode.Identifier = Guid.NewGuid().ToString();
+                copiedNode.Name += "_Copy";
+                copiedNode.Graph = InvertGraphEditor.CurrentDiagramViewModel.GraphData;
+                repository.Add(copiedNode);
+
+                foreach (var child in node.PersistedItems.ToArray())
+                {
+                    if (child == node) continue;
+                    var childJson = InvertJsonExtensions.SerializeObject(child);
+                    var copiedChild = InvertJsonExtensions.DeserializeObject(child.GetType(), childJson) as IDiagramNodeItem;
+                    copiedChild.Identifier = Guid.NewGuid().ToString();
+                    copiedChild.Node = copiedNode;
+                    repository.Add(copiedChild);
+                }
+
+          
+                InvertGraphEditor.CurrentDiagramViewModel.GraphData.CurrentFilter.ShowInFilter(copiedNode,
+                    item.Position + offset);
+
+               
+            }
+
+        }
+    }
+
+
+    public class CopyCommand : Command
+    {
+        
+    }
+
+    public class PasteCommand : Command
+    {
+        public Vector2 Position { get; set; }
     }
 }
