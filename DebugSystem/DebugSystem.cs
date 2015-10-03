@@ -141,6 +141,7 @@ namespace Invert.Core.GraphDesigner
             {
                 Title = "Debug Mode",
                 Checked = IsDebugMode,
+                Description = "Enabling debug mode will turn on breakpoints, which you can setup on Action nodes and other Sequence nodes.",
                 Command = new LambdaCommand("Debug Mode", () =>
                 {
                     IsDebugMode = !IsDebugMode;

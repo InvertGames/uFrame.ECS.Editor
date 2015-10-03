@@ -111,6 +111,7 @@ namespace Invert.uFrame.ECS {
                         {
                         
                             Node = this,
+                            Source = item as ITypedItem,
                             VariableType = item.MemberType,
                             Repository = this.Repository,
                         };
