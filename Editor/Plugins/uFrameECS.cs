@@ -70,6 +70,8 @@ namespace Invert.uFrame.ECS
             container.RegisterGraphItem<HandlerNode, HandlerNodeViewModel, HandlerNodeDrawer>();
             container.RegisterGraphItem<CustomAction, CustomActionViewModel, SequenceItemNodeDrawer>();
             Handler.AllowAddingInMenu = false;
+            CollectionItemAdded.Name = "Collection Item Added Handler";
+            CollectionItemRemoved.Name = "Collection Item Removed Handler";
             Library.HasSubNode<EnumNode>();
             //            ComponentGroup.AllowAddingInMenu = false;
             PropertyChanged.Name = "Property Changed Handler";
@@ -152,6 +154,8 @@ namespace Invert.uFrame.ECS
             AddHandlerType(typeof(ComponentDestroyedNode));
             AddHandlerType(typeof(ComponentCreatedNode));
             AddHandlerType(typeof(ActionGroupNode));
+            AddHandlerType(typeof(CollectionItemAddedNode));
+            AddHandlerType(typeof(CollectionItemRemovedNode));
 
 
         }

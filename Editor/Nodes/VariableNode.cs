@@ -12,7 +12,7 @@ namespace Invert.uFrame.ECS
     using Invert.Core.GraphDesigner;
 
 
-    public class VariableNode : VariableNodeBase, IContextVariable , ITypedItem
+    public class VariableNode : VariableNodeBase, IContextVariable , ITypedItem, IMemberInfo
     {
 
         public override void RecordRemoved(IDataRecord record)
@@ -75,7 +75,7 @@ namespace Invert.uFrame.ECS
 
      
 
-        public ITypedItem Source
+        public IMemberInfo Source
         {
             get { return this; }
             set
@@ -105,6 +105,20 @@ namespace Invert.uFrame.ECS
         }
 
         public bool IsSubVariable { get; set; }
+        public string MemberName { get { return Name; } }
+
+        public ITypeInfo MemberType
+        {
+            get
+            {
+                return VariableType;
+            }
+        }
+
+        public IEnumerable<Attribute> GetAttributes()
+        {
+            yield break;
+        }
     }
 
     public partial interface IVariableConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable

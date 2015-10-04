@@ -1,4 +1,4 @@
-
+﻿
 using Invert.Data;
 using Invert.Json;
 using UnityEngine;
@@ -57,7 +57,11 @@ namespace Invert.uFrame.ECS {
     public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem, IDemoVersionLimit {
         private string _customIcon;
 
-
+        public override bool AllowOutputs
+        {
+            get { return false; }
+        }
+    
         public IEnumerable<ComponentNode> WithAnyComponents
         {
             get { yield break; }
@@ -134,7 +138,7 @@ namespace Invert.uFrame.ECS {
             yield return new ContextVariable(input.HandlerPropertyName)
             {
                 Node = this,
-                Source = this,
+	            Source = null,
                 VariableType = new SystemTypeInfo(uFrameECS.EcsComponentType, this),
                 Repository = this.Repository,
                 //TypeInfo =  typeof(MonoBehaviour)
@@ -161,7 +165,7 @@ namespace Invert.uFrame.ECS {
                 {
                   
                     Node = this,
-                    Source = item as ITypedItem,
+	                Source = item as IMemberInfo,
                     VariableType = item.MemberType,
                     Repository = this.Repository,
                 };

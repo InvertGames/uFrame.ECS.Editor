@@ -149,6 +149,20 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class CollectionItemRemovedNodeDrawerBase : GenericNodeDrawer<CollectionItemRemovedNode,CollectionItemRemovedNodeViewModel> {
+        
+        public CollectionItemRemovedNodeDrawerBase(CollectionItemRemovedNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
+    public class CollectionModifiedHandlerNodeDrawerBase : GenericNodeDrawer<CollectionModifiedHandlerNode,CollectionModifiedHandlerNodeViewModel> {
+        
+        public CollectionModifiedHandlerNodeDrawerBase(CollectionModifiedHandlerNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
     public class PropertyChangedNodeDrawerBase : GenericNodeDrawer<PropertyChangedNode,PropertyChangedNodeViewModel> {
         
         public PropertyChangedNodeDrawerBase(PropertyChangedNodeViewModel viewModel) : 
@@ -201,6 +215,13 @@ namespace Invert.uFrame.ECS {
     public class IntNodeDrawerBase : GenericNodeDrawer<IntNode,IntNodeViewModel> {
         
         public IntNodeDrawerBase(IntNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
+    public class CollectionItemAddedNodeDrawerBase : GenericNodeDrawer<CollectionItemAddedNode,CollectionItemAddedNodeViewModel> {
+        
+        public CollectionItemAddedNodeDrawerBase(CollectionItemAddedNodeViewModel viewModel) : 
                 base(viewModel) {
         }
     }
