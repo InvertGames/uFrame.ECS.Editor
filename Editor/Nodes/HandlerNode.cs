@@ -58,6 +58,11 @@ namespace Invert.uFrame.ECS
             }
         }
 
+        public override string OutputDescription
+        {
+            get { return "Connect to any action to invoke it when the corresponding event happens."; }
+        }
+
         private EntityGroupIn[] _contextInputs;
         private EntityGroupIn _entityGroup;
         private string _eventIdentifier;

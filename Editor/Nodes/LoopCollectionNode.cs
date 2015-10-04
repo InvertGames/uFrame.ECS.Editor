@@ -461,7 +461,7 @@ namespace Invert.uFrame.ECS
     [ActionTitle("Format String")]
     public class FormatStringAction : CustomAction
     {
-        [JsonProperty, NodeProperty]
+        [JsonProperty, NodeProperty(InspectorType.TextArea)]
         public string Format
         {
             get { return _s; }

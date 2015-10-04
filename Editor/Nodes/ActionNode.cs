@@ -236,6 +236,16 @@ namespace Invert.uFrame.ECS
             get { return Meta.IsAsync; }
         }
 
+        public override string InputDescription
+        {
+            get { return "Plug in any other sequence node to continue execution with this action."; }
+        }
+
+        public override string OutputDescription
+        {
+            get { return "Connect to any other sequence node to assign next action."; }
+        }
+
         public override void RecordRemoved(IDataRecord record)
         {
             base.RecordRemoved(record);

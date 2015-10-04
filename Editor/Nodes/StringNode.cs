@@ -20,7 +20,7 @@ namespace Invert.uFrame.ECS {
 
             }
         }
-        [NodeProperty, JsonProperty]
+        [NodeProperty(InspectorType.TextArea), JsonProperty]
         public string Value
         {
             get { return _value; }

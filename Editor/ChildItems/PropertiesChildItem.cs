@@ -12,6 +12,12 @@ namespace Invert.uFrame.ECS {
     public class PropertiesChildItem : PropertiesChildItemBase {
         private string _friendlyName;
 
+
+        public override string OutputDescription
+        {
+            get { return "Connect to any other node which represents a Type. This will set corresponding type of the property."; }
+        }
+
         public override Type Type
         {
             get { return base.Type ?? typeof(int); }
