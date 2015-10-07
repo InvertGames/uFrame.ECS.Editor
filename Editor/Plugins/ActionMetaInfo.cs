@@ -12,6 +12,7 @@ namespace Invert.uFrame.ECS
         IEnumerable<string> CategoryPath { get; }
         bool IsEditorClass { get; set; }
         uFrameCategory Category { get; set; }
+        ActionDescription DescriptionAttribute {get;set;}
         bool IsAsync { get; }
     }
 
@@ -22,16 +23,15 @@ namespace Invert.uFrame.ECS
         private List<ActionFieldInfo> _actionFields;
         private uFrameCategory _category;
 
-   
+
         public ActionTitle TitleAttribute
         {
             get { return _title ?? (_title = MetaAttributes.OfType<ActionTitle>().FirstOrDefault()); }
             set { _title = value; }
         }
 
-        string IItem.Description { get; set; }
 
-        //public virtual string TitleText 
+        //public virtual string TitleText
         //{
         //    get
         //    {
@@ -53,7 +53,7 @@ namespace Invert.uFrame.ECS
         //        return Description.Description;
         //    }
         //}
-        
+
         public override string Title
         {
             get
@@ -75,6 +75,11 @@ namespace Invert.uFrame.ECS
         {
             get { return _category ?? (_category = SystemType.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault()); }
             set { _category = value; }
+        }
+
+        public override string Description
+        {
+            get { return DescriptionAttribute != null ? DescriptionAttribute.Description : null; }
         }
 
         public bool IsAsync
@@ -125,15 +130,19 @@ namespace Invert.uFrame.ECS
 
     public class ActionMethodMetaInfo : ActionMetaInfo
     {
+        private string _title1;
         public MethodInfo Method { get; set; }
 
         public bool IsConverter
         {
             get { return this.TitleAttribute is ActionTypeConverter; }
         }
+
         public override string Title
         {
-            get { return Method.Name; }
+            get {
+                return TitleAttribute == null ? Method.Name : TitleAttribute.Title ;
+            }
         }
 
         public IActionFieldInfo ConvertFrom
@@ -150,7 +159,7 @@ namespace Invert.uFrame.ECS
         {
             get { return base.FullName + "." + Method.Name; }
         }
-        
+
         //public MethodInfo Method { get; set; }
         public ActionMethodMetaInfo(Type systemType) : base(systemType)
         {

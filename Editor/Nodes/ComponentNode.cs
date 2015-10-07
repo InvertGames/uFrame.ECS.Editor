@@ -170,6 +170,8 @@ namespace Invert.uFrame.ECS {
             }
         }
 
+        
+
         [InspectorProperty, JsonProperty]
         public virtual string CustomIcon
         {

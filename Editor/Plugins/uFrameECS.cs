@@ -87,17 +87,21 @@ namespace Invert.uFrame.ECS
             Action.NodeColor.Literal = NodeColor.Green;
             //System.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<TypeReferenceNode>();
+            Module.HasSubNode<NoteNode>();
+          //  container.RegisterDrawer<NoteNodeViewModel, NoteNodeDrawer>();
+
             Module.HasSubNode<EnumNode>();
             Group.HasSubNode<EnumValueNode>();
             //System.HasSubNode<ComponentNode>();
             // System.HasSubNode<ContextNode>(); 
-
+  
             Library.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<ComponentNode>();
            // System.HasSubNode<ComponentNode>();
             container.RegisterDrawer<ItemViewModel<IContextVariable>, ItemDrawer>();
             //container.AddItemFlag<ComponentsReference>("Multiple", UnityEngine.Color.blue);
             container.AddItemFlag<PropertiesChildItem>("Mapping", UnityEngine.Color.blue);
+            container.AddItemFlag<PropertiesChildItem>("HideInUnityInspector", CachedStyles.GetColor(NodeColor.Azure4));
             container.AddNodeFlag<EventNode>("Dispatcher");
             //System.HasSubNode<EnumNode>();
             container.Connectable<IContextVariable, IActionIn>();
@@ -191,6 +195,8 @@ namespace Invert.uFrame.ECS
 
                 if (Actions.ContainsKey(actionType.FullName)) continue;
                 var actionInfo = new ActionMetaInfo(actionType);
+                var descAttrib = actionType.GetCustomAttributes(typeof(ActionDescription), true).OfType<ActionDescription>().FirstOrDefault();
+                actionInfo.DescriptionAttribute = descAttrib;
                 actionInfo.MetaAttributes =
                     actionType.GetCustomAttributes(typeof(ActionMetaAttribute), true).OfType<ActionMetaAttribute>().ToArray();
                 var fields = actionType.GetFields(BindingFlags.Instance | BindingFlags.Public);
@@ -245,6 +251,8 @@ namespace Invert.uFrame.ECS
                 {
 
                     var category = type.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault();
+                    var descAttrib = type.GetCustomAttributes(typeof(ActionDescription), true).OfType<ActionDescription>().FirstOrDefault();
+                    var title = type.GetCustomAttributes(typeof(ActionTitle), true).OfType<ActionTitle>().FirstOrDefault();
                     var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
                     foreach (var method in methods)
                     {
@@ -253,7 +261,8 @@ namespace Invert.uFrame.ECS
                         var actionInfo = new ActionMethodMetaInfo(type)
                         {
                             Category = category,
-                            Method = method,
+                            DescriptionAttribute = descAttrib,
+                            Method = method
                         };
 
                         actionInfo.MetaAttributes =
@@ -293,6 +302,10 @@ namespace Invert.uFrame.ECS
                             };
                             if (!SystemTypes.Contains(parameter.ParameterType))
                                 SystemTypes.Add(parameter.ParameterType);
+
+                            var paramDescr = parameter.GetCustomAttributes(typeof(Description), true).OfType<Description>().FirstOrDefault();
+                            if(paramDescr != null) fieldMetaInfo.Description = paramDescr.Text;
+
                             fieldMetaInfo.MetaAttributes =
                                 method.GetCustomAttributes(typeof(FieldDisplayTypeAttribute), true)
                                     .Cast<FieldDisplayTypeAttribute>()

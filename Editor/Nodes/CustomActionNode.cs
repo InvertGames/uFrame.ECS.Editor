@@ -23,6 +23,7 @@ namespace Invert.uFrame.ECS {
     
         private uFrameCategory _category;
         private bool _isAsync;
+        private ActionDescription _descriptionAttribute;
 
         [JsonProperty,InspectorProperty]
         public string ActionTitle { get; set; }
@@ -43,6 +44,13 @@ namespace Invert.uFrame.ECS {
             get { return _category ?? (_category = new uFrameCategory(Graph.Name)); }
             set { _category = value; }
         }
+
+        public virtual ActionDescription DescriptionAttribute
+        {
+            get { return _descriptionAttribute ?? (_descriptionAttribute = new ActionDescription("")); }
+            set { _descriptionAttribute = value; }
+        }
+
 
         [InspectorProperty, JsonProperty]
         public bool IsAsync

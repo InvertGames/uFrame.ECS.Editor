@@ -8,6 +8,7 @@ namespace Invert.uFrame.ECS
     public interface IActionFieldInfo : IMemberInfo
     {
         string Name { get;  }
+        string Description { get;  }
         bool IsGenericArgument { get;  }
         bool IsReturn { get; }
         bool IsByRef { get;  }
@@ -26,9 +27,31 @@ namespace Invert.uFrame.ECS
             }
             set { _name = value; }
         }
+
+        public string Description
+        {
+            get {
+                if (_description == null)
+                {
+                    if (MetaAttributes == null) return null;
+                    var descriptionContainer =
+                        MetaAttributes.OfType<Description>().FirstOrDefault();
+                    if (descriptionContainer != null)
+                    {
+                        _description = descriptionContainer.Text;
+                    }
+                    else
+                    {
+                        _description = "";
+                    }
+                }; return _description;}
+            set { _description = value; }
+        }
+
         private FieldDisplayTypeAttribute _displayType;
         private string _name;
-        
+        private string _description;
+
         public ActionAttribute[] MetaAttributes { get; set; }
 
         public FieldDisplayTypeAttribute DisplayType

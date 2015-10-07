@@ -496,7 +496,6 @@ namespace Invert.uFrame.ECS
                 foreach (var item in Meta.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is In))
                 {
                     IActionIn variableIn;
-
                     variableIn = item.IsGenericArgument ? (IActionIn)new TypeSelection() : new ActionIn();
                     variableIn.Node = this;
                     variableIn.Repository = Repository;
@@ -547,7 +546,6 @@ namespace Invert.uFrame.ECS
                     {
                         var variableOut = new ActionOut()
                         {
-
                             ActionFieldInfo = item,
                             Node = this,
                             Identifier = this.Identifier + ":" + item.Name,
@@ -683,6 +681,7 @@ namespace Invert.uFrame.ECS
     public class CustomAction : SequenceItemNode, IConnectableProvider
     {
         private string _title;
+        private string _description;
 
         public override string Title
         {
@@ -699,6 +698,24 @@ namespace Invert.uFrame.ECS
                 }
 
                 return _title = base.Title;
+            }
+        }
+
+        public override string Description
+        {
+            get
+            {
+                      if (_description != null) return _description;
+                var attribute = this.GetType()
+                    .GetCustomAttributes(typeof (ActionDescription), true)
+                    .OfType<ActionDescription>()
+                    .FirstOrDefault();
+                if (attribute != null)
+                {
+                    return _description = attribute.Description;
+                }
+
+                return _description = base.Description;
             }
         }
 
@@ -877,6 +894,18 @@ namespace Invert.uFrame.ECS
             return true;
         }
 
+
+        public override string Description 
+        {
+            get { return ActionFieldInfo == null ? null : ActionFieldInfo.Description; }
+            set { }
+        }
+
+        public override string InputDescription
+        {
+            get { return ActionFieldInfo == null ? null : ActionFieldInfo.Description; }
+        }
+
         public IActionFieldInfo ActionFieldInfo { get; set; }
 
         public SequenceItemNode SequenceItem
@@ -927,6 +956,7 @@ namespace Invert.uFrame.ECS
                 InvertApplication.Log("BS");
             }
         }
+
     }
     public class PropertyIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn
     {
@@ -1115,6 +1145,9 @@ namespace Invert.uFrame.ECS
             get { return DoesAllowInputs; }
 
         }
+        
+
+
 
         public override IContextVariable Item
         {
@@ -1219,6 +1252,17 @@ namespace Invert.uFrame.ECS
         public override bool AllowMultipleOutputs
         {
             get { return true; }
+        }
+
+
+        public override string Description
+        {
+            get { return ActionFieldInfo == null ? null : ActionFieldInfo.Description; }
+            set { }
+        }
+        public override string OutputDescription
+        {
+            get { return ActionFieldInfo == null ? null : ActionFieldInfo.Description; }
         }
 
         public override bool CanOutputTo(IConnectable input)
@@ -1326,6 +1370,17 @@ namespace Invert.uFrame.ECS
     public class ActionBranch : SingleOutputSlot<ActionNode>, IActionOut, IVariableContextProvider
     {
         private string _varName;
+
+        public override string Description
+        {
+            get { return ActionFieldInfo == null ? null : ActionFieldInfo.Description; }
+            set { }
+        }
+
+        public override string OutputDescription
+        {
+            get { return ActionFieldInfo == null ? null : ActionFieldInfo.Description; }
+        }
 
         public override Color Color
         {
