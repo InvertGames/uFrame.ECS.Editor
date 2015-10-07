@@ -372,6 +372,7 @@ namespace Invert.uFrame.ECS
 
         private IHandlerCodeWriter[] _codeWriters;
         private static HashSet<Type> _staticLibraries;
+        private static ActionMethodMetaInfo[] _converters;
 
         public IHandlerCodeWriter[] CodeWriters
         {
@@ -481,6 +482,15 @@ namespace Invert.uFrame.ECS
             set { _actions = value; }
         }
 
+        public static ActionMethodMetaInfo[] Converters
+        {
+            get
+            {
+                return _converters ??
+                       (_converters =
+                           uFrameECS.Actions.Values.OfType<ActionMethodMetaInfo>().Where(p => p.IsConverter).ToArray());
+            }
+        }
         public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, params object[] objs)
         {
             var obj = objs.FirstOrDefault();

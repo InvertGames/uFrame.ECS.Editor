@@ -126,10 +126,24 @@ namespace Invert.uFrame.ECS
     public class ActionMethodMetaInfo : ActionMetaInfo
     {
         public MethodInfo Method { get; set; }
-        
+
+        public bool IsConverter
+        {
+            get { return this.TitleAttribute is ActionTypeConverter; }
+        }
         public override string Title
         {
             get { return Method.Name; }
+        }
+
+        public IActionFieldInfo ConvertFrom
+        {
+            get { return ActionFields.First(p => !p.IsReturn); }
+        }
+
+        public IActionFieldInfo ConvertTo
+        {
+            get { return ActionFields.First(p => p.IsReturn); }
         }
 
         public override string FullName

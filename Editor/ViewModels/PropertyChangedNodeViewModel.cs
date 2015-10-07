@@ -28,6 +28,8 @@ namespace Invert.uFrame.ECS {
             base.CreateContent();
             //if (PropertyChangedNode.EntityGroup.Item != null)
             //{
+            if (IsVisible(SectionVisibility.WhenNodeIsNotFilter))
+            {
                 var propertySelection = new InputOutputViewModel()
                 {
                     DataObject = PropertyChangedNode.PropertyIn,
@@ -38,9 +40,12 @@ namespace Invert.uFrame.ECS {
                     AllowSelection = true
                 };
                 ContentItems.Add(propertySelection);
+                AddPropertyFields();
+            }
+              
             //}
            
-            AddPropertyFields();
+        
         }
 
 

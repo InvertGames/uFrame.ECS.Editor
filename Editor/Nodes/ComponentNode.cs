@@ -124,6 +124,7 @@ namespace Invert.uFrame.ECS {
             var systemInfo = info as SystemTypeInfo;
             if (systemInfo != null)
             {
+                if (systemInfo.SystemType == typeof (object)) return true;
                 if (systemInfo.SystemType == typeof (MonoBehaviour)) return true;
                 if (systemInfo.SystemType.Name == "IEcsComponent") return true;
                 if (systemInfo.SystemType.Name == "EcsComponent") return true;

@@ -15,15 +15,25 @@ namespace Invert.uFrame.ECS
     {
         public HandlerNode Node;
     }
+
+    public class CreateConverterConnectionCommand : Command
+    {
+        public IContextVariable Output;
+        public IActionIn Input;
+        public ActionMethodMetaInfo ConverterAction;
+
+    }
     public class ActionNodeSystem
         : DiagramPlugin
         , IExecuteCommand<ChangeHandlerEventCommand>
         , IContextMenuQuery
+        , IExecuteCommand<CreateConverterConnectionCommand>
+
     {
         public override void Initialize(UFrameContainer container)
         {
             base.Initialize(container);
-
+            container.RegisterInstance<IConnectionStrategy>(new ConvertConnectionStrategy(), "ConvertConnectionStrategy");
         }
 
         public void Execute(ChangeHandlerEventCommand command)
@@ -60,8 +70,116 @@ namespace Invert.uFrame.ECS
 
             }
         }
+
+        public void Execute(CreateConverterConnectionCommand command)
+        {
+            SequenceItemNode node = null;
+            var type = command.ConverterAction;
+            if (type != null && type.IsEditorClass)
+            {
+                node = Activator.CreateInstance(type.SystemType) as SequenceItemNode;
+            }
+            else
+            {
+                node = new ActionNode
+                {
+                    Meta = type,
+                };
+                //node.Name = "";
+            }
+            node.Graph = command.Output.Graph;
+
+            
+            InvertGraphEditor.CurrentDiagramViewModel.AddNode(node, Event.current.mousePosition - new Vector2(250f,0f));
+
+            var result = node.GraphItems.OfType<IActionOut>().FirstOrDefault(p => p.Name == "Result");
+            var input = node.GraphItems.OfType<IActionIn>().FirstOrDefault();
+
+            node.Graph.AddConnection(command.Output, input);
+            node.Graph.AddConnection(result, command.Input);
+
+            node.IsSelected = true;
+        }
     }
 
+    public class ConvertConnectionStrategy : DefaultConnectionStrategy<IContextVariable, IActionIn>
+    {
+        public override Color ConnectionColor
+        {
+            get { return Color.white; }
+        }
+
+        public override void Remove(ConnectorViewModel output, ConnectorViewModel input)
+        {
+
+        }
+
+        protected override bool CanConnect(IContextVariable output, IActionIn input)
+        {
+            foreach (var p in uFrameECS.Converters)
+            {
+                if (output.VariableType.IsAssignableTo(p.ActionFields.First(x => !x.IsReturn).MemberType))
+                {
+                    if (p.ActionFields.First(x => x.IsReturn).MemberType.FullName == input.VariableType.FullName)
+                        return true;
+                }
+                
+                   
+            }
+            return false;
+
+            return true;
+        }
+
+        //public override ConnectionViewModel Connect(DiagramViewModel diagramViewModel, ConnectorViewModel a, ConnectorViewModel b)
+        //{
+        //    //var converter = uFrameECS.Converters.FirstOrDefault(p =>
+        //    //  p.ActionFields.First(x => !x.IsReturn).MemberType.IsAssignableTo(output.VariableType) &&
+        //    //  p.ActionFields.First(x => x.IsReturn).MemberType.FullName == input.GetType().FullName
+        //    //  );
+        //    foreach (var p in uFrameECS.Converters)
+        //    {
+        //        //if (p.ActionFields.First(x => !x.IsReturn).MemberType.IsAssignableTo(output.VariableType))
+        //        //{
+        //        //    if (p.ActionFields.First(x => x.IsReturn).MemberType.FullName == input.GetType().FullName)
+        //        //    {
+        //        //        CreateConnection(diagramViewModel, a, b, Apply);
+        //        //    }
+        //        //}
+
+
+        //    }
+        //}
+        public override void Apply(ConnectionViewModel connectionViewModel)
+        {
+            base.Apply(connectionViewModel);
+        }
+
+        protected override void ApplyConnection(IGraphData graph, IConnectable output, IConnectable input)
+        {
+            //base.ApplyConnection(graph, output, input);
+            ApplyConnection(graph, output as IContextVariable,input as IActionIn);
+        }
+
+        protected override void ApplyConnection(IGraphData graph, IContextVariable output, IActionIn input)
+        {
+            base.ApplyConnection(graph, output, input);
+           
+            var converter = uFrameECS.Converters.FirstOrDefault(p =>
+               output.VariableType.IsAssignableTo(p.ConvertFrom.MemberType) &&
+               p.ConvertTo.MemberType.FullName == input.VariableType.FullName
+               );
+            if (converter != null)
+            {
+                InvertApplication.Execute(new CreateConverterConnectionCommand()
+                {
+                    ConverterAction = converter,
+                    Input = input,
+                    Output = output
+                });
+            }
+        }
+    }
     public class PickupCommand : Command
     {
 

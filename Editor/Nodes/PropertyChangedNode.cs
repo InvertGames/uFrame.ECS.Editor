@@ -59,7 +59,7 @@ namespace Invert.uFrame.ECS {
                 {
                     return _PropertyIn;
                 }
-                return _PropertyIn ?? (_PropertyIn = new PropertyIn() { Node = this, Identifier = PropertyInId,Repository = Repository, });
+                return _PropertyIn ?? (_PropertyIn = new PropertyIn() { Node = this, Identifier = PropertyInId, GroupIn=EntityGroup, Repository = Repository, });
             }
         }
         [Invert.Json.JsonProperty, NodeProperty("Only invoked when the property is set to a different value than the current value.")]

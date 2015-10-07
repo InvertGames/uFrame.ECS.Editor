@@ -978,9 +978,22 @@ namespace Invert.uFrame.ECS
             }
         }
 
+        public EntityGroupIn GroupIn { get; set; }
+
 
         public override IEnumerable<IValueItem> GetAllowed()
         {
+            if (GroupIn != null)
+            {
+                foreach (var item in GroupIn.Item.GetVariables(GroupIn))
+                {
+                    if (item.Source is PropertiesChildItem)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        
             var action = this.Node as IVariableContextProvider;
             if (action != null)
             {
