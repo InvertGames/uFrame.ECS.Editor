@@ -353,7 +353,7 @@ namespace Invert.uFrame.ECS
 
     }
 
-    [ActionTitle("Publish Event"), uFrameCategory("Events")]
+    [ActionTitle("Publish Event"), uFrameCategory("Events"),ActionDescription("Publish event of any type and provide any data specified by the event.")]
     public class PublishEventNode : CustomAction
     {
 
@@ -503,9 +503,13 @@ namespace Invert.uFrame.ECS
                 else
                 {
                     List<VariableIn> list = new List<VariableIn>();
+
+                    var x = 0;
                     foreach (var p in Options)
                     {
                         var slot = CreateSlot<VariableIn>(p);
+                        slot.Description =
+                            string.Format("This item will be cast to a string and used as {0} argument of the format string", x++);
                         slot.DoesAllowInputs = true;
                         list.Add(slot);
                     }

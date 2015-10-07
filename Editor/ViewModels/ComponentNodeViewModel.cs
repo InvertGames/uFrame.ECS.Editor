@@ -32,6 +32,11 @@ namespace Invert.uFrame.ECS {
             }
         }
 
+        protected override void OnAdd(NodeConfigSectionBase configSection, GenericNodeChildItem item)
+        {
+            base.OnAdd(configSection, item);
+            
+        }
 
         public override NodeColor Color
         {

@@ -12,6 +12,7 @@ namespace Invert.uFrame.ECS
         IEnumerable<string> CategoryPath { get; }
         bool IsEditorClass { get; set; }
         uFrameCategory Category { get; set; }
+        ActionDescription DescriptionAttribute {get;set;}
         bool IsAsync { get; }
     }
 
@@ -29,7 +30,6 @@ namespace Invert.uFrame.ECS
             set { _title = value; }
         }
 
-        string IItem.Description { get; set; }
 
         //public virtual string TitleText 
         //{
@@ -75,6 +75,11 @@ namespace Invert.uFrame.ECS
         {
             get { return _category ?? (_category = SystemType.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault()); }
             set { _category = value; }
+        }
+
+        public override string Description
+        {
+            get { return DescriptionAttribute != null ? DescriptionAttribute.Description : null; }
         }
 
         public bool IsAsync
@@ -125,11 +130,14 @@ namespace Invert.uFrame.ECS
 
     public class ActionMethodMetaInfo : ActionMetaInfo
     {
+        private string _title1;
         public MethodInfo Method { get; set; }
-        
+
         public override string Title
         {
-            get { return Method.Name; }
+            get { 
+                return TitleAttribute == null ? Method.Name : TitleAttribute.Title ;
+            }
         }
 
         public override string FullName

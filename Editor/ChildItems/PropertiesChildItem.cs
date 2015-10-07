@@ -48,6 +48,14 @@ namespace Invert.uFrame.ECS {
             set { this["Mapping"] = value; }
         }
 
+        
+        [InspectorProperty]
+        public bool HideInUnityInspector
+        {
+            get { return this["HideInUnityInspector"]; }
+            set { this["HideInUnityInspector"] = value; }
+        }
+
         public override IEnumerable<Attribute> GetAttributes()
         {
             if (Mapping)
