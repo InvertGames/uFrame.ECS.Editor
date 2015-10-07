@@ -140,7 +140,7 @@ namespace Assets.Plugins.Editor.uFrame.ECS.Editor.DebugSystem
     {
         private Vector2 _scrollPosition;
 
-        [MenuItem("uFrame/Breakpoints #&o")]
+        [MenuItem("Window/uFrame/Breakpoints #&o")]
         internal static void ShowWindow()
         {
             var window = GetWindow<uFrameBreakpointsWindow>();

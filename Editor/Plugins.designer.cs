@@ -57,6 +57,10 @@ namespace Invert.uFrame.ECS {
         
         private Invert.Core.GraphDesigner.NodeConfig<SetVariableNode> _SetVariable;
         
+        private Invert.Core.GraphDesigner.NodeConfig<CollectionItemRemovedNode> _CollectionItemRemoved;
+        
+        private Invert.Core.GraphDesigner.NodeConfig<CollectionModifiedHandlerNode> _CollectionModifiedHandler;
+        
         private Invert.Core.GraphDesigner.NodeConfig<PropertyChangedNode> _PropertyChanged;
         
         private Invert.Core.GraphDesigner.NodeConfig<VariableNode> _Variable;
@@ -72,6 +76,8 @@ namespace Invert.uFrame.ECS {
         private Invert.Core.GraphDesigner.NodeConfig<ComponentNode> _Component;
         
         private Invert.Core.GraphDesigner.NodeConfig<IntNode> _Int;
+        
+        private Invert.Core.GraphDesigner.NodeConfig<CollectionItemAddedNode> _CollectionItemAdded;
         
         private Invert.Core.GraphDesigner.NodeConfig<ComponentDestroyedNode> _ComponentDestroyed;
         
@@ -270,6 +276,24 @@ namespace Invert.uFrame.ECS {
             }
         }
         
+        public Invert.Core.GraphDesigner.NodeConfig<CollectionItemRemovedNode> CollectionItemRemoved {
+            get {
+                return _CollectionItemRemoved;
+            }
+            set {
+                _CollectionItemRemoved = value;
+            }
+        }
+        
+        public Invert.Core.GraphDesigner.NodeConfig<CollectionModifiedHandlerNode> CollectionModifiedHandler {
+            get {
+                return _CollectionModifiedHandler;
+            }
+            set {
+                _CollectionModifiedHandler = value;
+            }
+        }
+        
         public Invert.Core.GraphDesigner.NodeConfig<PropertyChangedNode> PropertyChanged {
             get {
                 return _PropertyChanged;
@@ -339,6 +363,15 @@ namespace Invert.uFrame.ECS {
             }
             set {
                 _Int = value;
+            }
+        }
+        
+        public Invert.Core.GraphDesigner.NodeConfig<CollectionItemAddedNode> CollectionItemAdded {
+            get {
+                return _CollectionItemAdded;
+            }
+            set {
+                _CollectionItemAdded = value;
             }
         }
         
@@ -508,10 +541,10 @@ namespace Invert.uFrame.ECS {
             Bool.Color(NodeColor.Purple);
             Module = container.AddGraph<ModuleGraph, ModuleNode>("ModuleGraph");
             Module.Color(NodeColor.Black);
-            Module.HasSubNode<ComponentNode>();
-            Module.HasSubNode<SystemNode>();
             Module.HasSubNode<EventNode>();
+            Module.HasSubNode<ComponentNode>();
             Module.HasSubNode<CustomActionNode>();
+            Module.HasSubNode<SystemNode>();
             Module.HasSubNode<GroupNode>();
             StopTimer = container.AddNode<StopTimerNode,StopTimerNodeViewModel,StopTimerNodeDrawer>("StopTimer");
             StopTimer.Color(NodeColor.Gray);
@@ -533,6 +566,10 @@ namespace Invert.uFrame.ECS {
             ComponentCreated.Color(NodeColor.Red);
             SetVariable = container.AddNode<SetVariableNode,SetVariableNodeViewModel,SetVariableNodeDrawer>("SetVariable");
             SetVariable.Color(NodeColor.Gray);
+            CollectionItemRemoved = container.AddNode<CollectionItemRemovedNode,CollectionItemRemovedNodeViewModel,CollectionItemRemovedNodeDrawer>("CollectionItemRemoved");
+            CollectionItemRemoved.Color(NodeColor.Red);
+            CollectionModifiedHandler = container.AddNode<CollectionModifiedHandlerNode,CollectionModifiedHandlerNodeViewModel,CollectionModifiedHandlerNodeDrawer>("CollectionModifiedHandler");
+            CollectionModifiedHandler.Color(NodeColor.Red);
             PropertyChanged = container.AddNode<PropertyChangedNode,PropertyChangedNodeViewModel,PropertyChangedNodeDrawer>("PropertyChanged");
             PropertyChanged.Color(NodeColor.Red);
             Variable = container.AddNode<VariableNode,VariableNodeViewModel,VariableNodeDrawer>("Variable");
@@ -566,6 +603,8 @@ namespace Invert.uFrame.ECS {
             Component.Color(NodeColor.Yellow);
             Int = container.AddNode<IntNode,IntNodeViewModel,IntNodeDrawer>("Int");
             Int.Color(NodeColor.Purple);
+            CollectionItemAdded = container.AddNode<CollectionItemAddedNode,CollectionItemAddedNodeViewModel,CollectionItemAddedNodeDrawer>("CollectionItemAdded");
+            CollectionItemAdded.Color(NodeColor.Red);
             ComponentDestroyed = container.AddNode<ComponentDestroyedNode,ComponentDestroyedNodeViewModel,ComponentDestroyedNodeDrawer>("ComponentDestroyed");
             ComponentDestroyed.Color(NodeColor.Red);
             Vector2 = container.AddNode<Vector2Node,Vector2NodeViewModel,Vector2NodeDrawer>("Vector2");
@@ -586,7 +625,6 @@ namespace Invert.uFrame.ECS {
             Handler.HasSubNode<ComponentNode>();
             Handler.HasSubNode<LoopCollectionNode>();
             Handler.HasSubNode<IntNode>();
-            Handler.HasSubNode<CodeActionNode>();
             Handler.HasSubNode<PropertyNode>();
             Handler.HasSubNode<EnumValueNode>();
             Handler.HasSubNode<Vector2Node>();
@@ -601,6 +639,8 @@ namespace Invert.uFrame.ECS {
             System.HasSubNode<ComponentCreatedNode>();
             System.HasSubNode<HandlerNode>();
             System.HasSubNode<ComponentDestroyedNode>();
+            System.HasSubNode<CollectionItemAddedNode>();
+            System.HasSubNode<CollectionItemRemovedNode>();
             Entity = container.AddNode<EntityNode,EntityNodeViewModel,EntityNodeDrawer>("Entity");
             Entity.Color(NodeColor.Gray);
             Color = container.AddNode<ColorNode,ColorNodeViewModel,ColorNodeDrawer>("Color");

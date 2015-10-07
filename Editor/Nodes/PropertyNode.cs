@@ -1,4 +1,4 @@
-using Invert.Data;
+﻿using Invert.Data;
 
 namespace Invert.uFrame.ECS
 {
@@ -71,7 +71,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public ITypedItem Source
+	    public IMemberInfo Source
         {
             get
             {

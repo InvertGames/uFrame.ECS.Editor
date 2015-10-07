@@ -15,7 +15,7 @@ namespace Invert.uFrame.ECS
 {
     public interface IContextVariable : IDiagramNodeItem
     {
-        ITypedItem Source { get; }
+        IMemberInfo Source { get; }
         string VariableName { get; }
         ITypeInfo VariableType { get; }
         string ShortName { get; }
@@ -141,7 +141,7 @@ namespace Invert.uFrame.ECS
                 {
                     yield return new ContextVariable(VariableName, item.MemberName)
                     {
-                        Source = item as ITypedItem,
+                        Source = item,
                    
                         Name = item.MemberName,
                         Node = this.Node,
@@ -164,7 +164,7 @@ namespace Invert.uFrame.ECS
 
         }
 
-        public ITypedItem Source { get; set; }
+        public IMemberInfo Source { get; set; }
         public string[] FirstMembers { get; set; }
     }
 
@@ -193,7 +193,7 @@ namespace Invert.uFrame.ECS
                 }
                 if (Source != null)
                 {
-                    yield return Source.Name;
+                    yield return Source.MemberName;
                 }
                 else
                 {
@@ -1008,14 +1008,22 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        //public override string Name
-        //{
-        //    get { return "Property"; }
-        //    set { base.Name = value; }
-        //}
+        public EntityGroupIn GroupIn { get; set; }
+
 
         public override IEnumerable<IValueItem> GetAllowed()
         {
+            if (GroupIn != null)
+            {
+                foreach (var item in GroupIn.Item.GetVariables(GroupIn))
+                {
+                    if (item.Source is PropertiesChildItem)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        
             var action = this.Node as IVariableContextProvider;
             if (action != null)
             {
@@ -1038,6 +1046,92 @@ namespace Invert.uFrame.ECS
                     }
                 }
             }
+
+        }
+    }
+    public class CollectionIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn
+    {
+        public bool DoesAllowInputs;
+        public override bool AllowInputs
+        {
+            get { return DoesAllowInputs; }
+
+        }
+
+        public override string SelectedDisplayName
+        {
+            get { return base.SelectedDisplayName; }
+        }
+
+        public override IContextVariable Item
+        {
+            get { return base.Item; }
+        }
+
+        public IVariableContextProvider Handler
+        {
+            get { return Node.Filter as IVariableContextProvider; }
+        }
+
+        public IActionFieldInfo ActionFieldInfo { get; set; }
+        public EntityGroupIn GroupIn { get; set; }
+        public string VariableName
+        {
+            get
+            {
+                var item = Item;
+                if (item == null)
+                {
+                    return "...";
+                }
+                return item.VariableName;
+            }
+        }
+
+        public virtual ITypeInfo VariableType
+        {
+            get
+            {
+                var item = Item;
+                if (item == null)
+                    return new SystemTypeInfo(typeof(object));
+                return Item.VariableType;
+            }
+        }
+
+
+        public override IEnumerable<IValueItem> GetAllowed()
+        {
+            foreach (var item in GroupIn.Item.GetVariables(GroupIn))
+            {
+                if (item.VariableType is CollectionTypeInfo)
+                {
+                    yield return item;
+                }
+            }
+
+            //var action = this.Node as IVariableContextProvider;
+            //if (action != null)
+            //{
+            //    foreach (var item in action.GetAllContextVariables())
+            //    {
+            //        if (item.VariableType is CollectionTypeInfo)
+            //        {
+            //            yield return item;
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    var hn = Handler;
+            //    if (hn != null)
+            //    {
+            //        foreach (var item in hn.GetAllContextVariables())
+            //        {
+            //            yield return item;
+            //        }
+            //    }
+            //}
 
         }
     }
@@ -1206,7 +1300,7 @@ namespace Invert.uFrame.ECS
             get { return VariableName; }
         }
 
-        public ITypedItem Source { get; set; }
+        public IMemberInfo Source { get; set; }
 
         public string AsParameter
         {

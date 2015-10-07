@@ -1,4 +1,4 @@
-using System.CodeDom;
+﻿using System.CodeDom;
 
 namespace Invert.uFrame.ECS {
     using System;
@@ -13,6 +13,7 @@ namespace Invert.uFrame.ECS {
         private PropertyIn _PropertyIn;
         private string _PropertyInId;
         private bool _immediate;
+        private bool _onlyWhenChanged;
 
         public override bool CanGenerate { get { return true; } }
         //public override string Name
@@ -28,13 +29,6 @@ namespace Invert.uFrame.ECS {
         public IContextVariable SourceProperty
         {
             get { return  PropertyIn.Item; }
-        }
-
-        [Invert.Json.JsonProperty, InspectorProperty]
-        public virtual bool Immediate
-        {
-            get { return _immediate; }
-            set { this.Changed("Immediate", ref _immediate, value); }
         }
 
         [Invert.Json.JsonProperty()]
@@ -65,8 +59,21 @@ namespace Invert.uFrame.ECS {
                 {
                     return _PropertyIn;
                 }
-                return _PropertyIn ?? (_PropertyIn = new PropertyIn() { Node = this, Identifier = PropertyInId,Repository = Repository, });
+                return _PropertyIn ?? (_PropertyIn = new PropertyIn() { Node = this, Identifier = PropertyInId, GroupIn=EntityGroup, Repository = Repository, });
             }
+        }
+        [Invert.Json.JsonProperty, NodeProperty("Only invoked when the property is set to a different value than the current value.")]
+        public virtual bool OnlyWhenChanged
+        {
+            get { return _onlyWhenChanged; }
+            set { this.Changed("OnlyWhenChanged", ref _onlyWhenChanged, value); }
+        }
+
+        [Invert.Json.JsonProperty, NodeProperty("Invoked immediately upon subscription.")]
+        public virtual bool Immediate
+        {
+            get { return _immediate; }
+            set { this.Changed("Immediate", ref _immediate, value); }
         }
 
         public override string DisplayName
@@ -74,7 +81,7 @@ namespace Invert.uFrame.ECS {
             get
             {
                 if (Repository != null && !string.IsNullOrEmpty(this.PropertyInId) && PropertyIn != null && SourceProperty != null)
-                    return string.Format("{0} {1} Property Changed", SourceProperty.Source.Node.Name, SourceProperty.Source.Name);
+                    return string.Format("{0} Property Changed", SourceProperty.Source.MemberName);
                 return "PropertyChanged";
             }
         }
@@ -83,7 +90,7 @@ namespace Invert.uFrame.ECS {
             get
             {
                 if (Repository != null && !string.IsNullOrEmpty(this.PropertyInId) && PropertyIn != null && SourceProperty != null)
-                    return string.Format("{0}{1}PropertyChanged", SourceProperty.Source.Node.Name, SourceProperty.Source.Name);
+                    return string.Format("{0}PropertyChanged", SourceProperty.Source.MemberName);
                 return Graph.CurrentFilter.Name + "PropertyChanged";
             }
         }
@@ -92,7 +99,7 @@ namespace Invert.uFrame.ECS {
             get
             {
                 if (Repository != null && !string.IsNullOrEmpty(this.PropertyInId) && PropertyIn != null && SourceProperty != null)
-                    return string.Format("{0}{1}PropertyChangedFilter", SourceProperty.Source.Node.Name, SourceProperty.Source.Name);
+	                return string.Format("{0}PropertyChangedFilter", SourceProperty.Source.MemberName, SourceProperty.Source.MemberName);
                 return Graph.CurrentFilter.Name + "PropertyChangedFilter";
             }
         }
@@ -128,16 +135,16 @@ namespace Invert.uFrame.ECS {
         {
             //base.WriteEventSubscription(ctx, filterMethod, handlerMethod);
             var relatedTypeProperty = SourceProperty.Source;
-            filterMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.RelatedTypeName, "value"));
-            handlerMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.RelatedTypeName, "value"));
+	        filterMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.MemberType.FullName, "value"));
+            handlerMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.MemberType.FullName, "value"));
             if (Immediate)
             {
-                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3}, Group=>{2})", 
-                    EventType, relatedTypeProperty.RelatedTypeName, SourceProperty.Name, filterMethod.Name);
+                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3}, Group=>{2}, {4})", 
+                    EventType, relatedTypeProperty.MemberType.FullName, SourceProperty.Name, filterMethod.Name, OnlyWhenChanged ? "true" : "false");
             }
             else
             {
-                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3})", EventType, relatedTypeProperty.RelatedTypeName, SourceProperty.Name, filterMethod.Name);
+                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3}, null, {4})", EventType, relatedTypeProperty.MemberType.FullName, SourceProperty.Name, filterMethod.Name, OnlyWhenChanged ? "true" : "false");
             }
             
         }

@@ -1,4 +1,4 @@
-using Invert.Data;
+﻿using Invert.Data;
 using Invert.Json;
 using UnityEngine;
 
@@ -111,7 +111,7 @@ namespace Invert.uFrame.ECS {
                         {
                         
                             Node = this,
-                            Source = item as ITypedItem,
+                            Source = item ,
                             VariableType = item.MemberType,
                             Repository = this.Repository,
                         };
@@ -190,7 +190,7 @@ namespace Invert.uFrame.ECS {
                     Repository = this.Repository,
                     Node = this,
                     VariableType = item.SourceItem as ITypeInfo,
-                    Source = item.SourceItem as ITypedItem,
+	                Source = item.SourceItem as IMemberInfo,
                     Identifier = this.Identifier + ":" + this.Name
                 };
             }

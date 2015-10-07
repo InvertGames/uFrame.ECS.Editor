@@ -35,6 +35,7 @@ namespace Invert.uFrame.ECS {
         {
             InputConnectorType = NodeConfig.SourceType;
             OutputConnectorType = NodeConfig.SourceType;
+            if (AutoAddProperties)
             AddPropertyFields();
             CreateContentByConfiguration(NodeConfig.GraphItemConfigurations, GraphItem);
 
@@ -80,6 +81,11 @@ namespace Invert.uFrame.ECS {
           
 
 
+        }
+
+        public virtual bool AutoAddProperties
+        {
+            get { return true; }
         }
     }
 }

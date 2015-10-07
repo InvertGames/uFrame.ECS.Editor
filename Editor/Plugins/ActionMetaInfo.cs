@@ -23,7 +23,7 @@ namespace Invert.uFrame.ECS
         private List<ActionFieldInfo> _actionFields;
         private uFrameCategory _category;
 
-   
+
         public ActionTitle TitleAttribute
         {
             get { return _title ?? (_title = MetaAttributes.OfType<ActionTitle>().FirstOrDefault()); }
@@ -31,7 +31,7 @@ namespace Invert.uFrame.ECS
         }
 
 
-        //public virtual string TitleText 
+        //public virtual string TitleText
         //{
         //    get
         //    {
@@ -53,7 +53,7 @@ namespace Invert.uFrame.ECS
         //        return Description.Description;
         //    }
         //}
-        
+
         public override string Title
         {
             get
@@ -133,18 +133,33 @@ namespace Invert.uFrame.ECS
         private string _title1;
         public MethodInfo Method { get; set; }
 
+        public bool IsConverter
+        {
+            get { return this.TitleAttribute is ActionTypeConverter; }
+        }
+
         public override string Title
         {
-            get { 
+            get {
                 return TitleAttribute == null ? Method.Name : TitleAttribute.Title ;
             }
+        }
+
+        public IActionFieldInfo ConvertFrom
+        {
+            get { return ActionFields.First(p => !p.IsReturn); }
+        }
+
+        public IActionFieldInfo ConvertTo
+        {
+            get { return ActionFields.First(p => p.IsReturn); }
         }
 
         public override string FullName
         {
             get { return base.FullName + "." + Method.Name; }
         }
-        
+
         //public MethodInfo Method { get; set; }
         public ActionMethodMetaInfo(Type systemType) : base(systemType)
         {

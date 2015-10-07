@@ -70,6 +70,8 @@ namespace Invert.uFrame.ECS
             container.RegisterGraphItem<HandlerNode, HandlerNodeViewModel, HandlerNodeDrawer>();
             container.RegisterGraphItem<CustomAction, CustomActionViewModel, SequenceItemNodeDrawer>();
             Handler.AllowAddingInMenu = false;
+            CollectionItemAdded.Name = "Collection Item Added Handler";
+            CollectionItemRemoved.Name = "Collection Item Removed Handler";
             Library.HasSubNode<EnumNode>();
             //            ComponentGroup.AllowAddingInMenu = false;
             PropertyChanged.Name = "Property Changed Handler";
@@ -156,6 +158,8 @@ namespace Invert.uFrame.ECS
             AddHandlerType(typeof(ComponentDestroyedNode));
             AddHandlerType(typeof(ComponentCreatedNode));
             AddHandlerType(typeof(ActionGroupNode));
+            AddHandlerType(typeof(CollectionItemAddedNode));
+            AddHandlerType(typeof(CollectionItemRemovedNode));
 
 
         }
@@ -381,6 +385,7 @@ namespace Invert.uFrame.ECS
 
         private IHandlerCodeWriter[] _codeWriters;
         private static HashSet<Type> _staticLibraries;
+        private static ActionMethodMetaInfo[] _converters;
 
         public IHandlerCodeWriter[] CodeWriters
         {
@@ -490,6 +495,15 @@ namespace Invert.uFrame.ECS
             set { _actions = value; }
         }
 
+        public static ActionMethodMetaInfo[] Converters
+        {
+            get
+            {
+                return _converters ??
+                       (_converters =
+                           uFrameECS.Actions.Values.OfType<ActionMethodMetaInfo>().Where(p => p.IsConverter).ToArray());
+            }
+        }
         public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, params object[] objs)
         {
             var obj = objs.FirstOrDefault();

@@ -17,7 +17,7 @@ namespace Invert.uFrame.ECS
         IEnumerable<IMappingsConnectable> GetSystemGroups();
     }
 
-    public class HandlerNode : HandlerNodeBase, ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider, IDemoVersionLimit
+    public class HandlerNode : HandlerNodeBase, ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider, IDemoVersionLimit, ITypeInfo
     {
         public override string Title
         {
@@ -88,6 +88,25 @@ namespace Invert.uFrame.ECS
         public IMappingsConnectable ContextNode
         {
             get { return this.InputFrom<IMappingsConnectable>(); }
+        }
+
+        public override IEnumerable<IMemberInfo> GetMembers()
+        {
+            yield return new DefaultMemberInfo()
+            {
+                MemberName = "Event",
+                MemberType = Meta
+            };
+            foreach (var input in FilterInputs)
+            {
+              var filter = input.FilterNode;
+              yield return new DefaultMemberInfo()
+              {
+                  MemberName = input.Name,
+                  MemberType = new SystemTypeInfo(uFrameECS.EcsComponentType, filter as ITypeInfo)
+              };
+            }
+
         }
 
         public EntityGroupIn EntityGroup
@@ -279,9 +298,16 @@ namespace Invert.uFrame.ECS
 
         public override IEnumerable<IContextVariable> GetContextVariables()
         {
+            yield return new ContextVariable("this")
+            {
+                Repository = this.Repository,
+                Node = this,
+                VariableType = this,
+            };
             var evtNode = Meta;
             if (evtNode != null && !evtNode.SystemEvent)
             {
+               
                 yield return new ContextVariable("Event")
                 {
                     Repository = this.Repository,
@@ -507,7 +533,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        private void WriteHandlerSetup(TemplateContext ctx, string name, CodeMemberMethod handlerMethod)
+        protected virtual void WriteHandlerSetup(TemplateContext ctx, string name, CodeMemberMethod handlerMethod)
         {
             if (!IsSystemEvent)
             {
@@ -539,6 +565,11 @@ namespace Invert.uFrame.ECS
         {
             InvertApplication.Log("YUP");
             return string.Format("{0}{1}", prefix, VariableCount++);
+        }
+
+        public virtual void AddProperties(TemplateContext<HandlerNode> ctx)
+        {
+            
         }
     }
 }

@@ -12,6 +12,15 @@ namespace Invert.uFrame.ECS {
 
     public class CustomActionNode : CustomActionNodeBase, IActionMetaInfo, IDemoVersionLimit
     {
+        public override bool AllowOutputs
+        {
+            get { return false; }
+        }
+        public override bool AllowInputs
+        {
+            get { return false; }
+        }
+    
         private uFrameCategory _category;
         private bool _isAsync;
         private ActionDescription _descriptionAttribute;

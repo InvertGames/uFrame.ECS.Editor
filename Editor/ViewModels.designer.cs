@@ -262,6 +262,32 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class CollectionItemRemovedNodeViewModelBase : CollectionModifiedHandlerNodeViewModel {
+        
+        public CollectionItemRemovedNodeViewModelBase(CollectionItemRemovedNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
+                base(graphItemObject, diagramViewModel) {
+        }
+        
+        public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
+            get {
+                return Invert.Core.GraphDesigner.NodeStyle.Normal;
+            }
+        }
+    }
+    
+    public class CollectionModifiedHandlerNodeViewModelBase : HandlerNodeViewModel {
+        
+        public CollectionModifiedHandlerNodeViewModelBase(CollectionModifiedHandlerNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
+                base(graphItemObject, diagramViewModel) {
+        }
+        
+        public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
+            get {
+                return Invert.Core.GraphDesigner.NodeStyle.Normal;
+            }
+        }
+    }
+    
     public class PropertyChangedNodeViewModelBase : HandlerNodeViewModel {
         
         public PropertyChangedNodeViewModelBase(PropertyChangedNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
@@ -362,6 +388,19 @@ namespace Invert.uFrame.ECS {
         public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
             get {
                 return Invert.Core.GraphDesigner.NodeStyle.Minimalistic;
+            }
+        }
+    }
+    
+    public class CollectionItemAddedNodeViewModelBase : CollectionModifiedHandlerNodeViewModel {
+        
+        public CollectionItemAddedNodeViewModelBase(CollectionItemAddedNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
+                base(graphItemObject, diagramViewModel) {
+        }
+        
+        public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
+            get {
+                return Invert.Core.GraphDesigner.NodeStyle.Normal;
             }
         }
     }
