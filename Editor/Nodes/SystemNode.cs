@@ -10,7 +10,7 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
     
     
-    public class SystemNode : SystemNodeBase {
+    public class SystemNode : SystemNodeBase, IClassNode {
 
         private int _variableCount;
 
@@ -45,10 +45,7 @@ namespace Invert.uFrame.ECS {
 
             base.Validate(errors);
 
-            if (Repository.AllOf<SystemNode>().Any(p => p != this && p.Name == this.Name))
-            {
-                errors.AddError(string.Format("The name {0} is already taken", this.Name), this);
-            }
+           
         }
         
         public IEnumerable<HandlerNode> EventHandlers

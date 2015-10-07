@@ -10,7 +10,7 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
     using Invert.Data;
 
-    public class CustomActionNode : CustomActionNodeBase, IActionMetaInfo, IDemoVersionLimit
+    public class CustomActionNode : CustomActionNodeBase, IActionMetaInfo, IDemoVersionLimit, IClassNode
     {
         public override bool AllowOutputs
         {

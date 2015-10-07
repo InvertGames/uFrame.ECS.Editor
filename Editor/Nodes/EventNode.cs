@@ -9,8 +9,14 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
 
 
-    public class EventNode : EventNodeBase, IEventMetaInfo, IDemoVersionLimit
+    public class EventNode : EventNodeBase, IEventMetaInfo, IDemoVersionLimit, IClassNode
     {
+        public override void Validate(List<ErrorInfo> errors)
+        {
+            base.Validate(errors);
+
+        }
+
         public string Category
         {
             get

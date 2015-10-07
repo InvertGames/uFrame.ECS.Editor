@@ -17,7 +17,8 @@ namespace Invert.uFrame.ECS
         IEnumerable<IMappingsConnectable> GetSystemGroups();
     }
 
-    public class HandlerNode : HandlerNodeBase, ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider, IDemoVersionLimit, ITypeInfo
+    public class HandlerNode : HandlerNodeBase, 
+        ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider, IDemoVersionLimit, ITypeInfo, IClassNode
     {
         public override string Title
         {
@@ -256,7 +257,7 @@ namespace Invert.uFrame.ECS
         public override void Validate(List<ErrorInfo> errors)
         {
             base.Validate(errors);
-            if (Repository.All<HandlerNode>().Any(p => p != this && p.Name == Name))
+            if (Repository.All<HandlerNode>().Any(p => p != this && p.HandlerMethodName == HandlerMethodName))
             {
                 errors.AddError("This name is already being used", this, () =>
                 {

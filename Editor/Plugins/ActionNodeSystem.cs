@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Invert.Core;
 using Invert.Core.GraphDesigner;
+using Invert.Data;
 using Invert.IOC;
 using Invert.Json;
 using UnityEditor;
@@ -28,6 +30,8 @@ namespace Invert.uFrame.ECS
         , IExecuteCommand<ChangeHandlerEventCommand>
         , IContextMenuQuery
         , IExecuteCommand<CreateConverterConnectionCommand>
+        , IDataRecordPropertyChanged
+        , IDataRecordPropertyBeforeChange
 
     {
         public override void Initialize(UFrameContainer container)
@@ -99,6 +103,30 @@ namespace Invert.uFrame.ECS
             node.Graph.AddConnection(result, command.Input);
 
             node.IsSelected = true;
+        }
+
+        public void PropertyChanged(IDataRecord record, string name, object previousValue, object nextValue)
+        {
+        }
+
+        public void BeforePropertyChanged(IDataRecord record, string name, object previousValue, object nextValue)
+        {
+
+            if (record is HandlerNode && name == "CodeHandler")
+            {
+                var items = record.GetCodeGeneratorsForNode(Container.Resolve<DatabaseService>().CurrentConfiguration).ToArray();
+                foreach (var item in items)
+                {
+                    if (item.AlwaysRegenerate)
+                    {
+                        var fullpath = Path.Combine(Application.dataPath, item.RelativeFullPathName);
+                        if (File.Exists(fullpath))
+                        {
+                            File.Delete(fullpath);
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -54,7 +54,7 @@ namespace Invert.uFrame.ECS {
         public string Description { get{return FullName; }set{} }
         public string Identifier { get{return FullName;} set{} }
     }
-    public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem, IDemoVersionLimit {
+    public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem, IDemoVersionLimit, IClassNode {
         private string _customIcon;
 
         public override bool AllowOutputs
@@ -113,10 +113,7 @@ namespace Invert.uFrame.ECS {
                     errors.AddError("All items must have a name.", this);
                 }
             }
-            if (Repository.AllOf<ComponentNode>().Any(p => p != this && p.Name == this.Name))
-            {
-                errors.AddError(string.Format("The name {0} is already taken", this.Name), this);
-            }
+          
         }
         
         public override bool IsAssignableTo(ITypeInfo info)
