@@ -744,7 +744,7 @@ namespace Invert.uFrame.ECS
             get { return GraphItems.OfType<IConnectable>(); }
         }
     }
-
+#if !SERVER
     public class CustomActionViewModel : SequenceItemNodeViewModel
     {
         public CustomActionViewModel(SequenceItemNode graphItemObject, DiagramViewModel diagramViewModel) : base(graphItemObject, diagramViewModel)
@@ -763,7 +763,7 @@ namespace Invert.uFrame.ECS
             set { base.Name = value; }
         }
     }
-
+#endif
     [ActionTitle("Enum Switch"), uFrameCategory("Enums", "Conditions")]
     public class EnumSwitch : CustomAction
     {
@@ -821,6 +821,16 @@ namespace Invert.uFrame.ECS
         public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
+            CodeStatementCollection collection = ctx.CurrentStatements;
+            foreach (var item in Branches)
+            {
+
+                var condition = collection._if("{0} == {1}.{2}", EnumIn.VariableName, EnumIn.VariableType.FullName, item.Name);
+                ctx.PushStatements(condition.TrueStatements);
+                item.WriteInvoke(ctx);
+                ctx.PopStatements();
+                collection = condition.FalseStatements;
+            }
         }
     }
 

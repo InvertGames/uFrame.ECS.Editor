@@ -106,11 +106,16 @@ namespace Invert.uFrame.ECS {
         {
             
             base.Validate(errors);
-            foreach (var item in PersistedItems)
+            
+            foreach (var item in PersistedItems.ToArray())
             {
                 if (string.IsNullOrEmpty(item.Name))
                 {
                     errors.AddError("All items must have a name.", this);
+                }
+                if (PersistedItems.Any(p => p != item && p.Name == item.Name))
+                {
+                    errors.AddError(string.Format("Duplicate items with the same name '{0}'.", item.Name), this);
                 }
             }
           

@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Invert.Core.GraphDesigner.Unity;
 using Invert.Data;
 using Invert.IOC;
@@ -17,7 +17,6 @@ namespace Invert.uFrame.ECS
     using Invert.Core.GraphDesigner;
 
     public class uFrameECS : uFrameECSBase,
-        IPrefabNodeProvider,
         IContextMenuQuery, IQuickAccessEvents, IOnMouseDoubleClickEvent,
         IExecuteCommand<AddSlotInputNodeCommand>,
         IExecuteCommand<NewModuleWorkspace>,
@@ -100,9 +99,9 @@ namespace Invert.uFrame.ECS
            // System.HasSubNode<ComponentNode>();
             container.RegisterDrawer<ItemViewModel<IContextVariable>, ItemDrawer>();
             //container.AddItemFlag<ComponentsReference>("Multiple", UnityEngine.Color.blue);
-            container.AddItemFlag<PropertiesChildItem>("Mapping", UnityEngine.Color.blue);
-            container.AddItemFlag<PropertiesChildItem>("HideInUnityInspector", CachedStyles.GetColor(NodeColor.Azure4));
-            container.AddNodeFlag<EventNode>("Dispatcher");
+            //container.AddItemFlag<PropertiesChildItem>("Mapping", UnityEngine.Color.blue);
+            //container.AddItemFlag<PropertiesChildItem>("HideInUnityInspector", CachedStyles.GetColor(NodeColor.Azure4));
+            //container.AddNodeFlag<EventNode>("Dispatcher");
             //System.HasSubNode<EnumNode>();
             container.Connectable<IContextVariable, IActionIn>();
             container.Connectable<IActionOut, IContextVariable>();
@@ -462,27 +461,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public IEnumerable<QuickAddItem> PrefabNodes(INodeRepository nodeRepository)
-        {
-            foreach (var item in Events)
-            {
-                var item1 = item;
-                var qa = new QuickAddItem(item.Value.Namespace, item.Value.Attribute.Title, _ =>
-                {
-                    var eventNode = new HandlerNode()
-                    {
-                        Meta = item1.Value
 
-                    };
-                    _.Diagram.AddNode(eventNode, _.MousePosition);
-                })
-                {
-
-                };
-                yield return qa;
-            }
-            yield break;
-        }
 
         public static Dictionary<string, EventMetaInfo> Events
         {
@@ -1117,6 +1096,28 @@ namespace Invert.uFrame.ECS
     public class uFrameECSPage : DocumentationPage
     {
         
+    }
+    [AttributeUsage(AttributeTargets.Class)]
+    public class AutoNamespaces : TemplateAttribute
+    {
+        public override int Priority
+        {
+            get { return -3; }
+        }
+
+        public override void Modify(object templateInstance, MemberInfo info, TemplateContext ctx)
+        {
+            var obj = ctx.DataObject as IDiagramNodeItem;
+            if (obj != null)
+                foreach (var item in obj.Graph.NodeItems.OfType<ISystemGroupProvider>().SelectMany(p => p.GetSystemGroups()))
+                {
+                    ctx.TryAddNamespace(item.Namespace);
+                    foreach (var child in item.PersistedItems.OfType<IMemberInfo>())
+                    {
+                        ctx.TryAddNamespace(child.MemberType.Namespace);
+                    }
+                }
+        }
     }
     public class ActionPage : DocumentationPage
     {
