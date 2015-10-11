@@ -156,7 +156,7 @@ public class ActionExplorerWindow : EditorWindow
 {
     private ActionExplorerUISystem _system;
 
-    [MenuItem("uFrame Dev/Action Explorer")]
+    
     public static void Init()
     {
         var window = ScriptableObject.CreateInstance<ActionExplorerWindow>();
