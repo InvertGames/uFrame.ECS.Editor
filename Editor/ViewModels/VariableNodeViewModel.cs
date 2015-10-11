@@ -12,7 +12,21 @@ namespace Invert.uFrame.ECS {
         public VariableNodeViewModel(VariableNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
                 base(graphItemObject, diagramViewModel) {
         }
-
+        public VariableNode Variable
+        {
+            get
+            {
+                return GraphItem as VariableNode;
+            }
+        }
+        public override string Name
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(Variable.VariableName) ?
+                    Variable.VariableName : base.Name;
+            }
+        }
         protected override void CreateContent()
         {
             

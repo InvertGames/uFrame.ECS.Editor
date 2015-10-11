@@ -18,6 +18,7 @@ namespace Invert.uFrame.ECS
     {
 
         private string _variableName;
+        private string _secondTitle;
 
         public override bool AllowMultipleInputs
         {
@@ -33,6 +34,14 @@ namespace Invert.uFrame.ECS
         {
             get { return Color.blue; }
         }
+
+        [JsonProperty, InspectorProperty]
+        public virtual string SecondTitle
+        {
+            get { return _secondTitle; }
+            set { this.Changed("SecondTitle", ref _secondTitle, value); }
+        }
+
 
         public IVariableContextProvider Left
         {
@@ -82,7 +91,8 @@ namespace Invert.uFrame.ECS
         [JsonProperty, InspectorProperty]
         public string VariableName
         {
-            get {
+            get
+            {
                 return _variableName ?? (_variableName = VariableNameProvider.GetNewVariableName(this.GetType().Name));
             }
             set { this.Changed("VariableName", ref _variableName, value); }
@@ -135,12 +145,12 @@ namespace Invert.uFrame.ECS
                 ctx._("while (this.DebugInfo(\"{0}\",\"{1}\", this) == 1) yield return null", LastSequenceItemId, this.Identifier);
                 LastSequenceItemId = this.Identifier;
             }
-          
+
         }
         public virtual void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
         {
-    
-            
+
+
 
         }
 
@@ -160,7 +170,7 @@ namespace Invert.uFrame.ECS
                     }
                 }
                 if (!found)
-                ctx.CurrentDeclaration.Members.Add(field);
+                    ctx.CurrentDeclaration.Members.Add(field);
             }
         }
 
@@ -197,7 +207,7 @@ namespace Invert.uFrame.ECS
             //{
             //    _.CurrentStatements.Add(new CodeAssignStatement(
             //             new CodeSnippetExpression(output.VariableName), new CodeSnippetExpression(actionIn.VariableName)
-               
+
             //        ));
             //}
         }

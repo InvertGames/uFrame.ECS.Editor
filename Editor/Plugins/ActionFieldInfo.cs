@@ -7,13 +7,14 @@ namespace Invert.uFrame.ECS
 {
     public interface IActionFieldInfo : IMemberInfo
     {
-        string Name { get;  }
-        string Description { get;  }
-        bool IsGenericArgument { get;  }
+        string Name { get; }
+        string Description { get; }
+        bool IsGenericArgument { get; }
         bool IsReturn { get; }
-        bool IsByRef { get;  }
+        bool IsByRef { get; }
         FieldDisplayTypeAttribute DisplayType { get; }
         bool IsBranch { get; }
+        bool IsOptional { get; }
     }
 
     public class ActionFieldInfo : IActionFieldInfo
@@ -30,7 +31,8 @@ namespace Invert.uFrame.ECS
 
         public string Description
         {
-            get {
+            get
+            {
                 if (_description == null)
                 {
                     if (MetaAttributes == null) return null;
@@ -44,7 +46,8 @@ namespace Invert.uFrame.ECS
                     {
                         _description = "";
                     }
-                }; return _description;}
+                }; return _description;
+            }
             set { _description = value; }
         }
 
@@ -62,6 +65,8 @@ namespace Invert.uFrame.ECS
 
         public bool IsBranch { get; set; }
 
+        public bool IsOptional { get; set; }
+
         public bool IsGenericArgument { get; set; }
         public bool IsReturn { get; set; }
         public bool IsByRef { get; set; }
@@ -71,7 +76,7 @@ namespace Invert.uFrame.ECS
         public ITypeInfo MemberType { get; set; }
         public IEnumerable<Attribute> GetAttributes()
         {
-           return MetaAttributes;
+            return MetaAttributes;
         }
 
     }

@@ -203,12 +203,14 @@ namespace Invert.uFrame.ECS
                 {
                     foreach (var field in fields)
                     {
+                        var paramOpt = field.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
                         var fieldMetaInfo = new ActionFieldInfo()
                         {
                             MemberType = new SystemTypeInfo(field.FieldType),
                             Name = field.Name,
                             IsBranch = field.FieldType == typeof(Action),
-                            MemberName = field.Name
+                            MemberName = field.Name,
+                            IsOptional = paramOpt != null
                         };
                         if (!SystemTypes.Contains(field.FieldType))
                             SystemTypes.Add(field.FieldType);
@@ -303,8 +305,9 @@ namespace Invert.uFrame.ECS
                                 SystemTypes.Add(parameter.ParameterType);
 
                             var paramDescr = parameter.GetCustomAttributes(typeof(Description), true).OfType<Description>().FirstOrDefault();
-                            if(paramDescr != null) fieldMetaInfo.Description = paramDescr.Text;
-
+                            var paramOpt = parameter.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
+                            if (paramDescr != null) fieldMetaInfo.Description = paramDescr.Text;
+                            if (paramOpt != null) fieldMetaInfo.IsOptional = true;
                             fieldMetaInfo.MetaAttributes =
                                 method.GetCustomAttributes(typeof(FieldDisplayTypeAttribute), true)
                                     .Cast<FieldDisplayTypeAttribute>()
@@ -961,13 +964,19 @@ namespace Invert.uFrame.ECS
 
         private void ShowQuickAccess(MouseEvent mouseEvent)
         {
-
+            if (InvertGraphEditor.CurrentDiagramViewModel != null)
+            {
+                var items = InvertGraphEditor.CurrentDiagramViewModel.SelectedNodeItems.ToArray();
+                foreach (var item in items)
+                {
+                    item.IsSelected = false;
+                }
+            }
             var menu = new SelectionMenu();
 
             QueryInsert(menu);
 
-            InvertApplication.SignalEvent<IShowSelectionMenu>(_ => _.ShowSelectionMenu(menu, mouseEvent.LastMousePosition - mouseEvent.ContextScroll));
-
+            InvertApplication.SignalEvent<IShowSelectionMenu>(_ => _.ShowSelectionMenu(menu, mouseEvent.LastMousePosition - mouseEvent.ContextScroll - new Vector2(20, 0)));
             //            InvertApplication.SignalEvent<IShowSelectionMenu>(_ => _.ShowSelectionMenu(new QuickAccessContext()
             //            {
             //                ContextType = typeof(IInsertQuickAccessContext),

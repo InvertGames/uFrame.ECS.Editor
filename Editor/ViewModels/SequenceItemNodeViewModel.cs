@@ -1,21 +1,25 @@
 using Invert.Core.GraphDesigner;
 
-namespace Invert.uFrame.ECS {
+namespace Invert.uFrame.ECS
+{
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    
-    
-    public class SequenceItemNodeViewModel : SequenceItemNodeViewModelBase {
-        
-        public SequenceItemNodeViewModel(SequenceItemNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
-                base(graphItemObject, diagramViewModel) {
+
+
+    public class SequenceItemNodeViewModel : SequenceItemNodeViewModelBase
+    {
+
+        public SequenceItemNodeViewModel(SequenceItemNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) :
+                base(graphItemObject, diagramViewModel)
+        {
         }
         public SequenceItemNode SequenceNode
         {
             get { return GraphItem as SequenceItemNode; }
         }
+
 
         public override void DataObjectChanged()
         {
@@ -25,10 +29,19 @@ namespace Invert.uFrame.ECS {
         public bool IsBreakpoint { get; set; }
 
 
+        public virtual string SecondTitle
+        {
+            get { return SequenceNode.SecondTitle; }
+        }
+
 
         public override IEnumerable<string> Tags
         {
-            get { yield break; }
+            get
+            {
+                if (!string.IsNullOrEmpty(SecondTitle)) yield return Name;
+                yield break;
+            }
         }
 
         protected override void CreateContent()
@@ -36,7 +49,7 @@ namespace Invert.uFrame.ECS {
             InputConnectorType = NodeConfig.SourceType;
             OutputConnectorType = NodeConfig.SourceType;
             if (AutoAddProperties)
-            AddPropertyFields();
+                AddPropertyFields();
             CreateContentByConfiguration(NodeConfig.GraphItemConfigurations, GraphItem);
 
             foreach (var item in SequenceNode.GraphItems.OfType<IActionIn>())
@@ -78,7 +91,7 @@ namespace Invert.uFrame.ECS {
 
 
             }
-          
+
 
 
         }
