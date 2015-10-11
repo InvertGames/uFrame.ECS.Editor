@@ -272,6 +272,21 @@ namespace Invert.uFrame.ECS
             {
                 errors.AddError(string.Format("Action {0} was not found.", MetaType), this);
             }
+
+            foreach (var var in this.GraphItems.OfType<ActionIn>().Where(_ => !_.ActionFieldInfo.IsOptional))
+            {
+                var connections = var.Inputs.ToArray();
+                if (connections.Length > 1)
+                {
+                    errors.AddError(string.Format("Variable {0} has more than 1 assignments.", var.Title), this);
+                }
+                if (connections.Length < 1)
+                {
+                    errors.AddError(string.Format("Variable {0} is not assigned.", var.Title), this);
+
+                }
+            }
+
         }
 
         public override bool AllowMultipleOutputs
