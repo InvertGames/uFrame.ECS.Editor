@@ -46,6 +46,17 @@ namespace Invert.uFrame.ECS {
             get { return GraphItem as HandlerNode; }
         }
 
+        public override string SubTitle
+        {
+            get
+            {
+                var meta = Handler.Meta as EventMetaInfo;
+                if (meta != null && meta.Dispatcher && meta.SystemType != null)
+                    return base.SubTitle + " with " + meta.SystemType.Name;
+                return base.SubTitle;
+            }
+        }
+
         protected override void CreateContent()
         {
             var inputs = Handler.HandlerInputs;
