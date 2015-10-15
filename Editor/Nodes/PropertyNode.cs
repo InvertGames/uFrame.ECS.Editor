@@ -206,7 +206,10 @@ namespace Invert.uFrame.ECS
 
         IContextVariable IActionIn.Item
         {
-            get { return null; }
+            get { return new ContextVariable(string.Format("typeof({0})", this.Item.FullName))
+            {
+                
+            }; }
         }
     }
 

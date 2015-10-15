@@ -304,16 +304,19 @@ namespace Invert.uFrame.ECS
                             if (!SystemTypes.Contains(parameter.ParameterType))
                                 SystemTypes.Add(parameter.ParameterType);
 
+                            //  Should these be part of the action meta info class ? - Micah Oct-15-2015
                             var paramDescr = parameter.GetCustomAttributes(typeof(Description), true).OfType<Description>().FirstOrDefault();
                             var paramOpt = parameter.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
                             if (paramDescr != null) fieldMetaInfo.Description = paramDescr.Text;
                             if (paramOpt != null) fieldMetaInfo.IsOptional = true;
+
+
                             fieldMetaInfo.MetaAttributes =
-                                method.GetCustomAttributes(typeof(FieldDisplayTypeAttribute), true)
-                                    .Cast<FieldDisplayTypeAttribute>()
-                                    .Where(p => p.ParameterName == parameter.Name).ToArray();
-                            if (!fieldMetaInfo.MetaAttributes.Any())
-                            {
+                                parameter.GetCustomAttributes(typeof (ActionAttribute), true)
+                                    .Cast<ActionAttribute>().ToArray();
+
+                            //if (!fieldMetaInfo.MetaAttributes.Any())
+                            //{
                                 if (parameter.IsOut || parameter.ParameterType == typeof(Action))
                                 {
                                     fieldMetaInfo.DisplayType = new Out(parameter.Name, parameter.Name);
@@ -322,7 +325,7 @@ namespace Invert.uFrame.ECS
                                 {
                                     fieldMetaInfo.DisplayType = new In(parameter.Name, parameter.Name);
                                 }
-                            }
+                            //}
                             actionInfo.ActionFields.Add(fieldMetaInfo);
                         }
                         if (method.ReturnType != typeof(void))

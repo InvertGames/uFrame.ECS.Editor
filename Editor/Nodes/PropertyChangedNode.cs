@@ -89,15 +89,17 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                if (Repository != null && !string.IsNullOrEmpty(this.PropertyInId) && PropertyIn != null && SourceProperty != null)
-                    return string.Format("{0}PropertyChanged", SourceProperty.Source.MemberName);
-                return Graph.CurrentFilter.Name + "PropertyChanged";
+                return this.Name;
+                //if (Repository != null && !string.IsNullOrEmpty(this.PropertyInId) && PropertyIn != null && SourceProperty != null)
+                //    return string.Format("{0}PropertyChanged", SourceProperty.Source.MemberName);
+                //return Graph.CurrentFilter.Name + "PropertyChanged";
             }
         }
         public override string HandlerFilterMethodName
         {
             get
             {
+                return this.Name + "Filter";
                 if (Repository != null && !string.IsNullOrEmpty(this.PropertyInId) && PropertyIn != null && SourceProperty != null)
 	                return string.Format("{0}PropertyChangedFilter", SourceProperty.Source.MemberName, SourceProperty.Source.MemberName);
                 return Graph.CurrentFilter.Name + "PropertyChangedFilter";
@@ -124,27 +126,93 @@ namespace Invert.uFrame.ECS {
             if (SourceProperty == null) 
                 errors.AddError("Source Property not set",this.Node);
         }
+        public override IEnumerable<IMemberInfo> GetMembers()
+        {
+            var source = SourceProperty.Source;
+            if (source == null)
+            {
+                return base.GetMembers();
+            }
+            return base.GetMembers().Concat(new[]
+            {
+                new DefaultMemberInfo()
+                {
+                    MemberName = "NewValue",
+                    MemberType = source.MemberType
+                },
+                new DefaultMemberInfo()
+                {
+                    MemberName = "OldValue",
+                    MemberType = source.MemberType
+                }
+            });
+        }
+
+        public override IEnumerable<IContextVariable> GetContextVariables()
+	    {
+		    if (SourceProperty == null) {
+		    	return base.GetContextVariables();
+		    }
+            var source = SourceProperty.Source;
+            if (source == null)
+            {
+                return base.GetContextVariables();
+            }
+            return base.GetContextVariables().Concat(new[]
+            {
+                new ContextVariable("OldValue")
+                {
+                    Node = this,
+                    VariableType =  source.MemberType,
+                    Source =  source,
+                    Repository = Repository
+                },
+                 new ContextVariable("NewValue")
+                {
+                    Node = this,
+                    VariableType =  source.MemberType,
+                    Source =  source,
+                    Repository = Repository
+                },
+            });
+        }
+        public override void AddProperties(TemplateContext<HandlerNode> ctx)
+        {
+            base.AddProperties(ctx);
+            var source = SourceProperty.Source;
+            if (source == null)
+            {
+                return;
+            }
+            ctx.CurrentDeclaration._public_(source.MemberType.FullName, "OldValue");
+            ctx.CurrentDeclaration._public_(source.MemberType.FullName, "NewValue");
+        }
 
         protected override void WriteHandlerInvoker(CodeMethodInvokeExpression handlerInvoker, CodeMemberMethod handlerFilterMethod)
         {
             base.WriteHandlerInvoker(handlerInvoker, handlerFilterMethod);
             handlerInvoker.Parameters.Add(new CodeSnippetExpression("value"));
         }
-
+        protected override void WriteHandlerSetup(TemplateContext ctx, string name, CodeMemberMethod handlerMethod)
+        {
+            base.WriteHandlerSetup(ctx, name, handlerMethod);
+            ctx._("{0}.OldValue = value.PreviousValue", name);
+            ctx._("{0}.NewValue = value.CurrentValue", name);
+        }
         public override void WriteEventSubscription(TemplateContext ctx, CodeMemberMethod filterMethod, CodeMemberMethod handlerMethod)
         {
             //base.WriteEventSubscription(ctx, filterMethod, handlerMethod);
             var relatedTypeProperty = SourceProperty.Source;
-	        filterMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.MemberType.FullName, "value"));
-            handlerMethod.Parameters.Add(new CodeParameterDeclarationExpression(relatedTypeProperty.MemberType.FullName, "value"));
+	        filterMethod.Parameters.Add(new CodeParameterDeclarationExpression(string.Format("PropertyChangedEvent<{0}>",relatedTypeProperty.MemberType.FullName), "value"));
+            handlerMethod.Parameters.Add(new CodeParameterDeclarationExpression(string.Format("PropertyChangedEvent<{0}>", relatedTypeProperty.MemberType.FullName), "value"));
             if (Immediate)
             {
-                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3}, Group=>{2}, {4})", 
+                ctx._("this.PropertyChangedEvent<{0},{1}>(Group=>{2}Observable, {3}, Group=>{2}, {4})", 
                     EventType, relatedTypeProperty.MemberType.FullName, SourceProperty.Name, filterMethod.Name, OnlyWhenChanged ? "true" : "false");
             }
             else
             {
-                ctx._("this.PropertyChanged<{0},{1}>(Group=>{2}Observable, {3}, null, {4})", EventType, relatedTypeProperty.MemberType.FullName, SourceProperty.Name, filterMethod.Name, OnlyWhenChanged ? "true" : "false");
+                ctx._("this.PropertyChangedEvent<{0},{1}>(Group=>{2}Observable, {3}, null, {4})", EventType, relatedTypeProperty.MemberType.FullName, SourceProperty.Name, filterMethod.Name, OnlyWhenChanged ? "true" : "false");
             }
             
         }

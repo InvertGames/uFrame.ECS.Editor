@@ -452,6 +452,7 @@ namespace Invert.uFrame.ECS
                     ctx._("var {0} = {1}", filter.GetContextItemName(item.Name),
                         filter.MatchAndSelect("data." + item.MappingId));
                     ctx._if("{0} == null", filter.GetContextItemName(item.Name)).TrueStatements._("return");
+                    ctx._if("!{0}.Enabled", filter.GetContextItemName(item.Name)).TrueStatements._("return");
                 }
                 WriteHandlerInvoker(handlerInvoker, handlerFilterMethod);
                 ctx.CurrentStatements.Add(handlerInvoker);
@@ -464,6 +465,7 @@ namespace Invert.uFrame.ECS
                 if (this.EntityGroup.Item != null)
                 {
                     var item = this.BeginWriteLoop(ctx, this.EntityGroup.Item);
+                    ctx._if("!{0}.Enabled",item).TrueStatements._("continue");
                     handlerInvoker.Parameters.Add(new CodeSnippetExpression(item));
                     ctx.CurrentStatements.Add(handlerInvoker);
                     this.EndWriteLoop(ctx);

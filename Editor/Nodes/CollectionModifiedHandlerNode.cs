@@ -98,9 +98,7 @@ namespace Invert.uFrame.ECS {
             get
             {
                 return Name;
-                if (Repository != null && SourceProperty.Source != null)
-                    return string.Format("{0}ItemAdded", SourceProperty.Source.MemberName);
-                return Graph.CurrentFilter.Name + "ItemAdded";
+
             }
         }
         public override string HandlerFilterMethodName
@@ -108,31 +106,9 @@ namespace Invert.uFrame.ECS {
             get
             {
                 return Name + "Filter";
-                if (Repository != null && SourceProperty.Source != null)
-                    return string.Format("{0}ItemAddedFilter", SourceProperty.Source.MemberName);
-                return Graph.CurrentFilter.Name + "ItemAddedFilter";
+
             }
         }
-        //public ActionBranch Added
-        //{
-        //    get { return GetSlot<ActionBranch>(ref _added, "Added"); }
-        //}
-
-        //public ActionBranch Removed
-        //{
-        //    get { return GetSlot<ActionBranch>(ref _removed, "Removed"); }
-        //}
-
-        //public ActionBranch Reset
-        //{
-        //    get { return GetSlot<ActionBranch>(ref _reset, "Reset"); }
-        //}
-        //public ActionBranch Moved
-        //{
-        //    get { return GetSlot<ActionBranch>(ref _moved, "Moved"); }
-        //}
-
-
 
 
         public override string EventType
@@ -162,11 +138,6 @@ namespace Invert.uFrame.ECS {
             handlerInvoker.Parameters.Add(new CodeSnippetExpression("item"));
         }
 
-        public override void WriteEventSubscription(TemplateContext ctx, CodeMemberMethod filterMethod, CodeMemberMethod handlerMethod)
-        {
-     
-
-        }
 
         public override bool IsLoop
         {

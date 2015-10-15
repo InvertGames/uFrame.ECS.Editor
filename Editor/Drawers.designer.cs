@@ -65,6 +65,13 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class FunctionNodeDrawerBase : GenericNodeDrawer<FunctionNode,FunctionNodeViewModel> {
+        
+        public FunctionNodeDrawerBase(FunctionNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
     public class BoolNodeDrawerBase : GenericNodeDrawer<BoolNode,BoolNodeViewModel> {
         
         public BoolNodeDrawerBase(BoolNodeViewModel viewModel) : 

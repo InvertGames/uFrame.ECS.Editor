@@ -33,6 +33,8 @@ namespace Invert.uFrame.ECS {
         
         private Invert.Core.GraphDesigner.NodeConfig<ActionGroupNode> _ActionGroup;
         
+        private Invert.Core.GraphDesigner.NodeConfig<FunctionNode> _Function;
+        
         private Invert.Core.GraphDesigner.NodeConfig<BoolNode> _Bool;
         
         private Invert.Core.GraphDesigner.NodeConfig<ModuleNode> _Module;
@@ -165,6 +167,15 @@ namespace Invert.uFrame.ECS {
             }
             set {
                 _ActionGroup = value;
+            }
+        }
+        
+        public Invert.Core.GraphDesigner.NodeConfig<FunctionNode> Function {
+            get {
+                return _Function;
+            }
+            set {
+                _Function = value;
             }
         }
         
@@ -537,6 +548,8 @@ namespace Invert.uFrame.ECS {
             String.Color(NodeColor.Purple);
             ActionGroup = container.AddNode<ActionGroupNode,ActionGroupNodeViewModel,ActionGroupNodeDrawer>("ActionGroup");
             ActionGroup.Color(NodeColor.Red);
+            Function = container.AddNode<FunctionNode,FunctionNodeViewModel,FunctionNodeDrawer>("Function");
+            Function.Color(NodeColor.Lightgoldenrod4);
             Bool = container.AddNode<BoolNode,BoolNodeViewModel,BoolNodeDrawer>("Bool");
             Bool.Color(NodeColor.Purple);
             Module = container.AddGraph<ModuleGraph, ModuleNode>("ModuleGraph");
@@ -596,10 +609,10 @@ namespace Invert.uFrame.ECS {
             Event.Color(NodeColor.Green);
             Event.HasSubNode<ActionNode>();
             Event.HasSubNode<UserMethodNode>();
-            Event.HasSubNode<ComponentNode>();
             Literal = container.AddNode<LiteralNode,LiteralNodeViewModel,LiteralNodeDrawer>("Literal");
             Literal.Color(NodeColor.Purple);
             Component = container.AddNode<ComponentNode,ComponentNodeViewModel,ComponentNodeDrawer>("Component");
+            Component.Inheritable();
             Component.Color(NodeColor.Yellow);
             Int = container.AddNode<IntNode,IntNodeViewModel,IntNodeDrawer>("Int");
             Int.Color(NodeColor.Purple);
@@ -635,11 +648,14 @@ namespace Invert.uFrame.ECS {
             Handler.HasSubNode<StringNode>();
             System = container.AddGraph<SystemGraph, SystemNode>("SystemGraph");
             System.Color(NodeColor.Blue);
+            System.HasSubNode<CollectionItemAddedNode>();
+            System.HasSubNode<FunctionNode>();
             System.HasSubNode<PropertyChangedNode>();
             System.HasSubNode<ComponentCreatedNode>();
+            System.HasSubNode<CustomActionNode>();
             System.HasSubNode<HandlerNode>();
+            System.HasSubNode<EventNode>();
             System.HasSubNode<ComponentDestroyedNode>();
-            System.HasSubNode<CollectionItemAddedNode>();
             System.HasSubNode<CollectionItemRemovedNode>();
             Entity = container.AddNode<EntityNode,EntityNodeViewModel,EntityNodeDrawer>("Entity");
             Entity.Color(NodeColor.Gray);

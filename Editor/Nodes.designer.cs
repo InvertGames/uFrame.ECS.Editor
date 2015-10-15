@@ -164,6 +164,24 @@ namespace Invert.uFrame.ECS {
     public partial interface IActionGroupConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
+    public class FunctionNodeBase : SequenceItemNode {
+        
+        public override bool AllowMultipleInputs {
+            get {
+                return true;
+            }
+        }
+        
+        public override bool AllowMultipleOutputs {
+            get {
+                return true;
+            }
+        }
+    }
+    
+    public partial interface IFunctionConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+    }
+    
     public class BoolNodeBase : LiteralNode {
         
         public override bool AllowMultipleInputs {
@@ -641,7 +659,7 @@ namespace Invert.uFrame.ECS {
     public partial interface ILiteralConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
-    public class ComponentNodeBase : Invert.Core.GraphDesigner.GenericNode, Invert.Core.GraphDesigner.IClassTypeNode, IRequireConnectable, IComponentsConnectable {
+    public class ComponentNodeBase : Invert.Core.GraphDesigner.GenericInheritableNode, Invert.Core.GraphDesigner.IClassTypeNode, IRequireConnectable, IComponentsConnectable {
         
         public virtual string ClassName {
             get {
@@ -650,12 +668,6 @@ namespace Invert.uFrame.ECS {
         }
         
         public override bool AllowMultipleInputs {
-            get {
-                return true;
-            }
-        }
-        
-        public override bool AllowMultipleOutputs {
             get {
                 return true;
             }

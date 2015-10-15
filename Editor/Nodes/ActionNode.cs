@@ -407,10 +407,11 @@ namespace Invert.uFrame.ECS
                 var varStatement = ctx.CurrentDeclaration._private_(this.Meta.FullName, this.VarName);
                 varStatement.InitExpression = new CodeObjectCreateExpression(this.Meta.FullName);
 
-                foreach (var item in this.GraphItems.OfType<ActionIn>())
+                foreach (var item in this.GraphItems.OfType<IActionIn>())
                 {
                     var contextVariable = item.Item;
-                    if (contextVariable == null) continue;
+                    if (contextVariable == null)
+                        continue;
                     ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
                 }
 
@@ -511,7 +512,7 @@ namespace Invert.uFrame.ECS
                 foreach (var item in Meta.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is In))
                 {
                     IActionIn variableIn;
-                    variableIn = item.IsGenericArgument ? (IActionIn)new TypeSelection() : new ActionIn();
+                    variableIn = CreateInput(item);
                     variableIn.Node = this;
                     variableIn.Repository = Repository;
                     variableIn.ActionFieldInfo = item;
@@ -522,21 +523,35 @@ namespace Invert.uFrame.ECS
 
         }
 
+        protected virtual IActionIn CreateInput(IActionFieldInfo item)
+        {
+            var att = item.GetAttribute<ActionTypeSelection>();
+            if (item.IsGenericArgument || att != null)
+            {
+
+                var typeSelection = new TypeSelection()
+                {
+                    Name = item.Name
+                };
+     
+                if (att != null)
+                {
+                    var assignableTo = new SystemTypeInfo(att.AssignableTo);
+                    typeSelection.Filter = info => info.IsAssignableTo(assignableTo);
+                }
+
+                return typeSelection;
+            }
+               
+            return new ActionIn();
+        }
+
         public IActionOut[] OutputVars
         {
             get { return _outputVars ?? (_outputVars = GetOutputVars().ToArray()); }
             set { _outputVars = value; }
         }
 
-        //public IEnumerable<IActionOut> GetOutsWithType<TType>()
-        //{
-        //    return OutputVars.Where(p => p.ActionFieldInfo.MemberType.IsAssignableFrom(typeof(TType)));
-        //}
-
-        //public IEnumerable<IActionIn> GetInsWithType<TType>()
-        //{
-        //    return InputVars.Where(p => p.ActionFieldInfo.Type.IsAssignableFrom(typeof(TType)));
-        //}
 
         private IEnumerable<IActionOut> GetOutputVars()
         {
@@ -1047,6 +1062,7 @@ namespace Invert.uFrame.ECS
                         yield return item;
                     }
                 }
+                yield break;
             }
         
             var action = this.Node as IVariableContextProvider;

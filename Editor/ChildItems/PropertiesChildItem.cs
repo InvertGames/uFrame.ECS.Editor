@@ -20,7 +20,10 @@ namespace Invert.uFrame.ECS {
 
         public override Type Type
         {
-            get { return base.Type ?? typeof(int); }
+            get
+            {
+                return base.Type ?? typeof(int);
+            }
         }
 
         [JsonProperty]
@@ -48,7 +51,7 @@ namespace Invert.uFrame.ECS {
             set { this["Mapping"] = value; }
         }
 
-        
+
         [InspectorProperty]
         public bool HideInUnityInspector
         {
@@ -62,6 +65,8 @@ namespace Invert.uFrame.ECS {
             {
                 yield return new uFrameEventMapping(this.Name);
             }
+          
+
         }
     }
     

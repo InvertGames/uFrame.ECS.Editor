@@ -18,6 +18,22 @@ namespace Invert.uFrame.ECS
         public bool IsBranch { get { return false; } }
 
         private bool _isOptional;
+        [InspectorProperty]
+        public bool IsTypeSelection
+        {
+            get { return this["IsTypeSelection"]; }
+            set { this["IsTypeSelection"] = value; }
+        }
+
+        public override string RelatedTypeName
+        {
+            get
+            {
+                if (IsTypeSelection)
+                    return "System.Type";
+                return base.RelatedTypeName;
+            }
+        }
 
         public bool IsOptional
         {
@@ -25,6 +41,16 @@ namespace Invert.uFrame.ECS
             set { this.Changed("IsOptional", ref _isOptional, value); }
         }
 
+        public override IEnumerable<Attribute> GetAttributes()
+        {
+            if (IsTypeSelection)
+            {
+                yield return new ActionTypeSelection()
+                { 
+                    AssignableTo = Type
+                };
+            }
+        }
     }
 
     public partial interface IInputsConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable

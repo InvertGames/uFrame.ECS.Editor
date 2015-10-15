@@ -59,7 +59,7 @@ namespace Invert.uFrame.ECS {
 
         public override bool AllowOutputs
         {
-            get { return false; }
+	        get { return true; }
         }
     
         public IEnumerable<ComponentNode> WithAnyComponents
