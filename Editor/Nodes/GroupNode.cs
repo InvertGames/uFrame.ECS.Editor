@@ -40,6 +40,14 @@ namespace Invert.uFrame.ECS {
             
         }
 
+        public override void Validate(List<ErrorInfo> errors)
+        {
+            base.Validate(errors);
+            if (!SelectComponents.Any())
+            {
+                errors.AddError(string.Format("No components selected for {0} group!", this.Name),this);
+            }
+        }
 
         public IEnumerable<ComponentNode> SelectComponents { get { return Require.Select(p => p.SourceItem).OfType<ComponentNode>(); } }
 

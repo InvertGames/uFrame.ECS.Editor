@@ -27,6 +27,7 @@ namespace Invert.Core.GraphDesigner
         IExecuteCommand<ContinueCommand>,
         IExecuteCommand<StepCommand>,
         IExecuteCommand<ToggleBreakpointCommand>,
+        IDataRecordRemoved,
         IContextMenuQuery,
         IToolbarQuery //,
         //IDrawInspector
@@ -346,6 +347,16 @@ namespace Invert.Core.GraphDesigner
                 return InvertGraphEditor.Prefs.GetBool("UFRAME_DEBUG_MODE", true);
             }
             set { InvertGraphEditor.Prefs.SetBool("UFRAME_DEBUG_MODE", value); }
+        }
+
+        public void RecordRemoved(IDataRecord record)
+        {
+            var srecord = record as SequenceItemNode;
+
+            if (srecord != null && srecord.BreakPoint != null)
+            {
+                Container.Resolve<IRepository>().Remove(srecord.BreakPoint);
+            }
         }
     }
 
