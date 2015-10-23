@@ -2,7 +2,7 @@ using Invert.Core.GraphDesigner;
 
 namespace Invert.uFrame.ECS
 {
-    public interface IHandlerNodeVisitor
+    public interface ISequenceVisitor
     {
         void Visit(IDiagramNodeItem item);
         

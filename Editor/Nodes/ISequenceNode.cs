@@ -7,9 +7,11 @@ namespace Invert.uFrame.ECS
     {
         bool CanGenerate { get; }
         string HandlerMethodName { get; }
-        IEnumerable<IFilterInput> FilterInputs { get; }
-        string EventType { get; set; }
-        void Accept(IHandlerNodeVisitor csharpVisitor);
-        SequenceItemNode Right { get; }
+      //  IEnumerable<IFilterInput> FilterInputs { get; }
+      //  string EventType { get; set; }
+        void Accept(ISequenceVisitor csharpVisitor);
+        //SequenceItemNode Right { get; }
+
+        SequenceItemNode StartNode { get; set; }
     }
 }

@@ -247,6 +247,13 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class SequenceContainerNodeDrawerBase : GenericNodeDrawer<SequenceContainerNode,SequenceContainerNodeViewModel> {
+        
+        public SequenceContainerNodeDrawerBase(SequenceContainerNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
     public class AllTrueNodeDrawerBase : GenericNodeDrawer<AllTrueNode,AllTrueNodeViewModel> {
         
         public AllTrueNodeDrawerBase(AllTrueNodeViewModel viewModel) : 

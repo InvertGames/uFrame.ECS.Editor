@@ -85,6 +85,8 @@ namespace Invert.uFrame.ECS {
         
         private Invert.Core.GraphDesigner.NodeConfig<Vector2Node> _Vector2;
         
+        private Invert.Core.GraphDesigner.NodeConfig<SequenceContainerNode> _SequenceContainer;
+        
         private Invert.Core.GraphDesigner.NodeConfig<AllTrueNode> _AllTrue;
         
         private Invert.Core.GraphDesigner.NodeConfig<StartTimerNode> _StartTimer;
@@ -404,6 +406,15 @@ namespace Invert.uFrame.ECS {
             }
         }
         
+        public Invert.Core.GraphDesigner.NodeConfig<SequenceContainerNode> SequenceContainer {
+            get {
+                return _SequenceContainer;
+            }
+            set {
+                _SequenceContainer = value;
+            }
+        }
+        
         public Invert.Core.GraphDesigner.NodeConfig<AllTrueNode> AllTrue {
             get {
                 return _AllTrue;
@@ -622,6 +633,8 @@ namespace Invert.uFrame.ECS {
             ComponentDestroyed.Color(NodeColor.Red);
             Vector2 = container.AddNode<Vector2Node,Vector2NodeViewModel,Vector2NodeDrawer>("Vector2");
             Vector2.Color(NodeColor.Purple);
+            SequenceContainer = container.AddNode<SequenceContainerNode,SequenceContainerNodeViewModel,SequenceContainerNodeDrawer>("SequenceContainer");
+            SequenceContainer.Color(NodeColor.Red);
             AllTrue = container.AddNode<AllTrueNode,AllTrueNodeViewModel,AllTrueNodeDrawer>("AllTrue");
             AllTrue.Color(NodeColor.Orange);
             StartTimer = container.AddNode<StartTimerNode,StartTimerNodeViewModel,StartTimerNodeDrawer>("StartTimer");
@@ -649,12 +662,13 @@ namespace Invert.uFrame.ECS {
             System = container.AddGraph<SystemGraph, SystemNode>("SystemGraph");
             System.Color(NodeColor.Blue);
             System.HasSubNode<CollectionItemAddedNode>();
-            System.HasSubNode<FunctionNode>();
+            System.HasSubNode<ComponentNode>();
             System.HasSubNode<PropertyChangedNode>();
             System.HasSubNode<ComponentCreatedNode>();
             System.HasSubNode<CustomActionNode>();
             System.HasSubNode<HandlerNode>();
             System.HasSubNode<EventNode>();
+            System.HasSubNode<GroupNode>();
             System.HasSubNode<ComponentDestroyedNode>();
             System.HasSubNode<CollectionItemRemovedNode>();
             Entity = container.AddNode<EntityNode,EntityNodeViewModel,EntityNodeDrawer>("Entity");

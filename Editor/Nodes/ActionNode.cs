@@ -30,7 +30,7 @@ namespace Invert.uFrame.ECS
     }
 
 
-    public class ContextVariable : GenericTypedChildItem, IContextVariable
+    public class ContextVariable : GenericTypedChildItem, IContextVariable, IDynamicDataRecord
     {
 
         private string _memberExpression;
@@ -137,7 +137,7 @@ namespace Invert.uFrame.ECS
             var sourceNode = VariableType;
             if (sourceNode != null)
             {
-                foreach (var item in sourceNode.GetMembers())
+                foreach (var item in sourceNode.GetAllMembers())
                 {
                     yield return new ContextVariable(VariableName, item.MemberName)
                     {
@@ -222,7 +222,7 @@ namespace Invert.uFrame.ECS
     }
     public interface ICodeOutput : IVariableContextProvider
     {
-        void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx);
+        void WriteCode(ISequenceVisitor visitor, TemplateContext ctx);
     }
 
     public interface IVariableNameProvider
@@ -320,8 +320,9 @@ namespace Invert.uFrame.ECS
             get { return VariableName; }
         }
         
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
+          
             if (this.Meta == null)
             {
                 ctx._comment("Skipping {0}", this.Name);
@@ -337,14 +338,7 @@ namespace Invert.uFrame.ECS
                 var codeMethodReferenceExpression = new CodeMethodReferenceExpression(
                     new CodeSnippetExpression(methodInfo.SystemType.FullName),
                     methodInfo.Method.Name);
-                //var genericInputVars = this.GraphItems.OfType<TypeSelection>().Where(p => p.ActionFieldInfo.IsGenericArgument && p.Item != null).Select(p => p.Item.TypeName).ToArray();
-                //if (genericInputVars.Length > 0)
-                //{
-                //    codeMethodReferenceExpression = new CodeMethodReferenceExpression(
-                //       new CodeSnippetExpression(this.Meta.FullName),
-                //       string.Format("{0}<{1}>", methodInfo.TypeName, string.Join(",", genericInputVars)));
 
-                //}
                 var _currentActionInvoker =
                     new CodeMethodInvokeExpression(
                         codeMethodReferenceExpression);
@@ -428,8 +422,15 @@ namespace Invert.uFrame.ECS
                     else
                     ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
                 }
-            
-                ctx._("{0}.Execute()", varStatement.Name);
+                if (DebugSystem.IsDebugMode)
+                {
+                    ctx._("yield return System.StartCoroutine({0}.Perform())", varStatement.Name);
+                }
+                else
+                {
+                    ctx._("{0}.Execute()", varStatement.Name);
+                }
+                
 
                 WriteActionOutputs(ctx);
 
@@ -509,7 +510,7 @@ namespace Invert.uFrame.ECS
                 //    yield return variableIn;
                 //}
 
-                foreach (var item in Meta.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is In))
+                foreach (var item in Meta.GetAllMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is In))
                 {
                     IActionIn variableIn;
                     variableIn = CreateInput(item);
@@ -558,7 +559,7 @@ namespace Invert.uFrame.ECS
             var meta = Meta;
             if (meta != null)
             {
-                foreach (var item in Meta.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out))
+                foreach (var item in Meta.GetAllMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out))
                 {
                     if (item.IsBranch)
                     {
@@ -606,6 +607,7 @@ namespace Invert.uFrame.ECS
             {
                 WriteActionOutput(_, output);
             }
+        
         }
 
         private void WriteActionOutput(TemplateContext _, IActionOut output)
@@ -623,6 +625,13 @@ namespace Invert.uFrame.ECS
                     new CodeSnippetExpression(actionIn.VariableName),
                     new CodeSnippetExpression(output.VariableName)));
             }
+            var outputChildItem = output.OutputTo<OutputsChildItem>();
+            if (outputChildItem != null)
+            {
+                _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(outputChildItem.Name),
+                    new CodeSnippetExpression(output.VariableName)));
+            }
+
         }
 
         public void RecordInserted(IDataRecord record)
@@ -708,10 +717,15 @@ namespace Invert.uFrame.ECS
     }
 
 
-    public class CustomAction : SequenceItemNode, IConnectableProvider
+    public class CustomAction : SequenceItemNode, IConnectableProvider, IDataRecordRemoved
     {
         private string _title;
         private string _description;
+        public override void RecordRemoved(IDataRecord record)
+        {
+            base.RecordRemoved(record);
+         
+        }
 
         public override string Title
         {
@@ -799,6 +813,12 @@ namespace Invert.uFrame.ECS
     {
         private VariableIn _enumIn;
         private ActionBranch[] _branches;
+        public override void RecordRemoved(IDataRecord record)
+        {
+            base.RecordRemoved(record);
+        
+            
+        }
 
         public VariableIn EnumIn
         {
@@ -841,14 +861,14 @@ namespace Invert.uFrame.ECS
         {
             get
             {
-                return _branches ?? (_branches = EnumIn.Item == null ? null : EnumIn.Item.VariableType.GetMembers()
+                return _branches ?? (_branches = EnumIn.Item == null ? null : EnumIn.Item.VariableType.GetAllMembers()
                           .Select(p => CreateSlot<ActionBranch>(p.MemberName))
                           .ToArray());
             }
             set { _branches = value; }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             CodeStatementCollection collection = ctx.CurrentStatements;
@@ -862,6 +882,8 @@ namespace Invert.uFrame.ECS
                 collection = condition.FalseStatements;
             }
         }
+
+
     }
 
     //[ActionTitle("Wait For End Of Frame"), uFrameCategory("Yield", "Wait","Timers")]
@@ -915,7 +937,7 @@ namespace Invert.uFrame.ECS
 
     //}
 
-    public class ActionIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn
+    public class ActionIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn, IDynamicDataRecord
     {
         private string _variableName;
 
@@ -1176,7 +1198,7 @@ namespace Invert.uFrame.ECS
 
         }
     }
-    public class VariableIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn
+    public class VariableIn : SelectionFor<IContextVariable, VariableSelection>, IActionIn, IDynamicDataRecord
     {
         public bool DoesAllowInputs;
         private ITypeInfo _variableType;
@@ -1192,7 +1214,8 @@ namespace Invert.uFrame.ECS
 
         public override IContextVariable Item
         {
-            get { return base.Item; } 
+            get { return base.Item; }
+            set { base.Item = value; }
         }
 
         public IVariableContextProvider Handler
@@ -1269,11 +1292,11 @@ namespace Invert.uFrame.ECS
 
         }
     }
-    public class GroupSelection : InputSelectionValue
+    public class GroupSelection : InputSelectionValue, IDynamicDataRecord
     {
 
     }
-    public class VariableSelection : InputSelectionValue
+    public class VariableSelection : InputSelectionValue, IDynamicDataRecord
     {
 
     }
@@ -1282,7 +1305,7 @@ namespace Invert.uFrame.ECS
     {
         
     }
-    public class ActionOut : MultiOutputSlot<IContextVariable>, IActionOut, IContextVariable
+    public class ActionOut : MultiOutputSlot<IContextVariable>, IActionOut, IContextVariable, IDynamicDataRecord
     {
         private string _variableName;
         private ITypeInfo _variableType;
@@ -1396,7 +1419,7 @@ namespace Invert.uFrame.ECS
         public static IEnumerable<IContextVariable> GetPropertyDescriptions(this ITypeInfo type, IContextVariable parent)
         {
             if (parent == null) throw new ArgumentNullException("parent");
-            foreach (var item in type.GetMembers())
+            foreach (var item in type.GetAllMembers())
             {
                 yield return new ContextVariable(parent.VariableName, item.MemberName)
                 {

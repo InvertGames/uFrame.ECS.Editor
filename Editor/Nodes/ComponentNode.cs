@@ -47,6 +47,11 @@ namespace Invert.uFrame.ECS {
         {
             return ListType.IsAssignableTo(info);
         }
+        
+        public ITypeInfo BaseTypeInfo
+        {
+            get { return ListType.BaseTypeInfo; }
+        }
 
         public string Title { get { return TypeName; } }
         public string Group { get { return ListType.Namespace; } }
@@ -70,6 +75,11 @@ namespace Invert.uFrame.ECS {
         public IEnumerable<ComponentNode> SelectComponents
         {
             get { yield return this; }
+        }
+
+        public override ITypeInfo BaseTypeInfo
+        {
+            get { return (SystemTypeInfo)uFrameECS.EcsComponentType; }
         }
 
         public string GetContextItemName(string mappingId)
@@ -142,7 +152,7 @@ namespace Invert.uFrame.ECS {
             {
                 Node = this,
 	            Source = null,
-                VariableType = new SystemTypeInfo(uFrameECS.EcsComponentType, this),
+                VariableType = this,
                 Repository = this.Repository,
                 //TypeInfo =  typeof(MonoBehaviour)
             };

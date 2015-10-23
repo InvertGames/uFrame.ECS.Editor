@@ -12,6 +12,26 @@ namespace Invert.uFrame.ECS {
 
     public class CustomActionNode : CustomActionNodeBase, IActionMetaInfo, IDemoVersionLimit, IClassNode
     {
+        public override IEnumerable<IContextVariable> GetContextVariables()
+        {
+            yield return new ContextVariable("this")
+            {
+
+                Node = this,
+                VariableType = this,
+                Repository = this.Repository,
+            };
+            foreach (var item in this.Inputs)
+            {
+                yield return new ContextVariable(item.Name)
+                {
+                    VariableType = item.MemberType,
+                    Node = this,
+                    Repository = Repository
+                };
+            }
+            //return base.GetContextVariables();
+        }
         public override bool AllowOutputs
         {
             get { return false; }
@@ -24,6 +44,7 @@ namespace Invert.uFrame.ECS {
         private uFrameCategory _category;
         private bool _isAsync;
         private ActionDescription _descriptionAttribute;
+        private bool _codeAction;
 
         [JsonProperty,InspectorProperty]
         public string ActionTitle { get; set; }
@@ -51,12 +72,48 @@ namespace Invert.uFrame.ECS {
             set { _descriptionAttribute = value; }
         }
 
+        [InspectorProperty, JsonProperty, NodeFlag("Code Action")]
+        public bool CodeAction
+        {
+            get { return _codeAction; }
+            set { this.Changed("CodeAction", ref _codeAction, value); }
+        }
 
         [InspectorProperty, JsonProperty]
         public bool IsAsync
         {
             get { return _isAsync; }
             set { this.Changed("IsAsync", ref _isAsync, value); }
+        }
+
+        public override void Accept(ISequenceVisitor csharpVisitor)
+        {
+           
+            base.Accept(csharpVisitor);
+            csharpVisitor.Visit(this);
+        }
+
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
+        {
+            base.WriteCode(visitor, ctx);
+            foreach (var item in Outputs)
+            {
+                var v = item.InputFrom<IContextVariable>();
+                ctx._("{0} = {1}", item.Name, v.VariableName);
+            }
+
+        }
+
+        public override void WriteActionOutputs(TemplateContext _)
+        {
+            base.WriteActionOutputs(_);
+            foreach (var item in Outputs)
+            {
+                var v = item.InputFrom<IContextVariable>();
+                _._("{0} = {1}",item.Name, v.VariableName);
+            }
+
+
         }
     }
     

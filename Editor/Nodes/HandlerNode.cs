@@ -20,6 +20,8 @@ namespace Invert.uFrame.ECS
     public class HandlerNode : HandlerNodeBase, 
         ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider, IDemoVersionLimit, ITypeInfo, IClassNode
     {
+       
+
         public override string Title
         {
             get { return Name; }
@@ -79,7 +81,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public virtual bool CanGenerate
+        public override bool CanGenerate
         {
             get { return Meta != null; }
         }
@@ -104,7 +106,7 @@ namespace Invert.uFrame.ECS
               yield return new DefaultMemberInfo()
               {
                   MemberName = input.Name,
-                  MemberType = new SystemTypeInfo(uFrameECS.EcsComponentType, filter as ITypeInfo)
+                  MemberType = filter as ITypeInfo
               };
             }
 
@@ -131,7 +133,7 @@ namespace Invert.uFrame.ECS
             set { MetaType = value; }
         }
 
-        public virtual IEnumerable<IFilterInput> FilterInputs
+        public IEnumerable<IFilterInput> FilterInputs
         {
             get
             {
@@ -186,7 +188,7 @@ namespace Invert.uFrame.ECS
             set { _contextInputs = value; }
         }
 
-        public virtual string HandlerMethodName
+        public override string HandlerMethodName
         {
             get { return Name + "Handler"; }
         }
@@ -266,13 +268,13 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public void Accept(IHandlerNodeVisitor visitor)
+        public override void Accept(ISequenceVisitor visitor)
         {
             foreach (var item in HandlerInputs)
             {
                 visitor.Visit(item);
             }
-            visitor.Visit(this.Right);
+            base.Accept(visitor);
         }
 
         public virtual string BeginWriteLoop(TemplateContext ctx, IMappingsConnectable connectable)
@@ -299,22 +301,23 @@ namespace Invert.uFrame.ECS
 
         public override IEnumerable<IContextVariable> GetContextVariables()
         {
+            var evtNode = Meta;
             yield return new ContextVariable("this")
             {
-                Repository = this.Repository,
+              
                 Node = this,
                 VariableType = this,
+                Repository = this.Repository,
             };
-            var evtNode = Meta;
             if (evtNode != null && !evtNode.SystemEvent)
             {
                
                 yield return new ContextVariable("Event")
                 {
-                    Repository = this.Repository,
+                  
                     Node = this,
                     VariableType = Meta,
-
+                    Repository = this.Repository,
                 };
 
                 //foreach (var child in evtNode.Members)
@@ -353,7 +356,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             VariableNode.VariableCount = 0;
             var handlerMethod = WriteHandler(ctx);
@@ -482,7 +485,7 @@ namespace Invert.uFrame.ECS
             return handlerFilterMethod;
         }
 
-        public virtual void WriteSetupCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public virtual void WriteSetupCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             WriteCode(visitor, ctx);
         }
@@ -555,6 +558,7 @@ namespace Invert.uFrame.ECS
 
         private int _variableCount;
         private bool _codeHandler;
+
 
 
         [JsonProperty]

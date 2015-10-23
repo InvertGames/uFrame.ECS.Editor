@@ -9,7 +9,7 @@ namespace Invert.uFrame.ECS
     using Invert.Core.GraphDesigner;
     using Invert.Data;
 
-    public class BranchesChildItem : BranchesChildItemBase, IActionFieldInfo
+    public class BranchesChildItem : BranchesChildItemBase, IActionFieldInfo, IActionIn
     {
         public string MemberName { get { return this.Name; } }
         public ITypeInfo MemberType { get { return new SystemTypeInfo(typeof(Action)); } }
@@ -29,6 +29,25 @@ namespace Invert.uFrame.ECS
             get { return false; }
         }
 
+        public IActionFieldInfo ActionFieldInfo { get; set; }
+
+        public string VariableName
+        {
+            get { return this.Name; }
+        }
+
+        public ITypeInfo VariableType
+        {
+            get
+            {
+                return new SystemTypeInfo(typeof(Action));
+            }
+        }
+
+        public IContextVariable Item
+        {
+            get { return null; }
+        }
     }
 
     public partial interface IBranchesConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable

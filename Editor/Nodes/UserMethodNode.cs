@@ -11,7 +11,7 @@ namespace Invert.uFrame.ECS {
     
     public class UserMethodNode : UserMethodNodeBase {
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             //base.WriteCode(ctx);
             var handlerMethod = ctx.CurrentDeclaration.protected_virtual_func(typeof(void), Name, Name.ToLower());

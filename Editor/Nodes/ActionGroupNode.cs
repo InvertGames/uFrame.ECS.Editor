@@ -15,7 +15,7 @@ namespace Invert.uFrame.ECS {
             get { return Color.blue; }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             //base.WriteCode(visitor, ctx);
 

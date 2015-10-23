@@ -4,7 +4,7 @@ using Invert.Core.GraphDesigner;
 
 namespace Invert.uFrame.ECS
 {
-    public class HandlerNodeVisitor : IHandlerNodeVisitor
+    public class SequenceVisitor : ISequenceVisitor
     {
         private List<SequenceItemNode> outputtedNodes = new List<SequenceItemNode>();
 
@@ -219,9 +219,9 @@ namespace Invert.uFrame.ECS
             
         }
 
-        public virtual void VisitHandler(ISequenceNode handlerNode)
+        public virtual void VisitSequenceContainer(ISequenceNode handlerNode)
         {
-            Visit(handlerNode.Right);
+            Visit(handlerNode.StartNode);
         }
     }
 }

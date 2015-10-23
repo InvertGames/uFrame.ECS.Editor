@@ -1,5 +1,6 @@
 using Invert.Core;
 using Invert.Core.GraphDesigner;
+using Invert.Data;
 
 namespace Invert.uFrame.ECS {
     using System;
@@ -54,6 +55,15 @@ namespace Invert.uFrame.ECS {
                 if (meta != null && meta.Dispatcher && meta.SystemType != null)
                     return base.SubTitle + " with " + meta.SystemType.Name;
                 return base.SubTitle;
+            }
+        }
+
+        public override void PropertyChanged(IDataRecord record, string name, object previousValue, object nextValue)
+        {
+            base.PropertyChanged(record, name, previousValue, nextValue);
+            if (record is PropertiesChildItem || record is CollectionsChildItem)
+            {
+                DataObjectChanged();
             }
         }
 

@@ -20,7 +20,11 @@ namespace Invert.uFrame.ECS {
         IDemoVersionLimit
     
     {
-        
+        public override ITypeInfo BaseTypeInfo
+        {
+            get { return (SystemTypeInfo)uFrameECS.EcsGroupType; }
+        }
+
         public override bool AllowOutputs
         {
             get { return false; }
@@ -73,6 +77,7 @@ namespace Invert.uFrame.ECS {
                     MemberType = item
                 };
             }
+        
         }
 
         public IEnumerable<IContextVariable> GetVariables(IFilterInput input)

@@ -1,4 +1,4 @@
-using Invert.Core.GraphDesigner;
+﻿using Invert.Core.GraphDesigner;
 
 namespace Invert.uFrame.ECS
 {
@@ -40,6 +40,16 @@ namespace Invert.uFrame.ECS
             get
             {
                 if (!string.IsNullOrEmpty(SecondTitle)) yield return Name;
+                var sequenceContainer = SequenceNode.Graph.CurrentFilter as ISequenceNode;
+                if (sequenceContainer != null && sequenceContainer.StartNode == SequenceNode)
+                {
+                    yield return "Start";
+                }
+                foreach (var item in SequenceNode.Flags)
+                {
+                    yield return item.Name;
+                }
+
                 yield break;
             }
         }
@@ -50,8 +60,45 @@ namespace Invert.uFrame.ECS
             OutputConnectorType = NodeConfig.SourceType;
             if (AutoAddProperties)
                 AddPropertyFields();
+
+            CreateActionContent();
+        }
+
+        protected virtual void CreateActionContent()
+        {
             CreateContentByConfiguration(NodeConfig.GraphItemConfigurations, GraphItem);
 
+            CreateActionIns();
+            CreateActionOuts();
+        }
+
+        protected virtual void CreateActionOuts()
+        {
+            foreach (var item in SequenceNode.GraphItems.OfType<IActionOut>())
+            {
+                var vm = new InputOutputViewModel()
+                {
+                    Name = item.Name,
+                    DataObject = item,
+                    IsOutput = true,
+                    IsNewLine =
+                        item.ActionFieldInfo == null || item.ActionFieldInfo.DisplayType == null
+                            ? true
+                            : item.ActionFieldInfo.DisplayType.IsNewLine,
+                    DiagramViewModel = DiagramViewModel
+                };
+                ContentItems.Add(vm);
+
+	            if (!(item is ActionBranch))
+                {
+                    vm.OutputConnector.Style = ConnectorStyle.Circle;
+                    vm.OutputConnector.TintColor = UnityEngine.Color.green;
+                }
+            }
+        }
+
+        protected virtual void CreateActionIns()
+        {
             foreach (var item in SequenceNode.GraphItems.OfType<IActionIn>())
             {
                 var vm = new InputOutputViewModel()
@@ -60,40 +107,19 @@ namespace Invert.uFrame.ECS
                     IsOutput = false,
                     IsInput = true,
                     DataObject = item,
-                    IsNewLine = item.ActionFieldInfo == null || item.ActionFieldInfo.DisplayType == null ? true : item.ActionFieldInfo.DisplayType.IsNewLine,
+                    IsNewLine =
+                        item.ActionFieldInfo == null || item.ActionFieldInfo.DisplayType == null
+                            ? true
+                            : item.ActionFieldInfo.DisplayType.IsNewLine,
                     DiagramViewModel = DiagramViewModel
                 };
                 ContentItems.Add(vm);
-                if (vm.InputConnector != null)
+                if (vm.InputConnector != null && !(item is BranchesChildItem))
                 {
                     vm.InputConnector.Style = ConnectorStyle.Circle;
                     vm.InputConnector.TintColor = UnityEngine.Color.green;
                 }
-
             }
-            foreach (var item in SequenceNode.GraphItems.OfType<IActionOut>())
-            {
-                var vm = new InputOutputViewModel()
-                {
-                    Name = item.Name,
-                    DataObject = item,
-                    IsOutput = true,
-                    IsNewLine = item.ActionFieldInfo == null || item.ActionFieldInfo.DisplayType == null ? true : item.ActionFieldInfo.DisplayType.IsNewLine,
-                    DiagramViewModel = DiagramViewModel
-                };
-                ContentItems.Add(vm);
-
-                if (!(item is ActionBranch))
-                {
-                    vm.OutputConnector.Style = ConnectorStyle.Circle;
-                    vm.OutputConnector.TintColor = UnityEngine.Color.green;
-                }
-
-
-            }
-
-
-
         }
 
         public virtual bool AutoAddProperties

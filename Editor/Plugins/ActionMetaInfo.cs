@@ -118,9 +118,7 @@ namespace Invert.uFrame.ECS
         {
         }
 
-        public ActionMetaInfo(Type systemType, ITypeInfo other) : base(systemType, other)
-        {
-        }
+
 
         public override IEnumerable<IMemberInfo> GetMembers()
         {
@@ -165,8 +163,5 @@ namespace Invert.uFrame.ECS
         {
         }
 
-        public ActionMethodMetaInfo(Type systemType, ITypeInfo other) : base(systemType, other)
-        {
-        }
     }
 }

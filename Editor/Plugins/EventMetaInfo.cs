@@ -78,8 +78,5 @@ namespace Invert.uFrame.ECS
         {
         }
 
-        public EventMetaInfo(Type systemType, ITypeInfo other) : base(systemType, other)
-        {
-        }
     }
 }

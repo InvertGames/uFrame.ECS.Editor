@@ -23,7 +23,8 @@ namespace Invert.uFrame.ECS
         IQueryPossibleConnections,
         IExecuteCommand<GroupActionNodes>,
         IQueryTypes,
-        IDocumentationProvider
+        IDocumentationProvider,
+        IUpgradeDatabase
 
     {
         public override decimal LoadPriority
@@ -37,12 +38,17 @@ namespace Invert.uFrame.ECS
 
         static uFrameECS()
         {
-            
+
             InvertApplication.CachedAssembly(typeof(Button).Assembly);
             InvertApplication.CachedTypeAssembly(typeof(uFrameECS).Assembly);
             InvertApplication.TypeAssemblies.AddRange(AppDomain.CurrentDomain.GetAssemblies().Where(p => p.FullName.StartsWith("Assembly")));
         }
         public static Type EcsComponentType
+        {
+            get;
+            set;
+        }
+        public static Type EcsGroupType
         {
             get;
             set;
@@ -53,18 +59,18 @@ namespace Invert.uFrame.ECS
             set;
         }
 
-       
+
 
         public override void Initialize(UFrameContainer container)
         {
             base.Initialize(container);
             InvertGraphEditor.TypesContainer.RegisterInstance(new GraphTypeInfo()
             {
-                Type=typeof(IDisposable),
-                IsPrimitive =  false,
+                Type = typeof(IDisposable),
+                IsPrimitive = false,
                 Label = "Disposable",
                 Name = "Disposable"
-            },"IDisposable");
+            }, "IDisposable");
             container.RegisterInstance<IDocumentationProvider>(this, "ECS");
             container.RegisterGraphItem<HandlerNode, HandlerNodeViewModel, HandlerNodeDrawer>();
             container.RegisterGraphItem<CustomAction, CustomActionViewModel, SequenceItemNodeDrawer>();
@@ -87,16 +93,16 @@ namespace Invert.uFrame.ECS
             //System.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<NoteNode>();
-          //  container.RegisterDrawer<NoteNodeViewModel, NoteNodeDrawer>();
+            //  container.RegisterDrawer<NoteNodeViewModel, NoteNodeDrawer>();
 
             Module.HasSubNode<EnumNode>();
             Group.HasSubNode<EnumValueNode>();
             //System.HasSubNode<ComponentNode>();
             // System.HasSubNode<ContextNode>(); 
-  
+
             Library.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<ComponentNode>();
-           // System.HasSubNode<ComponentNode>();
+            // System.HasSubNode<ComponentNode>();
             container.RegisterDrawer<ItemViewModel<IContextVariable>, ItemDrawer>();
             //container.AddItemFlag<ComponentsReference>("Multiple", UnityEngine.Color.blue);
             //container.AddItemFlag<PropertiesChildItem>("Mapping", UnityEngine.Color.blue);
@@ -118,11 +124,14 @@ namespace Invert.uFrame.ECS
             // container.Connectable<ActionOut, ActionIn>(UnityEngine.Color.blue);
             container.Connectable<ActionBranch, SequenceItemNode>();
             container.Connectable<IMappingsConnectable, HandlerIn>();
+            container.Connectable<ActionBranch, BranchesChildItem>();
+            container.Connectable<IContextVariable, OutputsChildItem>();
+            container.Connectable<SequenceItemNode, BranchesChildItem>();
             //container.AddWorkspaceConfig<LibraryWorkspace>("Library").WithGraph<LibraryGraph>("Library Graph");
             container.AddWorkspaceConfig<EcsWorkspace>("ECS")
-                .WithGraph<LibraryGraph>("Library","Create components, groups, events, custom actions, and more.")
-                .WithGraph<SystemGraph>("System","System defines behaviour for items defines inside a your libraries.")
-                .WithGraph<ModuleGraph>("Module","A module graph allows you to comprise library items and system as a single graph.")
+                .WithGraph<LibraryGraph>("Library", "Create components, groups, events, custom actions, and more.")
+                .WithGraph<SystemGraph>("System", "System defines behaviour for items defines inside a your libraries.")
+                .WithGraph<ModuleGraph>("Module", "A module graph allows you to comprise library items and system as a single graph.")
                 ;
             //container.AddWorkspaceConfig<BehaviourWorkspace>("Behaviour").WithGraph<SystemGraph>("System Graph");
             EnumValue.Name = "Enum Value";
@@ -131,20 +140,20 @@ namespace Invert.uFrame.ECS
             StaticLibraries.Add(typeof(Input));
             StaticLibraries.Add(typeof(Math));
             StaticLibraries.Add(typeof(Mathf));
-            SystemTypes.Add(typeof (UnityEngine.UI.Button));
-            SystemTypes.Add(typeof (UnityEngine.UI.LayoutElement));
-            SystemTypes.Add(typeof (UnityEngine.UI.LayoutGroup));
-            SystemTypes.Add(typeof (UnityEngine.UI.GridLayoutGroup));
-            SystemTypes.Add(typeof (UnityEngine.UI.Text));
-            SystemTypes.Add(typeof (UnityEngine.UI.InputField));
+            SystemTypes.Add(typeof(UnityEngine.UI.Button));
+            SystemTypes.Add(typeof(UnityEngine.UI.LayoutElement));
+            SystemTypes.Add(typeof(UnityEngine.UI.LayoutGroup));
+            SystemTypes.Add(typeof(UnityEngine.UI.GridLayoutGroup));
+            SystemTypes.Add(typeof(UnityEngine.UI.Text));
+            SystemTypes.Add(typeof(UnityEngine.UI.InputField));
             //SystemTypes.Add(typeof (UnityEngine.UI.Dropdown));
-            SystemTypes.Add(typeof (UnityEngine.UI.ScrollRect));
-            SystemTypes.Add(typeof (UnityEngine.UI.Scrollbar));
-            SystemTypes.Add(typeof (UnityEngine.UI.Outline));
-            SystemTypes.Add(typeof (UnityEngine.UI.Toggle));
-            SystemTypes.Add(typeof (UnityEngine.UI.ToggleGroup));
-            SystemTypes.Add(typeof (UnityEngine.UI.Slider));
-            SystemTypes.Add(typeof (UnityEngine.Transform));
+            SystemTypes.Add(typeof(UnityEngine.UI.ScrollRect));
+            SystemTypes.Add(typeof(UnityEngine.UI.Scrollbar));
+            SystemTypes.Add(typeof(UnityEngine.UI.Outline));
+            SystemTypes.Add(typeof(UnityEngine.UI.Toggle));
+            SystemTypes.Add(typeof(UnityEngine.UI.ToggleGroup));
+            SystemTypes.Add(typeof(UnityEngine.UI.Slider));
+            SystemTypes.Add(typeof(UnityEngine.Transform));
             //StaticLibraries.Add(typeof(Vector2));
             //StaticLibraries.Add(typeof(Vector3));
             StaticLibraries.Add(typeof(Physics));
@@ -159,6 +168,7 @@ namespace Invert.uFrame.ECS
             AddHandlerType(typeof(ActionGroupNode));
             AddHandlerType(typeof(CollectionItemAddedNode));
             AddHandlerType(typeof(CollectionItemRemovedNode));
+            AddHandlerType(typeof(CustomActionNode));
 
 
         }
@@ -247,7 +257,7 @@ namespace Invert.uFrame.ECS
             {
                 foreach (
                     var type in
-                        assembly.GetTypes() 
+                        assembly.GetTypes()
                             .Where(p => p.IsSealed && p.IsDefined(typeof(ActionLibrary), true) || StaticLibraries.Contains(p)))
                 {
 
@@ -286,7 +296,7 @@ namespace Invert.uFrame.ECS
                         //        Name = item.Name,
                         //        DisplayType = new In(item.Name, item.Name),
                         //        IsGenericArgument = true,
-                             
+
                         //    };
                         //    actionInfo.ActionFields.Add(fieldMetaInfo);
                         //}
@@ -312,19 +322,19 @@ namespace Invert.uFrame.ECS
 
 
                             fieldMetaInfo.MetaAttributes =
-                                parameter.GetCustomAttributes(typeof (ActionAttribute), true)
+                                parameter.GetCustomAttributes(typeof(ActionAttribute), true)
                                     .Cast<ActionAttribute>().ToArray();
 
                             //if (!fieldMetaInfo.MetaAttributes.Any())
                             //{
-                                if (parameter.IsOut || parameter.ParameterType == typeof(Action))
-                                {
-                                    fieldMetaInfo.DisplayType = new Out(parameter.Name, parameter.Name);
-                                }
-                                else
-                                {
-                                    fieldMetaInfo.DisplayType = new In(parameter.Name, parameter.Name);
-                                }
+                            if (parameter.IsOut || parameter.ParameterType == typeof(Action))
+                            {
+                                fieldMetaInfo.DisplayType = new Out(parameter.Name, parameter.Name);
+                            }
+                            else
+                            {
+                                fieldMetaInfo.DisplayType = new In(parameter.Name, parameter.Name);
+                            }
                             //}
                             actionInfo.ActionFields.Add(fieldMetaInfo);
                         }
@@ -424,8 +434,8 @@ namespace Invert.uFrame.ECS
             {
                 if (Events.ContainsKey(eventType.FullName)) continue;
                 var eventInfo = new EventMetaInfo(eventType)
-                {                    
-                 
+                {
+
                 };
 
                 eventInfo.Attribute =
@@ -494,7 +504,7 @@ namespace Invert.uFrame.ECS
             var obj = objs.FirstOrDefault();
             if (obj is InputOutputViewModel)
             {
-            
+
                 QuerySlotMenu(ui, (InputOutputViewModel)obj);
             }
             var handlerVM = obj as HandlerNodeViewModel;
@@ -506,8 +516,9 @@ namespace Invert.uFrame.ECS
                     Title = "Code Handler",
                     Checked = handler.CodeHandler,
                     Command = new LambdaCommand(
-                        "Toggle Code Handler", 
-                        () => {
+                        "Toggle Code Handler",
+                        () =>
+                        {
                             handler.CodeHandler = !handler.CodeHandler;
                         })
                 });
@@ -550,8 +561,8 @@ namespace Invert.uFrame.ECS
                     }
                 }
             }
-            
-            
+
+
 
             //var nodeViewModel = obj as SequenceItemNodeViewModel;
             //if (nodeViewModel != null)
@@ -600,7 +611,7 @@ namespace Invert.uFrame.ECS
                             });
                         }
                     }
-                  
+
                 }
             }
 
@@ -669,14 +680,15 @@ namespace Invert.uFrame.ECS
                     var item1 = item;
                     var qa = new SelectionMenuItem(item, () =>
                     {
-                        
+
                         var eventNode = new HandlerNode()
                         {
                             MetaType = item1.Identifier,
                             Name = systemNode.Name + item1.Name
                         };
                         InvertGraphEditor.CurrentDiagramViewModel.AddNode(eventNode, LastMouseEvent != null ? LastMouseEvent.MousePosition : new Vector2(0, 0));
-                    }) {Group = "Handlers"};
+                    })
+                    { Group = "Handlers" };
                     menu.AddItem(qa, category);
                 }
                 foreach (var item in Events)
@@ -758,7 +770,7 @@ namespace Invert.uFrame.ECS
                     node = Activator.CreateInstance(type.SystemType) as SequenceItemNode;
                 }
                 else
-                { 
+                {
                     node = new ActionNode
                     {
                         Meta = _,
@@ -768,7 +780,7 @@ namespace Invert.uFrame.ECS
                 node.Graph = diagramViewModel.GraphData;
                 diagramViewModel.AddNode(node, mousePosition);
                 node.IsSelected = true;
-                    
+
             });
         }
 
@@ -870,7 +882,7 @@ namespace Invert.uFrame.ECS
                     }
                     else
                     {
-                       
+
                         node = new ActionNode
                         {
                             Meta = _,
@@ -1093,21 +1105,30 @@ namespace Invert.uFrame.ECS
 
         public void GetDocumentation(IDocumentationBuilder node)
         {
-            
+
         }
 
         public void GetPages(List<DocumentationPage> rootPages)
         {
             foreach (var item in Actions)
             {
-                rootPages.Add(new ActionPage() {MetaInfo = item.Value});
+                rootPages.Add(new ActionPage() { MetaInfo = item.Value });
+            }
+        }
+
+        public void UpgradeDatabase(uFrameDatabaseConfig item)
+        {
+            if (item.BuildVersion < 1)
+            {
+                foreach (var ca in item.Database.AllOf<CustomActionNode>().ToArray())
+                    ca.CodeAction = true;
             }
         }
     }
 
     public class uFrameECSPage : DocumentationPage
     {
-        
+
     }
     [AttributeUsage(AttributeTargets.Class)]
     public class AutoNamespaces : TemplateAttribute
@@ -1143,12 +1164,12 @@ namespace Invert.uFrame.ECS
         public override void GetContent(IDocumentationBuilder _)
         {
             base.GetContent(_);
-           
-            _.Title3(string.Join(",",MetaInfo.CategoryPath.ToArray()));
-            
+
+            _.Title3(string.Join(",", MetaInfo.CategoryPath.ToArray()));
+
             _.Break();
             _.Title2("Inputs");
-            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p=>p.DisplayType is In))
+            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is In))
             {
                 _.Title3(item.Name);
                 PrintDescription(_, item);

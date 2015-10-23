@@ -72,6 +72,23 @@ namespace Invert.uFrame.ECS
                 });
 
             }
+            var sequenceVM = obj.FirstOrDefault() as SequenceItemNodeViewModel;
+            if (sequenceVM == null) return;
+            var handlerNode = sequenceVM.SequenceNode.Graph.CurrentFilter as ISequenceNode;
+            if (handlerNode != null)
+            {
+                ui.AddCommand(new ContextMenuItem()
+                {
+                    Title = "Set As Start Action",
+                    Group = " Start",
+                    Command = new LambdaCommand("Set Start", () =>
+                    {
+                        handlerNode.StartNode = sequenceVM.SequenceNode;
+                    })
+                });
+            }
+
+
         }
 
         public void Execute(CreateConverterConnectionCommand command)

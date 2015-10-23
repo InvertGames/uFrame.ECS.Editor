@@ -35,6 +35,11 @@ namespace Invert.uFrame.ECS
             return Info.IsAssignableTo(info);
         }
 
+        public ITypeInfo BaseTypeInfo
+        {
+            get { return Info.BaseTypeInfo; }
+        }
+
         public bool IsArray { get { return Info.IsArray; } }
 
         public bool IsList
@@ -116,7 +121,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
 
@@ -199,14 +204,14 @@ namespace Invert.uFrame.ECS
                     {
                         GetInfo = () =>
                         {
-                            return new SystemTypeInfo(typeof(MonoBehaviour), List.Item);
+                            return List.Item;
                         }
                     };
                 });
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             ctx._("var {0}Components = System.ComponentSystem.RegisterComponent<{1}>().Components", List.VariableName, List.Item.FullName);
@@ -334,7 +339,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             var eventVariableName = this.VariableName + "_" + "Component";
@@ -439,7 +444,7 @@ namespace Invert.uFrame.ECS
                 });
             }
         }
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             var eventVariableName = this.VariableName + "_" + "Event";
@@ -547,7 +552,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             if (!string.IsNullOrEmpty(Format))
@@ -621,7 +626,7 @@ namespace Invert.uFrame.ECS
     public class ListAdd : ListActionWithItem
     {
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             ctx._("{0}.Add({1})", List.VariableName, Item.VariableName);
@@ -631,7 +636,7 @@ namespace Invert.uFrame.ECS
     [ActionTitle("Remove From List"), uFrameCategory("Lists", "Collections")]
     public class ListRemove : ListActionWithItem
     {
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             ctx._("{0}.Remove({1})", List.VariableName, Item.VariableName);
@@ -665,7 +670,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
             ctx._("{0} = {1}[{2}]", Result.VariableName, List.VariableName, IndexVariable.VariableName);
@@ -696,7 +701,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             base.WriteCode(visitor, ctx);
 

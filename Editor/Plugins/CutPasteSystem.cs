@@ -99,13 +99,13 @@ namespace Invert.uFrame.ECS
             var node = obj.FirstOrDefault() as DiagramNodeViewModel;
             if (node != null)
             {
-                ui.AddCommand(new ContextMenuItem()
-                {
-                    Title = "Pickup",
-                    Group="CopyPaste",
-                    Command = new PickupCommand(),
+                //ui.AddCommand(new ContextMenuItem()
+                //{
+                //    Title = "Pickup",
+                //    Group="CopyPaste",
+                //    Command = new PickupCommand(),
          
-                });
+                //});
                 ui.AddCommand(new ContextMenuItem()
                 {
                     Title = "Copy",

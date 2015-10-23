@@ -17,7 +17,7 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
     
     
-    public class CustomActionNodeBase : Invert.Core.GraphDesigner.GenericNode {
+    public class CustomActionNodeBase : SequenceContainerNode {
         
         public override bool AllowMultipleInputs {
             get {
@@ -31,21 +31,21 @@ namespace Invert.uFrame.ECS {
             }
         }
         
-        [Invert.Core.GraphDesigner.Section("Outputs", SectionVisibility.Always, OrderIndex=0, IsNewRow=true)]
+        [Invert.Core.GraphDesigner.Section("Outputs", SectionVisibility.WhenNodeIsNotFilter, OrderIndex=0, IsNewRow=true)]
         public virtual System.Collections.Generic.IEnumerable<OutputsChildItem> Outputs {
             get {
                 return PersistedItems.OfType<OutputsChildItem>();
             }
         }
         
-        [Invert.Core.GraphDesigner.Section("Inputs", SectionVisibility.Always, OrderIndex=0, IsNewRow=true)]
+        [Invert.Core.GraphDesigner.Section("Inputs", SectionVisibility.WhenNodeIsNotFilter, OrderIndex=0, IsNewRow=true)]
         public virtual System.Collections.Generic.IEnumerable<InputsChildItem> Inputs {
             get {
                 return PersistedItems.OfType<InputsChildItem>();
             }
         }
         
-        [Invert.Core.GraphDesigner.Section("Branches", SectionVisibility.Always, OrderIndex=0, IsNewRow=true)]
+        [Invert.Core.GraphDesigner.Section("Branches", SectionVisibility.WhenNodeIsNotFilter, OrderIndex=0, IsNewRow=true)]
         public virtual System.Collections.Generic.IEnumerable<BranchesChildItem> Branches {
             get {
                 return PersistedItems.OfType<BranchesChildItem>();
@@ -763,6 +763,24 @@ namespace Invert.uFrame.ECS {
     public partial interface IVector2Connectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
+    public class SequenceContainerNodeBase : SequenceItemNode {
+        
+        public override bool AllowMultipleInputs {
+            get {
+                return true;
+            }
+        }
+        
+        public override bool AllowMultipleOutputs {
+            get {
+                return true;
+            }
+        }
+    }
+    
+    public partial interface ISequenceContainerConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+    }
+    
     public class AllTrueNodeBase : BoolExpressionNode {
         
         private string _ExpressionsInputSlotId;
@@ -895,7 +913,7 @@ namespace Invert.uFrame.ECS {
     public partial interface IActionConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
-    public class HandlerNodeBase : SequenceItemNode, ISequenceItemConnectable {
+    public class HandlerNodeBase : SequenceContainerNode, ISequenceItemConnectable {
         
         public override bool AllowMultipleInputs {
             get {

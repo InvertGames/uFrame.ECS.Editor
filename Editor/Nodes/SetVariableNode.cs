@@ -71,7 +71,7 @@ namespace Invert.uFrame.ECS {
             }
         }
 
-        public override void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             
             var ctxVariable = VariableInputSlot.Item;

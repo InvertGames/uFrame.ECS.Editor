@@ -1,5 +1,6 @@
 using System.Configuration;
 using Invert.Core.GraphDesigner;
+using Invert.Data;
 using uFrame.Attributes;
 
 namespace Invert.uFrame.ECS
@@ -37,6 +38,11 @@ namespace Invert.uFrame.ECS
                     if (Action.Meta == null) yield return "Action Not Found";
                     else yield return Action.Title;
                 };
+                var sequenceContainer = SequenceNode.Graph.CurrentFilter as ISequenceNode;
+                if (sequenceContainer != null && sequenceContainer.StartNode == SequenceNode)
+                {
+                    yield return "Start";
+                }
                 yield break;
             }
         }
@@ -50,6 +56,22 @@ namespace Invert.uFrame.ECS
         public override bool AllowCollapsing
         {
             get { return false; }
+        }
+
+        public override void DataObjectChanged()
+        {
+            base.DataObjectChanged();
+
+        }
+
+        public override void PropertyChanged(IDataRecord record, string name, object previousValue, object nextValue)
+        {
+            base.PropertyChanged(record, name, previousValue, nextValue);
+            if (name == "StartActionId")
+            {
+                DataObjectChanged();
+            }
+
         }
 
         public override bool IsEditable

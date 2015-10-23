@@ -16,7 +16,7 @@ namespace Invert.uFrame.ECS
 
     public class SequenceItemNode : SequenceItemNodeBase, ICodeOutput, IDataRecordRemoving
     {
-
+        
         private string _variableName;
         private string _secondTitle;
 
@@ -134,6 +134,10 @@ namespace Invert.uFrame.ECS
             {
                 Repository.Remove(this);
             }
+            foreach (var item in GraphItems.OfType<IDynamicDataRecord>().OfType<IDataRecordRemoved>())
+            {
+              item.RecordRemoved(record);
+            }
         }
 
         public static string LastSequenceItemId = string.Empty;
@@ -147,14 +151,14 @@ namespace Invert.uFrame.ECS
             }
 
         }
-        public virtual void WriteCode(IHandlerNodeVisitor visitor, TemplateContext ctx)
+        public virtual void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
 
-
+       
 
         }
 
-        public void OutputVariables(TemplateContext ctx)
+        public virtual void OutputVariables(TemplateContext ctx)
         {
             foreach (var item in GraphItems.OfType<IConnectable>())
             {
@@ -212,7 +216,7 @@ namespace Invert.uFrame.ECS
             //}
         }
 
-        public void WriteActionOutputs(TemplateContext _)
+        public virtual void WriteActionOutputs(TemplateContext _)
         {
             foreach (var output in this.GraphItems.OfType<ActionOut>())
             {
@@ -220,7 +224,7 @@ namespace Invert.uFrame.ECS
             }
         }
 
-        private void WriteActionOutput(TemplateContext _, IActionOut output)
+        protected virtual void WriteActionOutput(TemplateContext _, IActionOut output)
         {
             if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsReturn) return;
             _._("{0} = {1}.{2}", output.VariableName, VariableName, output.Name);

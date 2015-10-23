@@ -9,7 +9,7 @@ namespace Invert.uFrame.ECS
     using Invert.Core.GraphDesigner;
 
 
-    public class OutputsChildItem : OutputsChildItemBase, IActionFieldInfo
+    public class OutputsChildItem : OutputsChildItemBase, IActionFieldInfo, IActionIn
     {
         public bool IsGenericArgument { get { return false; } }
         public bool IsReturn { get { return false; } }
@@ -21,6 +21,20 @@ namespace Invert.uFrame.ECS
         {
             get { return false; }
         }
+
+        public IActionFieldInfo ActionFieldInfo { get; set; }
+
+        public string VariableName
+        {
+            get { return this.Name; }
+        }
+
+        public ITypeInfo VariableType
+        {
+            get { return MemberType; }
+        }
+        public IContextVariable Item { get { return null; } }
+
     }
 
     public partial interface IOutputsConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable

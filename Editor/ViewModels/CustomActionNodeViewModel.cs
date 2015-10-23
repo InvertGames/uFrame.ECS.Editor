@@ -1,3 +1,5 @@
+using Invert.Core.GraphDesigner;
+
 namespace Invert.uFrame.ECS {
     using System;
     using System.Collections;
@@ -11,6 +13,46 @@ namespace Invert.uFrame.ECS {
                 base(graphItemObject, diagramViewModel) {
         }
 
+        protected override void CreateContent()
+        {
+            base.CreateContent();
+      
+        }
 
+        public override IEnumerable<string> Tags
+        {
+            get
+            {
+                if (CustomActionNode.CodeAction)
+                {
+                    yield return "Code Action";
+                }
+            }
+        }
+
+        public CustomActionNode CustomActionNode
+        {
+            get
+            {
+                return DataObject as CustomActionNode;
+            }
+        }
+
+        public override bool IsFilter
+        {
+            get { return !CustomActionNode.CodeAction; }
+        }
+        protected override void CreateActionContent()
+        {
+            if (IsVisible(SectionVisibility.WhenNodeIsFilter))
+            {
+                CreateActionIns();
+                CreateActionOuts();
+            }
+            else
+            {
+                CreateContentByConfiguration(NodeConfig.GraphItemConfigurations, GraphItem);
+            }
+        }
     }
 }

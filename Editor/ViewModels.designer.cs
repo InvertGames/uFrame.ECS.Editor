@@ -15,7 +15,7 @@ namespace Invert.uFrame.ECS {
     using System.Linq;
     
     
-    public class CustomActionNodeViewModelBase : Invert.Core.GraphDesigner.GenericNodeViewModel<Invert.Core.GraphDesigner.GenericNode> {
+    public class CustomActionNodeViewModelBase : SequenceContainerNodeViewModel {
         
         public CustomActionNodeViewModelBase(CustomActionNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
                 base(graphItemObject, diagramViewModel) {
@@ -444,6 +444,19 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class SequenceContainerNodeViewModelBase : SequenceItemNodeViewModel {
+        
+        public SequenceContainerNodeViewModelBase(SequenceContainerNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
+                base(graphItemObject, diagramViewModel) {
+        }
+        
+        public override Invert.Core.GraphDesigner.NodeStyle NodeStyle {
+            get {
+                return Invert.Core.GraphDesigner.NodeStyle.Normal;
+            }
+        }
+    }
+    
     public class AllTrueNodeViewModelBase : BoolExpressionNodeViewModel {
         
         public AllTrueNodeViewModelBase(AllTrueNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
@@ -496,7 +509,7 @@ namespace Invert.uFrame.ECS {
         }
     }
     
-    public class HandlerNodeViewModelBase : SequenceItemNodeViewModel {
+    public class HandlerNodeViewModelBase : SequenceContainerNodeViewModel {
         
         public HandlerNodeViewModelBase(HandlerNode graphItemObject, Invert.Core.GraphDesigner.DiagramViewModel diagramViewModel) : 
                 base(graphItemObject, diagramViewModel) {
