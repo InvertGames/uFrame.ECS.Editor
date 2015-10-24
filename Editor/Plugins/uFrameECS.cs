@@ -801,7 +801,7 @@ namespace Invert.uFrame.ECS
 
             }
 
-            foreach (var action in this.Container.Resolve<IRepository>().All<CustomActionNode>())
+            foreach (var action in this.Container.Resolve<IRepository>().AllOf<GraphNode>().OfType<IActionMetaInfo>())
             {
                 var action1 = action;
                 menu.AddItem(new SelectionMenuItem(action, () =>

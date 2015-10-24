@@ -502,7 +502,7 @@ namespace Invert.uFrame.ECS
             var meta = Meta;
             if (meta != null)
             {
-                foreach (var item in Meta.GetMembers())
+                foreach (var item in Meta.GetAllMembers())
                 {
                     if (!item.HasAttribute<uFrameEventMapping>()) continue;
                 

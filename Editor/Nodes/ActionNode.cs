@@ -452,7 +452,7 @@ namespace Invert.uFrame.ECS
 
                 if (_meta != null) return _meta;
 
-                var item = Repository.All<CustomActionNode>().FirstOrDefault(p => p.FullName == MetaType);
+                var item = Repository.All<GraphNode>().OfType<IActionMetaInfo>().FirstOrDefault(p => p.FullName == MetaType);
 
                 if (item != null)
                 {
