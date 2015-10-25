@@ -11,6 +11,17 @@ namespace Invert.uFrame.ECS {
         {
             get { return base.Type ?? typeof(int); }
         }
+        public override string RelatedTypeName
+        {
+            get
+            {
+                if (Type == uFrameECS.EntityComponentType)
+                {
+                    return typeof(int).Name;
+                }
+                return base.RelatedTypeName;
+            }
+        }
 
     }
     

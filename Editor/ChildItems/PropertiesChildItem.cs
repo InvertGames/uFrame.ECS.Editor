@@ -18,6 +18,18 @@ namespace Invert.uFrame.ECS {
             get { return "Connect to any other node which represents a Type. This will set corresponding type of the property."; }
         }
 
+        public override string RelatedTypeName
+        {
+            get
+            {
+                if (Type == uFrameECS.EntityComponentType)
+                {
+                    return typeof (int).Name;
+                }
+                return base.RelatedTypeName;
+            }
+        }
+
         public override Type Type
         {
             get
@@ -47,7 +59,11 @@ namespace Invert.uFrame.ECS {
         [InspectorProperty]
         public bool Mapping
         {
-            get { return this["Mapping"]; }
+            get
+            {
+
+                return this["Mapping"] || this.Type == uFrameECS.EntityComponentType;
+            }
             set { this["Mapping"] = value; }
         }
 
