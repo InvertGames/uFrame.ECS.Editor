@@ -19,18 +19,14 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                if (string.IsNullOrEmpty(_startActionId))
-                {
-                    var found = this.OutputTo<SequenceItemNode>() ?? FilterNodes.OfType<SequenceItemNode>().FirstOrDefault(p => p != this);
-                    if (found != null)
-                    {
-                        StartActionId = found.Identifier;
-                    }
-
-                }
+                
                 return _startActionId;
             }
-            set { this.Changed("StartActionId", ref _startActionId, value); }
+            set
+            {
+              
+                this.Changed("StartActionId", ref _startActionId, value);
+            }
         }
 
         private SequenceItemNode _startAction;
@@ -66,14 +62,14 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-
-                return _startAction ?? (_startAction =  Repository.GetById<SequenceItemNode>(StartActionId));
+                return _startAction ?? (_startAction =  Repository.GetById<SequenceItemNode>(StartActionId) ?? this.OutputTo<SequenceItemNode>() ?? FilterNodes.OfType<SequenceItemNode>().FirstOrDefault(p => p != this));
             }
             set
             {
-            
                 _startAction = value;
                 StartActionId = value.Identifier;
+         
+          
             }
 
         }

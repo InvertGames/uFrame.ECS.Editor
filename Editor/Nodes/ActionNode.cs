@@ -322,7 +322,7 @@ namespace Invert.uFrame.ECS
         
         public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
-          
+            base.WriteCode(visitor,ctx);
             if (this.Meta == null)
             {
                 ctx._comment("Skipping {0}", this.Name);
@@ -422,15 +422,8 @@ namespace Invert.uFrame.ECS
                     else
                     ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
                 }
-                if (DebugSystem.IsDebugMode)
-                {
-                    ctx._("yield return System.StartCoroutine({0}.Perform())", varStatement.Name);
-                }
-                else
-                {
-                    ctx._("{0}.Execute()", varStatement.Name);
-                }
-                
+            
+                ctx._("{0}.Execute()", varStatement.Name);
 
                 WriteActionOutputs(ctx);
 
@@ -452,7 +445,7 @@ namespace Invert.uFrame.ECS
 
                 if (_meta != null) return _meta;
 
-                var item = Repository.All<GraphNode>().OfType<IActionMetaInfo>().FirstOrDefault(p => p.FullName == MetaType);
+                var item = Repository.All<CustomActionNode>().FirstOrDefault(p => p.FullName == MetaType);
 
                 if (item != null)
                 {
