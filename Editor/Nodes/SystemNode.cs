@@ -36,10 +36,6 @@ namespace Invert.uFrame.ECS {
             get { return false; }
         }
 
-        public override IEnumerable<ComponentsReference> Components
-        {
-            get { return base.Components; }
-        }
         public override void Validate(List<ErrorInfo> errors)
         {
 

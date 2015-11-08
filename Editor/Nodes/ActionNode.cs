@@ -77,6 +77,7 @@ namespace Invert.uFrame.ECS
                             return (string)p;
                         }).ToArray()));
             }
+            set { _memberExpression = value; }
         }
 
         public override string Title
@@ -273,19 +274,6 @@ namespace Invert.uFrame.ECS
                 errors.AddError(string.Format("Action {0} was not found.", MetaType), this);
             }
 
-            //foreach (var var in this.GraphItems.OfType<ActionIn>().Where(_ => !_.ActionFieldInfo.IsOptional))
-            //{
-            //    var connections = var.Inputs.ToArray();
-            //    if (connections.Length > 1)
-            //    {
-            //        errors.AddError(string.Format("Variable {0} has more than 1 assignments.", var.Title), this);
-            //    }
-            //    if (connections.Length < 1)
-            //    {
-            //        errors.AddError(string.Format("Variable {0} is not assigned.", var.Title), this);
-
-            //    }
-            //}
 
         }
 
@@ -331,104 +319,9 @@ namespace Invert.uFrame.ECS
             ctx._comment("Visit {0}", this.Meta.FullName);
 
 
-
-            var methodInfo = Meta as ActionMethodMetaInfo;
-            if (methodInfo != null)
-            {
-                var codeMethodReferenceExpression = new CodeMethodReferenceExpression(
-                    new CodeSnippetExpression(methodInfo.SystemType.FullName),
-                    methodInfo.Method.Name);
-
-                var _currentActionInvoker =
-                    new CodeMethodInvokeExpression(
-                        codeMethodReferenceExpression);
-
-                foreach (var input in this.InputVars)
-                {
-                    if (input.ActionFieldInfo.IsGenericArgument)
-                    {
-
-                    }
-                    else
-                    {
-                        _currentActionInvoker.Parameters.Add(
-                            new CodeSnippetExpression((input.ActionFieldInfo.IsByRef ? "ref " : string.Empty) + string.Format("{0}", input.VariableName)));
-                    }
-
-                }
-                ActionOut resultOut = null;
-                // The outputs that should be assigned to by the method
-                foreach (var @out in this.GraphItems.OfType<ActionOut>())
-                {
-                    if (@out.ActionFieldInfo != null && @out.ActionFieldInfo.IsReturn)
-                    {
-                        resultOut = @out;
-                        continue;
-                    }
-                    _currentActionInvoker.Parameters.Add(
-                        new CodeSnippetExpression(string.Format("out {0}", @out.VariableName)));
-                }
-                foreach (var @out in this.GraphItems.OfType<ActionBranch>())
-                {
-                    if (DebugSystem.IsDebugMode)
-                    {
-                        _currentActionInvoker.Parameters.Add(
-                            new CodeSnippetExpression(string.Format("()=> {{ System.StartCoroutine({0}()); }}",
-                                @out.VariableName)));
-                    }
-                    else
-                    {
-                        _currentActionInvoker.Parameters.Add(
-                       new CodeSnippetExpression(string.Format("{0}", @out.VariableName)));
-                    }
-                   
-                }
-               
-                if (resultOut == null)
-                {
-                    ctx.CurrentStatements.Add(_currentActionInvoker);
-                }
-                else
-                {
-                    var assignResult = new CodeAssignStatement(
-                        new CodeSnippetExpression(resultOut.VariableName), _currentActionInvoker);
-                    ctx.CurrentStatements.Add(assignResult);
-                }
-
-            }
-            else
-            {
-                var varStatement = ctx.CurrentDeclaration._private_(this.Meta.FullName, this.VarName);
-                varStatement.InitExpression = new CodeObjectCreateExpression(this.Meta.FullName);
-
-                foreach (var item in this.GraphItems.OfType<IActionIn>())
-                {
-                    var contextVariable = item.Item;
-                    if (contextVariable == null)
-                        continue;
-                    ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
-                }
-
-
-                ctx._("{0}.System = System", varStatement.Name);
-
-
-                foreach (var item in this.GraphItems.OfType<ActionBranch>())
-                {
-                    var branchOutput = item.OutputTo<SequenceItemNode>();
-                    if (branchOutput == null) continue;
-                    if (DebugSystem.IsDebugMode)
-                    ctx._("{0}.{1} = ()=> {{ System.StartCoroutine({2}()); }}", varStatement.Name, item.Name, item.VariableName);
-                    else
-                    ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
-                }
-            
-                ctx._("{0}.Execute()", varStatement.Name);
-
-                WriteActionOutputs(ctx);
-
-            }
+            Meta.WriteCode(ctx,this);
         }
+
 
         private IActionMetaInfo _meta;
         private string _metaType;
@@ -485,23 +378,7 @@ namespace Invert.uFrame.ECS
             if (meta != null)
             {
 
-                //// Get the generic contraints
-                //foreach (var item in meta.Type.GetGenericArguments())
-                //{
-                //    //var typeConstraints = item.GetGenericParameterConstraints().Select(p => p.Name);
-                //    var variableIn = new TypeSelection();
-                //    variableIn.Node = this;
-                //    variableIn.Repository = Repository;
-                //    variableIn.Identifier = this.Identifier + ":" + item.Name;
-                //    variableIn.ActionFieldInfo = new ActionFieldInfo()
-                //    {
-                //        DisplayType = new FieldDisplayTypeAttribute(item.Name,item.Name,true),
-                //        Name = item.Name,
-                //        Type = typeof(Type),
-                //        MetaAttributes = new ActionAttribute[] { }
-                //    };
-                //    yield return variableIn;
-                //}
+
 
                 foreach (var item in Meta.GetAllMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is In))
                 {
@@ -565,6 +442,7 @@ namespace Invert.uFrame.ECS
 
                         };
                         yield return variableOut;
+
                     }
                     else
                     {
@@ -578,6 +456,7 @@ namespace Invert.uFrame.ECS
                         yield return variableOut;
                     }
                 }
+           
             }
         }
 
@@ -603,29 +482,31 @@ namespace Invert.uFrame.ECS
         
         }
 
-        private void WriteActionOutput(TemplateContext _, IActionOut output)
-        {
-            if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsReturn) return;
-            _._("{0} = {1}.{2}", output.VariableName, VarName, output.Name);
-            var variableReference = output.OutputTo<IContextVariable>();
-            if (variableReference != null)
-                _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(variableReference.VariableName),
-                    new CodeSnippetExpression(output.VariableName)));
-            var actionIn = output.OutputTo<IActionIn>();
-            if (actionIn != null)
-            {
-                _.CurrentStatements.Add(new CodeAssignStatement(
-                    new CodeSnippetExpression(actionIn.VariableName),
-                    new CodeSnippetExpression(output.VariableName)));
-            }
-            var outputChildItem = output.OutputTo<OutputsChildItem>();
-            if (outputChildItem != null)
-            {
-                _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(outputChildItem.Name),
-                    new CodeSnippetExpression(output.VariableName)));
-            }
+        //private void WriteActionOutput(TemplateContext _, IActionOut output)
+        //{
+        //    if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsReturn) return;
+        //    if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsDelegateMember) return;
 
-        }
+        //    _._("{0} = {1}.{2}", output.VariableName, VarName, output.Name);
+        //    var variableReference = output.OutputTo<IContextVariable>();
+        //    if (variableReference != null)
+        //        _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(variableReference.VariableName),
+        //            new CodeSnippetExpression(output.VariableName)));
+        //    var actionIn = output.OutputTo<IActionIn>();
+        //    if (actionIn != null)
+        //    {
+        //        _.CurrentStatements.Add(new CodeAssignStatement(
+        //            new CodeSnippetExpression(actionIn.VariableName),
+        //            new CodeSnippetExpression(output.VariableName)));
+        //    }
+        //    var outputChildItem = output.OutputTo<OutputsChildItem>();
+        //    if (outputChildItem != null)
+        //    {
+        //        _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(outputChildItem.Name),
+        //            new CodeSnippetExpression(output.VariableName)));
+        //    }
+
+        //}
 
         public void RecordInserted(IDataRecord record)
         {

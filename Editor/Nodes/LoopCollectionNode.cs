@@ -40,6 +40,11 @@ namespace Invert.uFrame.ECS
             get { return Info.BaseTypeInfo; }
         }
 
+        public bool HasAttribute(Type attribute)
+        {
+            return Info.HasAttribute(attribute);
+        }
+
         public bool IsArray { get { return Info.IsArray; } }
 
         public bool IsList
@@ -358,9 +363,19 @@ namespace Invert.uFrame.ECS
 
     }
 
+    
+
     [ActionTitle("Publish Event"), uFrameCategory("Events"),ActionDescription("Publish event of any type and provide any data specified by the event.")]
     public class PublishEventNode : CustomAction
     {
+        public override string Title
+        {
+            get
+            {
+                if (Event.Item == null) return "Publish ...";
+                return "Publish " + Event.Item.TypeName;
+            }
+        }
 
         private TypeSelection _component;
         private ActionBranch _next;
@@ -375,14 +390,14 @@ namespace Invert.uFrame.ECS
             {
                 return GetSlot(ref _component, "Event", _ =>
                 {
-                    _.Filter = info => info is EventNode || info.IsAssignableTo(new SystemTypeInfo(typeof(uFrameEvent)));
+                    _.Filter = info => info is EventNode || info.HasAttribute(typeof(uFrameEvent));
                 });
             }
         }
 
-        public EventNode SelectedEvent
+        public ITypeInfo SelectedEvent
         {
-            get { return Event.Item as EventNode; }
+            get { return Event.Item as ITypeInfo; }
         }
 
         public VariableIn[] PropertyInputs
@@ -398,6 +413,7 @@ namespace Invert.uFrame.ECS
                 List<VariableIn> list = new List<VariableIn>();
                 foreach (var item in SelectedEvent.GetMembers())
                 {
+                    if (item is IMethodMemberInfo) continue;
                     var variableIn = CreateSlot<VariableIn>(item.MemberName, item.MemberName);
                     variableIn.DoesAllowInputs = true;
                     variableIn.VariableType = item.MemberType;
@@ -455,7 +471,7 @@ namespace Invert.uFrame.ECS
                 ctx._("{0}.{1} = {2}", eventVariableName, item.Name, item.VariableName);
             }
             ctx._("System.Publish({0})", eventVariableName);
-            ctx._("{0} = {1}", eventVariableName, Result.VariableName);
+            ctx._("{0} = {1}", Result.VariableName, eventVariableName);
         }
 
 

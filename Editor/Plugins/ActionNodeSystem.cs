@@ -23,6 +23,7 @@ namespace Invert.uFrame.ECS
         public ActionMethodMetaInfo ConverterAction;
 
     }
+    
     public class ActionNodeSystem
         : DiagramPlugin
         , IExecuteCommand<ChangeHandlerEventCommand>

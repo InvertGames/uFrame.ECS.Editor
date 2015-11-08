@@ -15,6 +15,7 @@ namespace Invert.uFrame.ECS
                 base(graphItemObject, diagramViewModel)
         {
         }
+
         public SequenceItemNode SequenceNode
         {
             get { return GraphItem as SequenceItemNode; }

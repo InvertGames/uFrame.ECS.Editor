@@ -2,6 +2,7 @@
 using Invert.Core.GraphDesigner.Unity;
 using Invert.Data;
 using Invert.IOC;
+using Invert.uFrame.Editor;
 using Invert.Windows;
 using uFrame.Attributes;
 using UnityEngine;
@@ -15,6 +16,50 @@ namespace Invert.uFrame.ECS
     using System.Linq;
     using Invert.Core;
     using Invert.Core.GraphDesigner;
+    public interface IQueryActionMetaInfo
+    {
+        void QueryActions(List<IActionMetaInfo> actions);
+    }
+
+    public class uFrameECSDescriptors : DiagramPlugin
+        , IContextMenuQuery
+
+    {
+        public void QueryContextMenu(ContextMenuUI ui, MouseEvent evt, params object[] obj)
+        {
+            var componentViewModel = obj.OfType<ComponentNodeViewModel>().FirstOrDefault();
+            if (componentViewModel != null)
+            {
+                
+            }
+            var propertyViewModel = obj.OfType<TypedItemViewModel>().FirstOrDefault();
+            if (propertyViewModel != null)
+            {
+                var property = propertyViewModel.DataObject as GenericTypedChildItem;
+                if (property != null)
+                {
+                    var db = Container.Resolve<DatabaseService>().CurrentConfiguration;
+                    if (db != null && db.Database != null)
+                    {
+                        foreach (var item in db.Database.All<DescriptorNode>())
+                        {
+                            var item1 = item;
+                            ui.AddCommand(new ContextMenuItem()
+                            {
+                                Checked = property[item.Identifier],
+                                Title = item.Name,
+                                Group = "Descriptors",
+                                Command = new LambdaCommand(item.Name, () =>
+                                {
+                                    property[item1.Identifier] = !property[item1.Identifier];
+                                })
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     public class uFrameECS : uFrameECSBase,
         IContextMenuQuery, IQuickAccessEvents, IOnMouseDoubleClickEvent,
@@ -25,14 +70,13 @@ namespace Invert.uFrame.ECS
         IQueryTypes,
         IDocumentationProvider,
         IUpgradeDatabase
-
     {
         public override decimal LoadPriority
         {
             get { return 500; }
         }
 
-        private static Dictionary<string, ActionMetaInfo> _actions;
+        private static Dictionary<string, IActionMetaInfo> _actions;
         private static Dictionary<string, EventMetaInfo> _events;
         private readonly static HashSet<Type> _types = new HashSet<Type>();
 
@@ -59,11 +103,11 @@ namespace Invert.uFrame.ECS
             set;
         }
 
-
-
         public override void Initialize(UFrameContainer container)
         {
             base.Initialize(container);
+            container.RegisterInstance<IExplorerProvider>(new EventsExplorerProvider(), "Events");
+            container.RegisterConnectionStrategy<ECSConnectionStrategy>();
             InvertGraphEditor.TypesContainer.RegisterInstance(new GraphTypeInfo()
             {
                 Type = typeof(IDisposable),
@@ -92,6 +136,7 @@ namespace Invert.uFrame.ECS
             Action.NodeColor.Literal = NodeColor.Green;
             //System.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<TypeReferenceNode>();
+            System.HasSubNode<TypeReferenceNode>();
             Module.HasSubNode<NoteNode>();
             //  container.RegisterDrawer<NoteNodeViewModel, NoteNodeDrawer>();
 
@@ -111,17 +156,7 @@ namespace Invert.uFrame.ECS
             //System.HasSubNode<EnumNode>();
             container.Connectable<IContextVariable, IActionIn>();
             container.Connectable<IActionOut, IContextVariable>();
-            //container.RegisterInstance<RegisteredConnection>(new RegisteredConnection()
-            //{
-            //    TInputType = typeof(IContextVariable),
-            //    TOutputType = typeof(IActionIn)
-            //}, "Context Variables");
-            //container.RegisterInstance<RegisteredConnection>(new RegisteredConnection()
-            //{
-            //    TInputType = typeof(IActionOut),
-            //    TOutputType = typeof(IContextVariable)
-            //}, "Context Variables2");
-            // container.Connectable<ActionOut, ActionIn>(UnityEngine.Color.blue);
+
             container.Connectable<ActionBranch, SequenceItemNode>();
             container.Connectable<IMappingsConnectable, HandlerIn>();
             container.Connectable<ActionBranch, BranchesChildItem>();
@@ -137,10 +172,8 @@ namespace Invert.uFrame.ECS
             EnumValue.Name = "Enum Value";
             //            VariableReference.Name = "Var";
 
-            StaticLibraries.Add(typeof(Input));
-            StaticLibraries.Add(typeof(Math));
-            StaticLibraries.Add(typeof(Mathf));
-            SystemTypes.Add(typeof(UnityEngine.UI.Button));
+
+            SystemTypes.Add(typeof(Button));
             SystemTypes.Add(typeof(UnityEngine.UI.LayoutElement));
             SystemTypes.Add(typeof(UnityEngine.UI.LayoutGroup));
             SystemTypes.Add(typeof(UnityEngine.UI.GridLayoutGroup));
@@ -154,13 +187,10 @@ namespace Invert.uFrame.ECS
             SystemTypes.Add(typeof(UnityEngine.UI.ToggleGroup));
             SystemTypes.Add(typeof(UnityEngine.UI.Slider));
             SystemTypes.Add(typeof(UnityEngine.Transform));
-            //StaticLibraries.Add(typeof(Vector2));
-            //StaticLibraries.Add(typeof(Vector3));
-            StaticLibraries.Add(typeof(Physics));
-            StaticLibraries.Add(typeof(Physics2D));
+            SystemTypes.Add(typeof(UnityEngine.PlayerPrefs));
+            SystemTypes.Add(typeof(UnityEngine.Application));
 
-            LoadActions();
-            LoadEvents();
+       
 
             AddHandlerType(typeof(PropertyChangedNode));
             AddHandlerType(typeof(ComponentDestroyedNode));
@@ -173,6 +203,41 @@ namespace Invert.uFrame.ECS
 
         }
 
+
+        public override void Loaded(UFrameContainer container)
+        {
+            base.Loaded(container);
+            LoadActions();
+            LoadEvents();
+
+
+        }
+
+        public void LoadActions()
+        {
+            var actions = new List<IActionMetaInfo>();
+            Signal<IQueryActionMetaInfo>(_ => _.QueryActions(actions));
+            Actions.Clear();
+            foreach (var item in actions)
+            {
+                if (!Actions.ContainsKey(item.Identifier))
+                {
+   
+                    Actions.Add(item.Identifier, item);
+
+                    // BAckwards compatability ERGH!!
+                    if (item.FullName != item.Identifier)
+                    {
+                        if (!Actions.ContainsKey(item.FullName))
+                        Actions.Add(item.FullName, item);
+                    }
+
+                    
+                }
+                
+            }
+        }
+
         private static void AddHandlerType(Type type)
         {
             var propertyTypes = FilterExtensions.AllowedFilterNodes[type] = new List<Type>();
@@ -183,203 +248,6 @@ namespace Invert.uFrame.ECS
         }
 
 
-        private void LoadActions()
-        {
-
-
-            LoadActionTypes();
-
-            LoadActionLibrary();
-        }
-
-        private void LoadActionTypes()
-        {
-            Actions.Clear();
-
-            //// Query for the available actions
-            //ActionTypes = InvertApplication.GetDerivedTypes<UFAction>(false, false).ToArray();
-
-            foreach (var actionType in ActionTypes)
-            {
-
-                if (Actions.ContainsKey(actionType.FullName)) continue;
-                var actionInfo = new ActionMetaInfo(actionType);
-                var descAttrib = actionType.GetCustomAttributes(typeof(ActionDescription), true).OfType<ActionDescription>().FirstOrDefault();
-                actionInfo.DescriptionAttribute = descAttrib;
-                actionInfo.MetaAttributes =
-                    actionType.GetCustomAttributes(typeof(ActionMetaAttribute), true).OfType<ActionMetaAttribute>().ToArray();
-                var fields = actionType.GetFields(BindingFlags.Instance | BindingFlags.Public);
-                if (!typeof(SequenceItemNode).IsAssignableFrom(actionType))
-                {
-                    foreach (var field in fields)
-                    {
-                        var paramOpt = field.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
-                        var fieldMetaInfo = new ActionFieldInfo()
-                        {
-                            MemberType = new SystemTypeInfo(field.FieldType),
-                            Name = field.Name,
-                            IsBranch = field.FieldType == typeof(Action),
-                            MemberName = field.Name,
-                            IsOptional = paramOpt != null
-                        };
-                        if (!SystemTypes.Contains(field.FieldType))
-                            SystemTypes.Add(field.FieldType);
-                        fieldMetaInfo.MetaAttributes =
-                            field.GetCustomAttributes(typeof(ActionAttribute), true)
-                                .OfType<ActionAttribute>()
-                                .ToArray();
-                        if (fieldMetaInfo.DisplayType == null)
-                            continue;
-
-                        actionInfo.ActionFields.Add(fieldMetaInfo);
-                    }
-                }
-                else
-                {
-                    Container.RegisterRelation(actionType, typeof(ViewModel), typeof(CustomActionViewModel));
-                    Container.GetNodeConfig(actionType);
-                    actionInfo.IsEditorClass = true;
-                }
-
-                Actions.Add(actionType.FullName, actionInfo);
-            }
-        }
-
-        public static HashSet<Type> StaticLibraries
-        {
-            get { return _staticLibraries ?? (_staticLibraries = new HashSet<Type>()); }
-            set { _staticLibraries = value; }
-        }
-
-        private static void LoadActionLibrary()
-        {
-            foreach (var assembly in InvertApplication.CachedAssemblies.Concat(InvertApplication.TypeAssemblies))
-            {
-                foreach (
-                    var type in
-                        assembly.GetTypes()
-                            .Where(p => p.IsSealed && p.IsDefined(typeof(ActionLibrary), true) || StaticLibraries.Contains(p)))
-                {
-
-                    var category = type.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault();
-                    var descAttrib = type.GetCustomAttributes(typeof(ActionDescription), true).OfType<ActionDescription>().FirstOrDefault();
-                    var title = type.GetCustomAttributes(typeof(ActionTitle), true).OfType<ActionTitle>().FirstOrDefault();
-                    var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
-                    foreach (var method in methods)
-                    {
-                        if (method.Name.StartsWith("get_")) continue;
-                        if (method.Name.StartsWith("set_")) continue;
-                        var actionInfo = new ActionMethodMetaInfo(type)
-                        {
-                            Category = category,
-                            DescriptionAttribute = descAttrib,
-                            Method = method
-                        };
-
-                        actionInfo.MetaAttributes =
-                            method.GetCustomAttributes(typeof(ActionMetaAttribute), true)
-                                .OfType<ActionMetaAttribute>()
-                                .ToArray();
-
-                        if (actionInfo.Category == null)
-                        {
-                            actionInfo.Category = new uFrameCategory(type.Name);
-                        }
-                        //var genericArguments = method.GetGenericArguments();
-                        var vars = method.GetParameters();
-
-                        //foreach (var item in genericArguments)
-                        //{
-                        //    var fieldMetaInfo = new ActionFieldInfo()
-                        //    {
-                        //        MemberType = new SystemTypeInfo(item.GetGenericParameterConstraints()[0]),
-                        //        Name = item.Name,
-                        //        DisplayType = new In(item.Name, item.Name),
-                        //        IsGenericArgument = true,
-
-                        //    };
-                        //    actionInfo.ActionFields.Add(fieldMetaInfo);
-                        //}
-
-                        foreach (var parameter in vars)
-                        {
-                            var fieldMetaInfo = new ActionFieldInfo()
-                            {
-                                MemberType = new SystemTypeInfo(parameter.ParameterType),
-                                Name = parameter.Name,
-                                IsBranch = parameter.ParameterType == typeof(Action),
-                                MemberName = parameter.Name,
-                                IsByRef = parameter.ParameterType.IsByRef
-                            };
-                            if (!SystemTypes.Contains(parameter.ParameterType))
-                                SystemTypes.Add(parameter.ParameterType);
-
-                            //  Should these be part of the action meta info class ? - Micah Oct-15-2015
-                            var paramDescr = parameter.GetCustomAttributes(typeof(Description), true).OfType<Description>().FirstOrDefault();
-                            var paramOpt = parameter.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
-                            if (paramDescr != null) fieldMetaInfo.Description = paramDescr.Text;
-                            if (paramOpt != null) fieldMetaInfo.IsOptional = true;
-
-
-                            fieldMetaInfo.MetaAttributes =
-                                parameter.GetCustomAttributes(typeof(ActionAttribute), true)
-                                    .Cast<ActionAttribute>().ToArray();
-
-                            //if (!fieldMetaInfo.MetaAttributes.Any())
-                            //{
-                            if (parameter.IsOut || parameter.ParameterType == typeof(Action))
-                            {
-                                fieldMetaInfo.DisplayType = new Out(parameter.Name, parameter.Name);
-                            }
-                            else
-                            {
-                                fieldMetaInfo.DisplayType = new In(parameter.Name, parameter.Name);
-                            }
-                            //}
-                            actionInfo.ActionFields.Add(fieldMetaInfo);
-                        }
-                        if (method.ReturnType != typeof(void))
-                        {
-                            var result = new ActionFieldInfo()
-                            {
-                                MemberType = new SystemTypeInfo(method.ReturnType),
-                                IsReturn = true,
-                                Name = "Result",
-                                MemberName = "Result"
-                            };
-                            if (!SystemTypes.Contains(method.ReturnType))
-                                SystemTypes.Add(method.ReturnType);
-                            result.MetaAttributes =
-                                method.GetCustomAttributes(typeof(FieldDisplayTypeAttribute), true)
-                                    .OfType<FieldDisplayTypeAttribute>()
-                                    .Where(p => p.ParameterName == "Result").ToArray();
-
-                            result.DisplayType = new Out("Result", "Result");
-                            actionInfo.ActionFields.Add(result);
-                        }
-                        if (Actions.ContainsKey(actionInfo.FullName))
-                            continue;
-                        Actions.Add(actionInfo.FullName, actionInfo);
-                    }
-                }
-            }
-        }
-        public IEnumerable<Type> ActionTypes
-        {
-            get
-            {
-                foreach (var assembly in InvertApplication.TypeAssemblies)
-                {
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        if (type.IsDefined(typeof(ActionTitle), true))
-                        {
-                            yield return type;
-                        }
-                    }
-                }
-            }
-        }
         public IEnumerable<Type> EventTypes
         {
             get
@@ -399,7 +267,6 @@ namespace Invert.uFrame.ECS
         }
 
         private IHandlerCodeWriter[] _codeWriters;
-        private static HashSet<Type> _staticLibraries;
         private static ActionMethodMetaInfo[] _converters;
 
         public IHandlerCodeWriter[] CodeWriters
@@ -477,16 +344,14 @@ namespace Invert.uFrame.ECS
             }
         }
 
-
-
         public static Dictionary<string, EventMetaInfo> Events
         {
             get { return _events ?? (_events = new Dictionary<string, EventMetaInfo>()); }
             set { _events = value; }
         }
-        public static Dictionary<string, ActionMetaInfo> Actions
+        public static Dictionary<string, IActionMetaInfo> Actions
         {
-            get { return _actions ?? (_actions = new Dictionary<string, ActionMetaInfo>()); }
+            get { return _actions ?? (_actions = new Dictionary<string, IActionMetaInfo>()); }
             set { _actions = value; }
         }
 
@@ -522,6 +387,17 @@ namespace Invert.uFrame.ECS
                             handler.CodeHandler = !handler.CodeHandler;
                         })
                 });
+                ui.AddCommand(new ContextMenuItem()
+                {
+                    Title = "Custom",
+                    Checked = handler.Custom,
+                    Command = new LambdaCommand(
+                    "Toggle Custom Handler",
+                () =>
+                {
+                    handler.Custom = !handler.Custom;
+                })
+                });
                 foreach (var handlerIn in handler.HandlerInputs)
                 {
                     if (handlerIn.Item != null)
@@ -546,7 +422,7 @@ namespace Invert.uFrame.ECS
                 var node = seqVM.SequenceNode as PublishEventNode;
                 if (node != null)
                 {
-                    var evtNode = node.SelectedEvent;
+                    var evtNode = node.SelectedEvent as EventNode;
                     if (evtNode != null)
                     {
                         ui.AddCommand(new ContextMenuItem()
@@ -637,8 +513,6 @@ namespace Invert.uFrame.ECS
             //});
 
         }
-
-
 
         public void QuickAccessItemsEvents(QuickAccessContext context, List<IItem> items)
         {
@@ -800,7 +674,14 @@ namespace Invert.uFrame.ECS
 
 
             }
-
+            //foreach (var action in this.Container.Resolve<IRepository>().AllOf<GraphNode>().OfType<IActionMetaInfo>())
+            //{
+            //    var action1 = action;
+            //    menu.AddItem(new SelectionMenuItem(action, () =>
+            //    {
+            //        onSelect(action1);
+            //    }));
+            //}
             foreach (var action in this.Container.Resolve<IRepository>().AllOf<GraphNode>().OfType<IActionMetaInfo>())
             {
                 var action1 = action;
@@ -867,6 +748,15 @@ namespace Invert.uFrame.ECS
                         node.IsSelected = true;
                     }));
                 }
+                foreach (var item in contextVar.VariableType.GetMembers().OfType<IMethodMemberInfo>())
+                {
+                    var item1 = item;
+                    menu.AddItem(new SelectionMenuItem(contextVar.ShortName, item.MethodIdentifier, () =>
+                    {
+                      
+                    }));
+                }
+
             }
 
             if (startConnector.ConnectorFor.DataObject is IVariableContextProvider)
@@ -1126,6 +1016,397 @@ namespace Invert.uFrame.ECS
         }
     }
 
+    public class ActionClassImporter : DiagramPlugin, IQueryActionMetaInfo
+    {
+        public IEnumerable<Type> ActionTypes
+        {
+            get
+            {
+                foreach (var assembly in InvertApplication.TypeAssemblies)
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        if (type.IsDefined(typeof(ActionTitle), true))
+                        {
+                            yield return type;
+                        }
+                    }
+                }
+            }
+        }
+        public void QueryActions(List<IActionMetaInfo> actions)
+        {
+            foreach (var actionType in ActionTypes)
+            {
+                var actionInfo = new ActionMetaInfo(actionType);
+                var descAttrib = actionType.GetCustomAttributes(typeof(ActionDescription), true).OfType<ActionDescription>().FirstOrDefault();
+                actionInfo.DescriptionAttribute = descAttrib;
+                actionInfo.MetaAttributes =
+                    actionType.GetCustomAttributes(typeof(ActionMetaAttribute), true).OfType<ActionMetaAttribute>().ToArray();
+                var fields = actionType.GetFields(BindingFlags.Instance | BindingFlags.Public);
+                if (!typeof(SequenceItemNode).IsAssignableFrom(actionType))
+                {
+                    foreach (var field in fields)
+                    {
+                        var paramOpt = field.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
+                        var fieldMetaInfo = new ActionFieldInfo()
+                        {
+                            MemberType = new SystemTypeInfo(field.FieldType),
+                            Name = field.Name,
+                            IsBranch = field.FieldType.IsSubclassOf(typeof(Delegate)),
+                            MemberName = field.Name,
+                            IsOptional = paramOpt != null
+                        };
+
+                        if (!uFrameECS.SystemTypes.Contains(field.FieldType))
+                            uFrameECS.SystemTypes.Add(field.FieldType);
+
+                        fieldMetaInfo.MetaAttributes =
+                            field.GetCustomAttributes(typeof(ActionAttribute), true)
+                                .OfType<ActionAttribute>()
+                                .ToArray();
+                        if (fieldMetaInfo.DisplayType == null)
+                            continue;
+
+                        actionInfo.ActionFields.Add(fieldMetaInfo);
+                    }
+                }
+                else
+                {
+                    Container.RegisterRelation(actionType, typeof(ViewModel), typeof(CustomActionViewModel));
+                    Container.GetNodeConfig(actionType);
+                    actionInfo.IsEditorClass = true;
+                }
+
+                actions.Add(actionInfo);
+            }
+        }
+    }
+    public class ActionLibraryImporter : DiagramPlugin, IQueryActionMetaInfo, IDataRecordInserted, IDataRecordPropertyChanged, IDataRecordRemoved
+    {
+        private static HashSet<Type> _staticLibraries;
+
+        public override void Initialize(UFrameContainer container)
+        {
+            base.Initialize(container);
+            StaticLibraries.Add(typeof(Input));
+            StaticLibraries.Add(typeof(Math));
+            StaticLibraries.Add(typeof(Mathf));
+            StaticLibraries.Add(typeof(Physics));
+            StaticLibraries.Add(typeof(Physics2D));
+            StaticLibraries.Add(typeof(PlayerPrefs));
+            StaticLibraries.Add(typeof(Application));
+        }
+
+        public static HashSet<Type> StaticLibraries
+        {
+            get { return _staticLibraries ?? (_staticLibraries = new HashSet<Type>()); }
+            set { _staticLibraries = value; }
+        }
+
+        public void QueryActions(List<IActionMetaInfo> actions)
+        {
+
+            foreach (
+                var type in
+                    GetLibraryTypes())
+            {
+
+                var category = type.GetCustomAttributes(typeof(uFrameCategory), true).OfType<uFrameCategory>().FirstOrDefault();
+                var descAttrib = type.GetCustomAttributes(typeof(ActionDescription), true).OfType<ActionDescription>().FirstOrDefault();
+                var title = type.GetCustomAttributes(typeof(ActionTitle), true).OfType<ActionTitle>().FirstOrDefault();
+                var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                foreach (var method in methods)
+                {
+                    if (method.Name.StartsWith("get_")) continue;
+                    if (method.Name.StartsWith("set_")) continue;
+                    var actionInfo = new ActionMethodMetaInfo(type)
+                    {
+                        Category = category,
+                        DescriptionAttribute = descAttrib,
+                        Method = method
+                    };
+
+                    actionInfo.MetaAttributes =
+                        method.GetCustomAttributes(typeof(ActionMetaAttribute), true)
+                            .OfType<ActionMetaAttribute>()
+                            .ToArray();
+
+                    if (actionInfo.Category == null)
+                    {
+                        actionInfo.Category = new uFrameCategory(type.Name);
+                    }
+                    //var genericArguments = method.GetGenericArguments();
+                    var vars = method.GetParameters();
+
+                    if (!method.IsStatic)
+                    {
+                        var fieldMetaInfo = new ActionFieldInfo()
+                        {
+                            MemberType = new SystemTypeInfo(type),
+                            Name = "Instance",
+                            IsBranch = false,
+                            MemberName = "Instance",
+                            IsByRef = false,
+                            DisplayType = new In() { DisplayName = "Instance",IsNewLine = true, ParameterName = "Instance"}
+                        };
+
+                        actionInfo.InstanceInfo = fieldMetaInfo;
+                        actionInfo.ActionFields.Add(fieldMetaInfo);
+                    }
+                    foreach (var parameter in vars)
+                    {
+                        var fieldMetaInfo = new ActionFieldInfo()
+                        {
+                            MemberType = new SystemTypeInfo(parameter.ParameterType),
+                            Name = parameter.Name,
+                            IsBranch = parameter.ParameterType.IsSubclassOf(typeof(Delegate)),
+                            MemberName = parameter.Name,
+                            IsByRef = parameter.ParameterType.IsByRef
+                        };
+                        if (!uFrameECS.SystemTypes.Contains(parameter.ParameterType))
+                            uFrameECS.SystemTypes.Add(parameter.ParameterType);
+
+                        //  Should these be part of the action meta info class ? - Micah Oct-15-2015
+                        var paramDescr = parameter.GetCustomAttributes(typeof(Description), true).OfType<Description>().FirstOrDefault();
+                        var paramOpt = parameter.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
+                        if (paramDescr != null) fieldMetaInfo.Description = paramDescr.Text;
+                        if (paramOpt != null) fieldMetaInfo.IsOptional = true;
+
+
+                        fieldMetaInfo.MetaAttributes =
+                            parameter.GetCustomAttributes(typeof(ActionAttribute), true)
+                                .Cast<ActionAttribute>().ToArray();
+
+                        //if (!fieldMetaInfo.MetaAttributes.Any())
+                        //{
+                        if (parameter.IsOut || fieldMetaInfo.IsBranch)
+                        {
+                            fieldMetaInfo.DisplayType = new Out(parameter.Name, parameter.Name);
+                          
+
+                        }
+                        else
+                        {
+                            fieldMetaInfo.DisplayType = new In(parameter.Name, parameter.Name);
+                        }
+               
+                        //}
+                        actionInfo.ActionFields.Add(fieldMetaInfo);
+                        if (fieldMetaInfo.IsBranch)
+                        {
+                            var parameters = parameter.ParameterType.GetMethod("Invoke").GetParameters();
+                            foreach (var p in parameters)
+                            {
+                                var result = new ActionFieldInfo()
+                                {
+                                    MemberType = new SystemTypeInfo(p.ParameterType),
+                                    IsReturn = false,
+                                    Name = p.Name,
+                                    MemberName = p.Name,
+                                    IsDelegateMember = true
+                                };
+
+                                //result.MetaAttributes =
+                                //    method.GetCustomAttributes(typeof (FieldDisplayTypeAttribute), true)
+                                //        .OfType<FieldDisplayTypeAttribute>().ToArray();
+
+                                result.DisplayType = new Out(p.Name, p.Name);
+                                actionInfo.ActionFields.Add(result);
+                            }
+
+                        }
+                    }
+                    if (method.ReturnType != typeof(void))
+                    {
+                        var result = new ActionFieldInfo()
+                        {
+                            MemberType = new SystemTypeInfo(method.ReturnType),
+                            IsReturn = true,
+                            Name = "Result",
+                            MemberName = "Result"
+                        };
+                        if (!uFrameECS.SystemTypes.Contains(method.ReturnType))
+                            uFrameECS.SystemTypes.Add(method.ReturnType);
+
+                        result.MetaAttributes =
+                            method.GetCustomAttributes(typeof(FieldDisplayTypeAttribute), true)
+                                .OfType<FieldDisplayTypeAttribute>()
+                                .Where(p => p.ParameterName == "Result").ToArray();
+
+                        result.DisplayType = new Out("Result", "Result");
+                        actionInfo.ActionFields.Add(result);
+                    }
+
+                    actions.Add(actionInfo);
+                }
+
+            }
+        }
+
+        private IEnumerable<Type> GetLibraryTypes()
+        {
+            foreach (var assembly in InvertApplication.CachedAssemblies.Concat(InvertApplication.TypeAssemblies))
+            {
+                foreach (var item in assembly.GetTypes().Where(p => p.IsSealed && p.IsDefined(typeof(ActionLibrary), true) || StaticLibraries.Contains(p)))
+                {
+                    yield return item;
+                }
+            }
+            var graphConfig = Container.Resolve<DatabaseService>().CurrentConfiguration;
+            if (graphConfig != null)
+            {
+                var typeReferences = graphConfig.Repository.All<TypeReferenceNode>();
+                foreach (var item in typeReferences)
+                {
+                    var t = item.Type;
+                    if (t == null) continue;
+                    yield return t;
+                }
+
+            }
+
+
+        }
+
+        public void RecordInserted(IDataRecord record)
+        {
+            if (record is TypeReferenceNode)
+            {
+                this.Container.Resolve<uFrameECS>().LoadActions();
+            }
+        }
+
+        public void PropertyChanged(IDataRecord record, string name, object previousValue, object nextValue)
+        {
+            if (record is TypeReferenceNode)
+            {
+                this.Container.Resolve<uFrameECS>().LoadActions();
+            }
+        }
+
+        public void RecordRemoved(IDataRecord record)
+        {
+            if (record is TypeReferenceNode)
+            {
+                this.Container.Resolve<uFrameECS>().LoadActions();
+            }
+        }
+    }
+
+    public class ECSConnectionStrategy : DefaultConnectionStrategy
+    {
+        //protected override bool CanConnect(EventNode output, HandlerNode input)
+        //{
+        //    if (input.Meta == output)
+        //    {
+        //        return true;
+        //    }
+        //    return base.CanConnect(output, input);
+        //}
+
+        //public override bool IsConnected(IRepository currentRepository, EventNode output, HandlerNode input)
+        //{
+        //    if (input.Meta == output)
+        //    {
+        //        return true;
+        //    }
+        //    return base.IsConnected(currentRepository, output, input);
+        //}
+        public override bool IsConnected(ConnectorViewModel output, ConnectorViewModel input)
+        {
+            var handler = input.DataObject as HandlerNode;
+            var evt = output.DataObject as EventNode;
+            if (handler != null && evt != null && handler.Meta != null)
+            {
+                if (handler.Meta.FullName == evt.FullName)
+                {
+                    return true;
+                }
+
+
+            }
+
+            var group = output.DataObject as IMappingsConnectable;
+            if (handler != null && group != null)
+            {
+                if (handler.HandlerInputs.Any(p => p.Item == group))
+                {
+                    return true;
+                }
+            }
+
+            evt = input.DataObject as EventNode;
+            handler = output.DataObject as HandlerNode;
+
+            if (handler != null && evt != null && handler.FilterNodes.OfType<PublishEventNode>().Any(p => p.Event.Item == evt))
+            {
+                return true;
+            }
+
+
+            
+            //if (handler  != null)
+
+
+            return base.IsConnected(output, input);
+        }
+
+        public override ConnectionViewModel Connect(DiagramViewModel diagramViewModel, ConnectorViewModel a, ConnectorViewModel b)
+        {
+            return base.Connect(diagramViewModel, a, b);
+        }
+
+        public override Color ConnectionColor { get { return new Color(0.2f,0.2f,0.2f,0.4f); } }
+        public override void Remove(ConnectorViewModel output, ConnectorViewModel input)
+        {
+           
+        }
+    }
+
+    public class EventsExplorerProvider : IExplorerProvider
+    {
+        public string Name { get { return "Events"; } }
+        public List<IItem> GetItems(IRepository repository)
+        {
+            var list = new List<IItem>();
+            foreach (var item in repository.All<EventNode>())
+            {
+                var eventCategory = new SelectionMenuCategory()
+                {
+                    Title = item.Name,
+                    Expanded = true
+                };
+                list.Add(eventCategory);
+
+                //var listenersCategory = new SelectionMenuCategory() {Title = "Listeners", Expanded = true};
+                //var publishersCategory = new SelectionMenuCategory() {Title = "Publishers", Expanded = true};
+               
+          
+
+                foreach (var listener in repository.All<HandlerNode>().Where(p => p.Meta == item))
+                {
+                    //listenersCategory.Add(new SelectionMenuItem(string.Empty, "-> " + listener.Name, () => { }));
+                    //if (!eventCategory.ChildItems.Contains(listenersCategory))
+                    //{
+                    //    eventCategory.Add(listenersCategory);
+                    //}
+                    eventCategory.Add(new SelectionMenuItem(string.Empty, "-> " + listener.Title, () => { }));
+                }
+                //foreach (var listener in repository.All<HandlerNode>().Where(p=>p.FilterNodes.OfType<PublishEventNode>().Any(x=>x.SelectedEvent == item)))
+                //{
+                //    // publishersCategory.Add(new SelectionMenuItem(string.Empty,listener.Name,()=> {}));
+                //    //if (!eventCategory.ChildItems.Contains(publishersCategory))
+                //    //{
+                //    //    eventCategory.Add(publishersCategory);
+                //    //}
+                //    eventCategory.Add(new SelectionMenuItem(string.Empty, listener.Title + " -> ", () => { }));
+                //}
+
+            }
+            return list;
+        }
+    }
     public class uFrameECSPage : DocumentationPage
     {
 
@@ -1176,14 +1457,14 @@ namespace Invert.uFrame.ECS
             }
             _.Break();
             _.Title2("Outputs");
-            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out && !p.MemberType.IsAssignableTo(new SystemTypeInfo(typeof(Action)))))
+            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out && !p.MemberType.IsAssignableTo(new SystemTypeInfo(typeof(Delegate)))))
             {
                 _.Title3(item.Name);
                 PrintDescription(_, item);
             }
             _.Break();
             _.Title2("Branches");
-            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out && p.MemberType.IsAssignableTo(new SystemTypeInfo(typeof(Action)))))
+            foreach (var item in MetaInfo.GetMembers().OfType<IActionFieldInfo>().Where(p => p.DisplayType is Out && p.MemberType.IsAssignableTo(new SystemTypeInfo(typeof(Delegate)))))
             {
                 _.Title3(item.Name);
                 PrintDescription(_, item);

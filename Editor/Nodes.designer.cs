@@ -92,6 +92,24 @@ namespace Invert.uFrame.ECS {
     public partial interface ILibraryConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
+    public class NullNodeBase : LiteralNode {
+        
+        public override bool AllowMultipleInputs {
+            get {
+                return true;
+            }
+        }
+        
+        public override bool AllowMultipleOutputs {
+            get {
+                return true;
+            }
+        }
+    }
+    
+    public partial interface INullConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+    }
+    
     public class StringLiteralNodeBase : VariableNode {
         
         public override bool AllowMultipleInputs {
@@ -524,6 +542,24 @@ namespace Invert.uFrame.ECS {
     public partial interface ICollectionModifiedHandlerConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
+    public class ObjectNodeBase : LiteralNode {
+        
+        public override bool AllowMultipleInputs {
+            get {
+                return true;
+            }
+        }
+        
+        public override bool AllowMultipleOutputs {
+            get {
+                return true;
+            }
+        }
+    }
+    
+    public partial interface IObjectConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+    }
+    
     public class PropertyChangedNodeBase : HandlerNode {
         
         public override bool AllowMultipleInputs {
@@ -589,6 +625,24 @@ namespace Invert.uFrame.ECS {
     }
     
     public partial interface IGroupConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+    }
+    
+    public class DescriptorNodeBase : Invert.Core.GraphDesigner.GenericNode {
+        
+        public override bool AllowMultipleInputs {
+            get {
+                return true;
+            }
+        }
+        
+        public override bool AllowMultipleOutputs {
+            get {
+                return true;
+            }
+        }
+    }
+    
+    public partial interface IDescriptorConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
     public class Vector3NodeBase : LiteralNode {
@@ -659,7 +713,7 @@ namespace Invert.uFrame.ECS {
     public partial interface ILiteralConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
     }
     
-    public class ComponentNodeBase : Invert.Core.GraphDesigner.GenericInheritableNode, Invert.Core.GraphDesigner.IClassTypeNode, IRequireConnectable, IComponentsConnectable {
+    public class ComponentNodeBase : Invert.Core.GraphDesigner.GenericInheritableNode, Invert.Core.GraphDesigner.IClassTypeNode, IRequireConnectable {
         
         public virtual string ClassName {
             get {
@@ -945,16 +999,10 @@ namespace Invert.uFrame.ECS {
             }
         }
         
-        public virtual System.Collections.Generic.IEnumerable<Invert.Core.IItem> PossibleComponents {
+        [Invert.Core.GraphDesigner.Section("Variables", SectionVisibility.WhenNodeIsFilter, OrderIndex=0, IsNewRow=true)]
+        public virtual System.Collections.Generic.IEnumerable<VariablesChildItem> Variables {
             get {
-                return this.Repository.AllOf<IComponentsConnectable>().Cast<IItem>();
-            }
-        }
-        
-        [Invert.Core.GraphDesigner.ReferenceSection("Components", SectionVisibility.Always, false, false, typeof(IComponentsConnectable), false, OrderIndex=0, HasPredefinedOptions=false, IsNewRow=false)]
-        public virtual System.Collections.Generic.IEnumerable<ComponentsReference> Components {
-            get {
-                return PersistedItems.OfType<ComponentsReference>();
+                return PersistedItems.OfType<VariablesChildItem>();
             }
         }
     }
@@ -973,19 +1021,6 @@ namespace Invert.uFrame.ECS {
         public override bool AllowMultipleOutputs {
             get {
                 return true;
-            }
-        }
-        
-        public virtual System.Collections.Generic.IEnumerable<Invert.Core.IItem> PossibleComponents {
-            get {
-                return this.Repository.AllOf<IComponentsConnectable>().Cast<IItem>();
-            }
-        }
-        
-        [Invert.Core.GraphDesigner.ReferenceSection("Components", SectionVisibility.Always, false, false, typeof(IComponentsConnectable), false, OrderIndex=0, HasPredefinedOptions=false, IsNewRow=false)]
-        public virtual System.Collections.Generic.IEnumerable<ComponentsReference> Components {
-            get {
-                return PersistedItems.OfType<ComponentsReference>();
             }
         }
     }

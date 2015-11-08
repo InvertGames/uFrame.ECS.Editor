@@ -29,6 +29,13 @@ namespace Invert.uFrame.ECS
             get { return false; }
         }
 
+        public IEnumerable<IMemberInfo> DelegateMembers
+        {
+            get { yield break; }
+        }
+
+        public bool IsDelegateMember { get; set; }
+
         public IActionFieldInfo ActionFieldInfo { get; set; }
 
         public string VariableName

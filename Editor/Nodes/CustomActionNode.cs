@@ -86,6 +86,11 @@ namespace Invert.uFrame.ECS {
             set { this.Changed("IsAsync", ref _isAsync, value); }
         }
 
+        public void WriteCode(TemplateContext ctx, ActionNode node)
+        {
+            
+        }
+
         public override void Accept(ISequenceVisitor csharpVisitor)
         {
            

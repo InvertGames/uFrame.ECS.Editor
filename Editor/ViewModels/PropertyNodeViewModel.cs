@@ -14,9 +14,23 @@ namespace Invert.uFrame.ECS {
                 base(graphItemObject, diagramViewModel) {
         }
 
+        public PropertyNode PropertyNode
+        {
+            get
+            {
+                return DataObject as PropertyNode;
+            }
+        }
         public override IEnumerable<string> Tags
         {
-            get { yield break; }
+            get
+            {
+                if (PropertyNode.VariableType != null)
+                {
+                    yield return PropertyNode.VariableType.TypeName;
+                }
+                yield break;
+            }
         }
 
         public override void DataObjectChanged()

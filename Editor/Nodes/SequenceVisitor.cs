@@ -184,15 +184,15 @@ namespace Invert.uFrame.ECS
                     hasInferredOutput = true;
                 }
             }
-            if (!hasInferredOutput)
-            {
+            //if (!hasInferredOutput)
+            //{
                 var innerRight = actionNode.OutputsTo<SequenceItemNode>().FirstOrDefault(p => p.Filter == actionNode);
                 if (innerRight != null)
                     Visit(innerRight);
                 var outterRight = actionNode.OutputsTo<SequenceItemNode>().FirstOrDefault(p => p.Filter != actionNode);
                 if (outterRight != null)
                     Visit(outterRight);
-            }
+            //}
         }
 
         public virtual void VisitAction(SequenceItemNode actionNode)

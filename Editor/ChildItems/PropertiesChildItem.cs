@@ -1,5 +1,7 @@
 using Invert.Json;
+using JetBrains.Annotations;
 using uFrame.Attributes;
+using UnityEngine;
 
 namespace Invert.uFrame.ECS {
     using System;
@@ -7,9 +9,15 @@ namespace Invert.uFrame.ECS {
     using System.Collections.Generic;
     using System.Linq;
     using Invert.Core.GraphDesigner;
-    
-    
-    public class PropertiesChildItem : PropertiesChildItemBase {
+    using Invert.Data;
+
+    public interface IDescriptorItem : IDiagramNodeItem, ITypedItem
+    {
+        IEnumerable<DescriptorNode> Descriptors { get; }
+        
+    }
+    public class PropertiesChildItem : PropertiesChildItemBase, IDescriptorItem
+    {
         private string _friendlyName;
 
 
@@ -17,7 +25,7 @@ namespace Invert.uFrame.ECS {
         {
             get { return "Connect to any other node which represents a Type. This will set corresponding type of the property."; }
         }
-
+   
         public override string RelatedTypeName
         {
             get
@@ -56,7 +64,7 @@ namespace Invert.uFrame.ECS {
             get { return typeof(int).Name; }
         }
 
-        [InspectorProperty]
+        [InspectorProperty, NodeFlag("Mapping", NodeColor.Blue)]
         public bool Mapping
         {
             get
@@ -75,6 +83,8 @@ namespace Invert.uFrame.ECS {
             set { this["HideInUnityInspector"] = value; }
         }
 
+
+
         public override IEnumerable<Attribute> GetAttributes()
         {
             if (Mapping)
@@ -83,6 +93,20 @@ namespace Invert.uFrame.ECS {
             }
           
 
+        }
+
+        public IEnumerable<DescriptorNode> Descriptors
+        {
+            get
+            {
+                foreach (var item in this.Repository.All<DescriptorNode>())
+                {
+                    if (this[item.Identifier])
+                    {
+                        yield return item;
+                    }
+                }
+            }
         }
     }
     

@@ -37,6 +37,13 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class NullNodeDrawerBase : GenericNodeDrawer<NullNode,NullNodeViewModel> {
+        
+        public NullNodeDrawerBase(NullNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
     public class StringLiteralNodeDrawerBase : GenericNodeDrawer<StringLiteralNode,StringLiteralNodeViewModel> {
         
         public StringLiteralNodeDrawerBase(StringLiteralNodeViewModel viewModel) : 
@@ -170,6 +177,13 @@ namespace Invert.uFrame.ECS {
         }
     }
     
+    public class ObjectNodeDrawerBase : GenericNodeDrawer<ObjectNode,ObjectNodeViewModel> {
+        
+        public ObjectNodeDrawerBase(ObjectNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
     public class PropertyChangedNodeDrawerBase : GenericNodeDrawer<PropertyChangedNode,PropertyChangedNodeViewModel> {
         
         public PropertyChangedNodeDrawerBase(PropertyChangedNodeViewModel viewModel) : 
@@ -187,6 +201,13 @@ namespace Invert.uFrame.ECS {
     public class GroupNodeDrawerBase : GenericNodeDrawer<GroupNode,GroupNodeViewModel> {
         
         public GroupNodeDrawerBase(GroupNodeViewModel viewModel) : 
+                base(viewModel) {
+        }
+    }
+    
+    public class DescriptorNodeDrawerBase : GenericNodeDrawer<DescriptorNode,DescriptorNodeViewModel> {
+        
+        public DescriptorNodeDrawerBase(DescriptorNodeViewModel viewModel) : 
                 base(viewModel) {
         }
     }

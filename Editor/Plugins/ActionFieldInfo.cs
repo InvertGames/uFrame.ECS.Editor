@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using uFrame.Attributes;
@@ -15,6 +16,8 @@ namespace Invert.uFrame.ECS
         FieldDisplayTypeAttribute DisplayType { get; }
         bool IsBranch { get; }
         bool IsOptional { get; }
+        IEnumerable<IMemberInfo> DelegateMembers { get; }
+        bool IsDelegateMember { get; set; }
     }
 
     public class ActionFieldInfo : IActionFieldInfo
@@ -76,8 +79,31 @@ namespace Invert.uFrame.ECS
         public ITypeInfo MemberType { get; set; }
         public IEnumerable<Attribute> GetAttributes()
         {
-            return MetaAttributes;
+            if (MetaAttributes == null)
+                yield break;
+
+            foreach (var item in MetaAttributes)
+                yield return item;
         }
 
+
+        public IEnumerable<IMemberInfo> DelegateMembers
+        {
+            get
+            {
+                var member = MemberType.GetMembers().OfType<IMethodMemberInfo>().FirstOrDefault(p => p.MemberName == "Invoke");
+                if (member == null) yield break;
+                var parameters = member.GetParameters();
+                foreach (var item in parameters)
+                {
+                    yield return item;
+                    
+                }
+            }
+        }
+
+        public bool IsDelegateMember { get; set; }
     }
+
+    
 }

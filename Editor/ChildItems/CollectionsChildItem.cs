@@ -6,7 +6,8 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
     
     
-    public class CollectionsChildItem : CollectionsChildItemBase, IMemberInfo {
+    public class CollectionsChildItem : CollectionsChildItemBase, IMemberInfo, IDescriptorItem
+    {
         public override Type Type
         {
             get { return base.Type ?? typeof(int); }
@@ -23,6 +24,19 @@ namespace Invert.uFrame.ECS {
             }
         }
 
+        public IEnumerable<DescriptorNode> Descriptors
+        {
+            get
+            {
+                foreach (var item in this.Repository.All<DescriptorNode>())
+                {
+                    if (this[item.Identifier])
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
     }
     
     public partial interface ICollectionsConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {

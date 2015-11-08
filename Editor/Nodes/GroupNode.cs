@@ -18,8 +18,24 @@ namespace Invert.uFrame.ECS {
         IVariableContextProvider,
         IVariableNameProvider,
         IDemoVersionLimit
-    
+
     {
+        private int _componentId;
+
+        [JsonProperty, InspectorProperty]
+        public int ComponentId
+        {
+            get
+            {
+                if (_componentId == 0)
+                {
+                    _componentId = Repository.GetSingleLazy<ComponentIds>().NextId;
+                }
+                return _componentId;
+            }
+            set { this.Changed("ComponentId", ref _componentId, value); }
+        }
+
         public override ITypeInfo BaseTypeInfo
         {
             get { return (SystemTypeInfo)uFrameECS.EcsGroupType; }

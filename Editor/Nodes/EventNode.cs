@@ -1,3 +1,4 @@
+using Invert.Data;
 using Invert.Json;
 
 namespace Invert.uFrame.ECS {
@@ -8,9 +9,25 @@ namespace Invert.uFrame.ECS {
     using Invert.Core;
     using Invert.Core.GraphDesigner;
 
-
+    public class EventIds : IntegerIdProvider { }
     public class EventNode : EventNodeBase, IEventMetaInfo, IDemoVersionLimit, IClassNode
     {
+        private int _eventId;
+
+        [JsonProperty, InspectorProperty]
+        public int EventId
+        {
+            get
+            {
+                if (_eventId == 0)
+                {
+                    _eventId = Repository.GetSingleLazy<EventIds>().NextId;
+                }
+                return _eventId;
+            }
+            set { this.Changed("EventId", ref _eventId, value); }
+        }
+
         public override void Validate(List<ErrorInfo> errors)
         {
             base.Validate(errors);
@@ -41,6 +58,8 @@ namespace Invert.uFrame.ECS {
                 return Name;
             }
         }
+
+
 
         //[InspectorProperty]
         //public bool NeedsMappings

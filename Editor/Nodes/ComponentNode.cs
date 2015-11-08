@@ -53,14 +53,68 @@ namespace Invert.uFrame.ECS {
             get { return ListType.BaseTypeInfo; }
         }
 
+        public bool HasAttribute(Type attribute)
+        {
+            return false;
+        }
+
         public string Title { get { return TypeName; } }
         public string Group { get { return ListType.Namespace; } }
         public string SearchTag { get{return FullName;} }
         public string Description { get{return FullName; }set{} }
         public string Identifier { get{return FullName;} set{} }
     }
-    public class ComponentNode : ComponentNodeBase, IComponentsConnectable, IMappingsConnectable, ITypedItem, IDemoVersionLimit, IClassNode {
+
+    public class IntegerIdProvider : IDataRecord
+    {
+        public string Identifier { get; set; }
+        public IRepository Repository { get; set; }
+        public bool Changed { get; set; }
+
+        public IEnumerable<string> ForeignKeys
+        {
+            get { yield break; }
+        }
+
+        private int _currentId;
+
+        [JsonProperty, InspectorProperty]
+        public int CurrentId
+        {
+            get
+            {
+                return _currentId;
+            }
+            set { this.Changed("CurrentId", ref _currentId, value); }
+        }
+
+        public int NextId
+        {
+            get { return CurrentId++; }
+        }
+    }
+
+    public class ComponentIds : IntegerIdProvider { }
+    
+    public class ComponentNode : ComponentNodeBase, IMappingsConnectable, ITypedItem, IDemoVersionLimit, IClassNode {
         private string _customIcon;
+        private int _componentId;
+ 
+
+        [JsonProperty,InspectorProperty]
+        public int ComponentId
+        {
+            get
+            {
+                if (_componentId == 0)
+                {
+                    _componentId = Repository.GetSingleLazy<ComponentIds>().NextId;
+                }
+                return _componentId;
+            }
+            set { this.Changed("ComponentId", ref _componentId, value); }
+        }
+
 
         public override bool AllowOutputs
         {

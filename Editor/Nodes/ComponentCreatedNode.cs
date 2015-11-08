@@ -1,20 +1,22 @@
 using System.CodeDom;
 
-namespace Invert.uFrame.ECS {
+namespace Invert.uFrame.ECS
+{
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using Invert.Core;
     using Invert.Core.GraphDesigner;
-    
-    
-    public class ComponentCreatedNode : ComponentCreatedNodeBase {
+
+
+    public class ComponentCreatedNode : ComponentCreatedNodeBase
+    {
         public override int SetupOrder
         {
             get { return 1; }
         }
-        
+
         public override bool CanGenerate { get { return true; } }
         public override string DisplayName
         {
@@ -29,18 +31,16 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-       
-                    return string.Format("{0}ComponentCreated", Name);
-   
+                return string.Format("{0}", Name);
             }
         }
         public override string HandlerFilterMethodName
         {
             get
             {
-            
-                    return string.Format("{0}ComponentCreatedFilter", Name);
-     
+
+                return string.Format("{0}Filter", Name);
+
             }
         }
         public override string EventType
@@ -48,7 +48,7 @@ namespace Invert.uFrame.ECS {
             get
             {
                 if (EntityGroup.Item == null) return "...";
-                return EntityGroup.Item.Name;
+                return EntityGroup.Item.ContextTypeName;
                 //return SourceInputSlot.InputFrom<IMappingsConnectable>().Name;
             }
             set
@@ -78,7 +78,8 @@ namespace Invert.uFrame.ECS {
             }
         }
     }
-    
-    public partial interface IComponentCreatedConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable {
+
+    public partial interface IComponentCreatedConnectable : Invert.Core.GraphDesigner.IDiagramNodeItem, Invert.Core.GraphDesigner.IConnectable
+    {
     }
 }

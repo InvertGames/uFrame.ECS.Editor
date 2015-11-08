@@ -41,6 +41,13 @@ namespace Invert.uFrame.ECS
             set { this.Changed("IsOptional", ref _isOptional, value); }
         }
 
+        public IEnumerable<IMemberInfo> DelegateMembers
+        {
+            get { yield break; }
+        }
+
+        public bool IsDelegateMember { get; set; }
+
         public override IEnumerable<Attribute> GetAttributes()
         {
             if (IsTypeSelection)

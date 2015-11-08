@@ -19,6 +19,14 @@ namespace Invert.uFrame.ECS {
                 base(graphItemObject, diagramViewModel) {
         }
 
+        public override NodeColor Color
+        {
+            get
+            {
+                return NodeColor.Indianred4;
+            }
+        }
+
         public HandlerNode Handler
         {
             get { return GraphItem as HandlerNode; }
@@ -29,11 +37,15 @@ namespace Invert.uFrame.ECS {
             get
             {
                 yield return Handler.DisplayName;
-                if (Handler.CodeHandler)
+   
+                if (Handler.Custom)
+                {
+                    yield return "Custom";
+                } else if (Handler.CodeHandler)
                 {
                     yield return "Code Handler";
                 }
-             
+
             }
         }
 

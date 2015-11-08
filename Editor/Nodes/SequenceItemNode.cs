@@ -227,6 +227,7 @@ namespace Invert.uFrame.ECS
         protected virtual void WriteActionOutput(TemplateContext _, IActionOut output)
         {
             if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsReturn) return;
+            if (output.ActionFieldInfo != null && output.ActionFieldInfo.IsDelegateMember) return;
             _._("{0} = {1}.{2}", output.VariableName, VariableName, output.Name);
             var variableReference = output.OutputTo<IContextVariable>();
             if (variableReference != null)
@@ -237,6 +238,12 @@ namespace Invert.uFrame.ECS
             {
                 _.CurrentStatements.Add(new CodeAssignStatement(
                     new CodeSnippetExpression(actionIn.VariableName),
+                    new CodeSnippetExpression(output.VariableName)));
+            }
+            var outputChildItem = output.OutputTo<OutputsChildItem>();
+            if (outputChildItem != null)
+            {
+                _.CurrentStatements.Add(new CodeAssignStatement(new CodeSnippetExpression(outputChildItem.Name),
                     new CodeSnippetExpression(output.VariableName)));
             }
         }
