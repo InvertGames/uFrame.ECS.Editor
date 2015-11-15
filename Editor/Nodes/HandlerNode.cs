@@ -317,18 +317,30 @@ namespace Invert.uFrame.ECS
             };
 
 
-            foreach (var item in this.Repository.All<SystemNode>())
+            var systemNode = this.Container() as SystemNode;
+
+            if (systemNode != null)
+            {
+                yield return new ContextVariable(systemNode.Name)
+                {
+                    MemberExpression = string.Format("{0}.Instance", systemNode.Name),
+                    Node = this,
+                    VariableType = systemNode,
+                    Repository = this.Repository,
+                };
+            }
+            
+            foreach (var item in this.Repository.All<ComponentNode>().Where(p=>p.BlackBoard))
             {
                 yield return new ContextVariable(item.Name)
                 {
-                    MemberExpression = string.Format("{0}.Instance", item.Name),
+                    MemberExpression = string.Format("System.BlackBoardSystem.Get<{0}>()", item.Name),
                     Node = this,
                     VariableType = item,
                     Repository = this.Repository,
                 };
-
+             
             }
-
 
             yield return new ContextVariable("this")
             {

@@ -75,6 +75,14 @@ namespace Invert.uFrame.ECS {
             set { this["Mapping"] = value; }
         }
 
+        public override IEnumerable<IFlagItem> DisplayedFlags
+        {
+            get
+            {
+                foreach (var item in Descriptors)
+                    yield return item;
+            }
+        }
 
         [InspectorProperty]
         public bool HideInUnityInspector

@@ -51,6 +51,11 @@ namespace Invert.uFrame.ECS {
                 errors.AddError("Variable and Value must be set.", this.Node);
                 return;
             }
+            if (ValueInputSlot.Item.VariableType == null)
+            {
+                errors.AddError(string.Format("{0} doesn't have a type.", ValueInputSlot.Item.VariableName),this);
+                return;
+            }
             if (!ValueInputSlot.Item.VariableType.IsAssignableTo(VariableInputSlot.Item.VariableType))
             {
                 errors.AddError(string.Format("Variable types {0} and {1} do not match.", VariableInputSlot.Item.VariableType.FullName, ValueInputSlot.Item.VariableType.FullName),this.Node);

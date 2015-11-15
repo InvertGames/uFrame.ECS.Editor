@@ -99,7 +99,14 @@ namespace Invert.uFrame.ECS {
     public class ComponentNode : ComponentNodeBase, IMappingsConnectable, ITypedItem, IDemoVersionLimit, IClassNode {
         private string _customIcon;
         private int _componentId;
- 
+        private bool _blackBoard;
+
+        [JsonProperty,InspectorProperty,NodeFlag("Black Board")]
+        public bool BlackBoard
+        {
+            get { return _blackBoard; }
+            set { this.Changed("BlackBoard",ref _blackBoard, value); }
+        }
 
         [JsonProperty,InspectorProperty]
         public int ComponentId
