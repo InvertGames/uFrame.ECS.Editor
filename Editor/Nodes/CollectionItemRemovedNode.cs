@@ -14,7 +14,7 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-                if (Repository != null && SourceProperty.Source != null)
+                if (Repository != null && SourceProperty != null && SourceProperty.Source != null)
                     return string.Format("{0} Item Removed", SourceProperty.Source.MemberName);
                 return "PropertyChanged";
             }
