@@ -1,3 +1,6 @@
+using Invert.Json;
+using UnityEngine;
+
 namespace Invert.uFrame.ECS {
     using System;
     using System.Collections;
@@ -5,9 +8,15 @@ namespace Invert.uFrame.ECS {
     using System.Linq;
     using Invert.Core;
     using Invert.Core.GraphDesigner;
-    
-    
-    public class DescriptorNode : DescriptorNodeBase, IMappingsConnectable {
+    using Invert.Data;
+
+    public enum DescriptorNodeType
+    {
+        ComponentOnly,
+        ComponentProperties
+    }
+    public class DescriptorNode : DescriptorNodeBase, IMappingsConnectable, IFlagItem {
+        private NodeColor _flagColor;
         public IEnumerable<ComponentNode> SelectComponents { get { yield break; } }
         public string GetContextItemName(string mappingId)
         {
@@ -28,6 +37,17 @@ namespace Invert.uFrame.ECS {
             get { return string.Format("{0}.Components", SystemPropertyName); }
         }
 
+        [JsonProperty, NodeProperty]
+        public NodeColor FlagColor
+        {
+            get { return _flagColor; }
+            set { this.Changed("FlagColor", ref _flagColor, value); }
+        }
+
+        public override Color Color
+        {
+            get { return CachedStyles.GetColor(_flagColor); }
+        }
 
         public IEnumerable<IContextVariable> GetVariables(IFilterInput input)
         {
@@ -61,6 +81,11 @@ namespace Invert.uFrame.ECS {
         public IEnumerable<PropertiesChildItem> GetObservableProperties()
         {
             yield break;
+        }
+
+        NodeColor IFlagItem.Color
+        {
+            get { return FlagColor; }
         }
     }
     

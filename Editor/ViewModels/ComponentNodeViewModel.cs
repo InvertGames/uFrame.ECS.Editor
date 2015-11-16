@@ -24,6 +24,18 @@ namespace Invert.uFrame.ECS {
             }
         }
 
+        public override string SubTitle
+        {
+            get
+            {
+                if (ComponentNode.BlackBoard)
+                {
+                    return "Black Board Component";
+                }
+                return base.SubTitle;
+            }
+        }
+
         public ComponentNode ComponentNode
         {
             get
@@ -42,7 +54,10 @@ namespace Invert.uFrame.ECS {
         {
             get
             {
-               
+                if (ComponentNode.BlackBoard)
+                {
+                    return NodeColor.Black;
+                }
                 return base.Color;
             }
         }
