@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.IO;
+using System.Reflection;
 using Invert.Core.GraphDesigner.Unity;
 using Invert.Data;
 using Invert.IOC;
@@ -1012,6 +1013,22 @@ namespace Invert.uFrame.ECS
             {
                 foreach (var ca in item.Database.AllOf<CustomActionNode>().ToArray())
                     ca.CodeAction = true;
+            }
+            if (item.BuildNumber < 1)
+            {
+                InvertApplication.Log("Updating database.  You should commit changes to any version control.");
+                var systemNodes = item.Database.AllOf<SystemNode>().ToArray();
+                foreach (var sn in systemNodes)
+                {
+                    foreach (var f in sn.GetAllEditableFilesForNode(item.Database.GetSingle<uFrameDatabaseConfig>())
+                        .Where(p => File.Exists(p.FullPathName)))
+                    {
+                        InvertApplication.Log(string.Format("Removing file {0} for recompile.", f.FullPathName));
+                        File.Delete(f.FullPathName);
+                    }
+                }
+                Execute(new SaveAndCompileCommand() {ForceCompileAll = true});
+                item.BuildNumber = 1;
             }
         }
     }
