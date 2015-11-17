@@ -1024,7 +1024,7 @@ namespace Invert.uFrame.ECS
                         .Where(p => File.Exists(p.FullPathName)))
                     {
                         InvertApplication.Log(string.Format("Removing file {0} for recompile.", f.FullPathName));
-                        File.Delete(f.Filename);
+                        File.Delete(f.FullPathName);
                     }
                 }
                 Execute(new SaveAndCompileCommand() {ForceCompileAll = true});
