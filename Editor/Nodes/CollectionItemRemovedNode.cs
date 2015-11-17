@@ -23,7 +23,6 @@ namespace Invert.uFrame.ECS {
 
         public override void WriteEventSubscription(TemplateContext ctx, CodeMemberMethod filterMethod, CodeMemberMethod handlerMethod)
         {
-            base.WriteEventSubscription(ctx, filterMethod, handlerMethod);
             //base.WriteEventSubscription(ctx, filterMethod, handlerMethod);
             var relatedTypeProperty = SourceProperty.Source.MemberType as CollectionTypeInfo;
 
