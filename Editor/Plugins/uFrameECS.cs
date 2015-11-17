@@ -31,7 +31,22 @@ namespace Invert.uFrame.ECS
             var componentViewModel = obj.OfType<ComponentNodeViewModel>().FirstOrDefault();
             if (componentViewModel != null)
             {
-                
+                var property = componentViewModel.DataObject as GraphNode;
+                var db = Container.Resolve<DatabaseService>().CurrentConfiguration;
+                foreach (var item in db.Database.All<DescriptorNode>())
+                {
+                    var item1 = item;
+                    ui.AddCommand(new ContextMenuItem()
+                    {
+                        Checked = property[item.Identifier],
+                        Title = item.Name,
+                        Group = "Descriptors",
+                        Command = new LambdaCommand(item.Name, () =>
+                        {
+                            property[item1.Identifier] = !property[item1.Identifier];
+                        })
+                    });
+                }
             }
             var propertyViewModel = obj.OfType<TypedItemViewModel>().FirstOrDefault();
             if (propertyViewModel != null)

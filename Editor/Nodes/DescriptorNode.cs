@@ -12,11 +12,12 @@ namespace Invert.uFrame.ECS {
 
     public enum DescriptorNodeType
     {
-        ComponentOnly,
-        ComponentProperties
+        Components,
+        Properties,
     }
     public class DescriptorNode : DescriptorNodeBase, IMappingsConnectable, IFlagItem {
         private NodeColor _flagColor;
+        private DescriptorNodeType _descriptorType = DescriptorNodeType.Properties;
         public IEnumerable<ComponentNode> SelectComponents { get { yield break; } }
         public string GetContextItemName(string mappingId)
         {
@@ -36,7 +37,12 @@ namespace Invert.uFrame.ECS {
         {
             get { return string.Format("{0}.Components", SystemPropertyName); }
         }
-
+        [JsonProperty, NodeProperty]
+        public DescriptorNodeType Type
+        {
+            get { return _descriptorType; }
+            set { this.Changed("Type", ref _descriptorType, value); }
+        }
         [JsonProperty, NodeProperty]
         public NodeColor FlagColor
         {
