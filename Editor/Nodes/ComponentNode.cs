@@ -95,7 +95,11 @@ namespace Invert.uFrame.ECS {
     }
 
     public class ComponentIds : IntegerIdProvider { }
-    
+
+    public interface IComponentId : IDiagramNode
+    {
+        int ComponentId { get; set; }
+    }
     public class ComponentNode : ComponentNodeBase, IMappingsConnectable, ITypedItem, IDemoVersionLimit, IClassNode {
         private string _customIcon;
         private int _componentId;

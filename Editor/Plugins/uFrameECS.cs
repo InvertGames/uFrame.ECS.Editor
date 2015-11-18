@@ -85,7 +85,8 @@ namespace Invert.uFrame.ECS
         IExecuteCommand<GroupActionNodes>,
         IQueryTypes,
         IDocumentationProvider,
-        IUpgradeDatabase
+        IUpgradeDatabase,
+        ICompilingStarted
     {
         public override decimal LoadPriority
         {
@@ -1053,6 +1054,23 @@ namespace Invert.uFrame.ECS
              
                
             }
+        }
+
+        public void CompilingStarted(IRepository repository)
+        {
+            var items = repository.AllOf<IComponentId>().OrderBy(p => p.ComponentId).ToArray();
+            for (int index = 0; index < items.Length; index++)
+            {
+                var item = items[index];
+                item.ComponentId = index + 1;
+            }
+            var eventIds = repository.AllOf<IEventId>().OrderBy(p => p.EventId).ToArray();
+            for (int index = 0; index < eventIds.Length; index++)
+            {
+                var item = eventIds[index];
+                item.EventId = index + 1;
+            }
+            repository.Commit();
         }
     }
 

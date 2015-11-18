@@ -10,7 +10,12 @@ namespace Invert.uFrame.ECS {
     using Invert.Core.GraphDesigner;
 
     public class EventIds : IntegerIdProvider { }
-    public class EventNode : EventNodeBase, IEventMetaInfo, IDemoVersionLimit, IClassNode
+
+    public interface IEventId : IDiagramNode
+    {
+        int EventId { get; set; }
+    }
+    public class EventNode : EventNodeBase, IEventMetaInfo, IDemoVersionLimit, IClassNode, IEventId
     {
         private int _eventId;
 
