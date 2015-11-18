@@ -143,6 +143,7 @@ namespace Invert.uFrame.ECS
             UserMethod.AllowAddingInMenu = false;
             Action.AllowAddingInMenu = false;
             SequenceItem.AllowAddingInMenu = false;
+            System.HasSubNode<EnumNode>();
             //            VariableReference.AllowAddingInMenu = false;
             CustomAction.Name = "Custom Action";
             System.Name = "System";
