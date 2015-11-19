@@ -86,7 +86,7 @@ namespace Invert.uFrame.ECS
         IQueryTypes,
         IDocumentationProvider,
         IUpgradeDatabase,
-        ICompilingStarted
+        ICompilingStarted, IGraphSelectionEvents
     {
         public override decimal LoadPriority
         {
@@ -1018,10 +1018,59 @@ namespace Invert.uFrame.ECS
 
         public void GetPages(List<DocumentationPage> rootPages)
         {
-            foreach (var item in Actions)
+            //foreach (var item in Actions)
+            //{
+            //    rootPages.Add(new ActionPage() { MetaInfo = item.Value });
+            //}
+            var configs = Container.Resolve<DatabaseService>().Configurations.Values;
+            if (configs != null)
             {
-                rootPages.Add(new ActionPage() { MetaInfo = item.Value });
+                foreach (var config in configs)
+                {
+                    var configPage = new ConfigPage(config);
+                    var systemsPage = new ConfigPage(config);
+                    //var componentsPage = new ConfigPage(config);
+
+                    foreach (var item in config.Repository.AllOf<SystemNode>())
+                    {
+
+                        if (item.Comments != null)
+                        {
+                            configPage.ChildPages.Add(new NodePage(item));
+                        }
+                   
+                    }
+                    foreach (var item in config.Repository.AllOf<HandlerNode>())
+                    {
+                        if (item.Comments != null)
+                        {
+                            systemsPage.ChildPages.Add(new NodePage(item));
+                        }
+                    }
+                    foreach (var item in config.Repository.AllOf<ComponentNode>())
+                    {
+                        if (item.Comments != null)
+                        {
+                            systemsPage.ChildPages.Add(new NodePage(item));
+                        }
+                    }
+                    foreach (var item in config.Repository.AllOf<GroupNode>())
+                    {
+                        if (item.Comments != null)
+                        {
+                            systemsPage.ChildPages.Add(new NodePage(item));
+                        }
+                    }
+           
+                    if (configPage.ChildPages.Count > 0)
+                    rootPages.Add(configPage);
+                }
+                
+             
+
+                
             }
+
         }
 
         public void UpgradeDatabase(uFrameDatabaseConfig item)
@@ -1071,6 +1120,17 @@ namespace Invert.uFrame.ECS
                 item.EventId = index + 1;
             }
             repository.Commit();
+        }
+
+        public void SelectionChanged(GraphItemViewModel selected)
+        {
+            if (uFrameHelp.Instance != null)
+            {
+                var item =
+                    uFrameHelp.Instance.AllPages().OfType<NodePage>().FirstOrDefault(p => p.Node == selected.DataObject);
+                uFrameHelp.Instance.PageStack.Push(item);
+
+            }
         }
     }
 
@@ -1538,4 +1598,34 @@ namespace Invert.uFrame.ECS
             }
         }
     }
+
+    public class ConfigPage : DocumentationPage
+    {
+        public ConfigPage(uFrameDatabaseConfig config)
+        {
+            Config = config;
+        }
+
+        public override string Name { get { return Config.Title; } }
+
+        public uFrameDatabaseConfig Config { get; set; }
+
+    }
+
+    public class NodePage : DocumentationPage
+    {
+        public NodePage(GenericNode node)
+        {
+            Node = node;
+        }
+        public override string Name { get { return Node.Name; } }
+        public GenericNode Node { get; set; }
+        public override void GetContent(IDocumentationBuilder _)
+        {
+            base.GetContent(_);
+            _.Title(Node.Name);
+
+        }
+    }
+
 }
