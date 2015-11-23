@@ -208,7 +208,7 @@ namespace Invert.uFrame.ECS
             SystemTypes.Add(typeof(UnityEngine.PlayerPrefs));
             SystemTypes.Add(typeof(UnityEngine.Application));
 
-       
+
 
             AddHandlerType(typeof(PropertyChangedNode));
             AddHandlerType(typeof(ComponentDestroyedNode));
@@ -240,19 +240,19 @@ namespace Invert.uFrame.ECS
             {
                 if (!Actions.ContainsKey(item.Identifier))
                 {
-   
+
                     Actions.Add(item.Identifier, item);
 
                     // BAckwards compatability ERGH!!
                     if (item.FullName != item.Identifier)
                     {
                         if (!Actions.ContainsKey(item.FullName))
-                        Actions.Add(item.FullName, item);
+                            Actions.Add(item.FullName, item);
                     }
 
-                    
+
                 }
-                
+
             }
         }
 
@@ -771,7 +771,7 @@ namespace Invert.uFrame.ECS
                     var item1 = item;
                     menu.AddItem(new SelectionMenuItem(contextVar.ShortName, item.MethodIdentifier, () =>
                     {
-                      
+
                     }));
                 }
 
@@ -1028,47 +1028,68 @@ namespace Invert.uFrame.ECS
                 foreach (var config in configs)
                 {
                     var configPage = new ConfigPage(config);
-                    var systemsPage = new ConfigPage(config);
+                    var componentsPage = new CategoryPage("Components/Descriptors/Groups");
+                    var systemsPage = new CategoryPage("Systems");
+                    var eventsPage = new CategoryPage("Events");
+                    configPage.ChildPages.Add(componentsPage);
+                    configPage.ChildPages.Add(systemsPage);
+                    configPage.ChildPages.Add(eventsPage);
                     //var componentsPage = new ConfigPage(config);
 
                     foreach (var item in config.Repository.AllOf<SystemNode>())
                     {
 
-                        if (item.Comments != null)
-                        {
-                            configPage.ChildPages.Add(new NodePage(item));
-                        }
-                   
+                        //if (item.Comments != null)
+                        //{ 
+
+
+                        systemsPage.ChildPages.Add(new NodePage(item));
+
+                        //}
+
                     }
-                    foreach (var item in config.Repository.AllOf<HandlerNode>())
-                    {
-                        if (item.Comments != null)
-                        {
-                            systemsPage.ChildPages.Add(new NodePage(item));
-                        }
-                    }
+                    //foreach (var item in config.Repository.AllOf<HandlerNode>())
+                    //{
+                    //    if (item.Comments != null)
+                    //    {
+                    //        componentsPage.ChildPages.Add(new NodePage(item));
+                    //    }
+                    //}
                     foreach (var item in config.Repository.AllOf<ComponentNode>())
                     {
-                        if (item.Comments != null)
-                        {
-                            systemsPage.ChildPages.Add(new NodePage(item));
-                        }
+
+                        componentsPage.ChildPages.Add(new NodePage(item));
+
                     }
                     foreach (var item in config.Repository.AllOf<GroupNode>())
                     {
-                        if (item.Comments != null)
-                        {
-                            systemsPage.ChildPages.Add(new NodePage(item));
-                        }
+
+                        componentsPage.ChildPages.Add(new NodePage(item));
+
                     }
-           
-                    if (configPage.ChildPages.Count > 0)
+                    foreach (var item in config.Repository.AllOf<DescriptorNode>())
+                    {
+
+                        componentsPage.ChildPages.Add(new NodePage(item));
+
+
+                    }
+
+                    foreach (var item in config.Repository.AllOf<EventNode>())
+                    {
+
+                        eventsPage.ChildPages.Add(new NodePage(item));
+
+                    }
+
+
+
                     rootPages.Add(configPage);
                 }
-                
-             
 
-                
+
+
+
             }
 
         }
@@ -1100,8 +1121,8 @@ namespace Invert.uFrame.ECS
                     item.Repository.Commit();
                     Execute(new SaveAndCompileCommand() { ForceCompileAll = true });
                 }
-             
-               
+
+
             }
         }
 
@@ -1128,8 +1149,17 @@ namespace Invert.uFrame.ECS
             {
                 var item =
                     uFrameHelp.Instance.AllPages().OfType<NodePage>().FirstOrDefault(p => p.Node == selected.DataObject);
-                uFrameHelp.Instance.PageStack.Push(item);
+                if (item == null)
+                {
+                    
+                }
 
+                if (item != null)
+                {
+                    uFrameHelp.Instance.PageStack.Push(item);
+                    uFrameHelp.Instance.Repaint();
+                }
+                
             }
         }
     }
@@ -1266,7 +1296,7 @@ namespace Invert.uFrame.ECS
                             IsBranch = false,
                             MemberName = "Instance",
                             IsByRef = false,
-                            DisplayType = new In() { DisplayName = "Instance",IsNewLine = true, ParameterName = "Instance"}
+                            DisplayType = new In() { DisplayName = "Instance", IsNewLine = true, ParameterName = "Instance" }
                         };
 
                         actionInfo.InstanceInfo = fieldMetaInfo;
@@ -1301,14 +1331,14 @@ namespace Invert.uFrame.ECS
                         if (parameter.IsOut || fieldMetaInfo.IsBranch)
                         {
                             fieldMetaInfo.DisplayType = new Out(parameter.Name, parameter.Name);
-                          
+
 
                         }
                         else
                         {
                             fieldMetaInfo.DisplayType = new In(parameter.Name, parameter.Name);
                         }
-               
+
                         //}
                         actionInfo.ActionFields.Add(fieldMetaInfo);
                         if (fieldMetaInfo.IsBranch)
@@ -1463,7 +1493,7 @@ namespace Invert.uFrame.ECS
             }
 
 
-            
+
             //if (handler  != null)
 
 
@@ -1475,10 +1505,10 @@ namespace Invert.uFrame.ECS
             return base.Connect(diagramViewModel, a, b);
         }
 
-        public override Color ConnectionColor { get { return new Color(0.2f,0.2f,0.2f,0.4f); } }
+        public override Color ConnectionColor { get { return new Color(0.2f, 0.2f, 0.2f, 0.4f); } }
         public override void Remove(ConnectorViewModel output, ConnectorViewModel input)
         {
-           
+
         }
     }
 
@@ -1499,8 +1529,8 @@ namespace Invert.uFrame.ECS
 
                 //var listenersCategory = new SelectionMenuCategory() {Title = "Listeners", Expanded = true};
                 //var publishersCategory = new SelectionMenuCategory() {Title = "Publishers", Expanded = true};
-               
-          
+
+
 
                 foreach (var listener in repository.All<HandlerNode>().Where(p => p.Meta == item))
                 {
@@ -1612,6 +1642,31 @@ namespace Invert.uFrame.ECS
 
     }
 
+    public class CategoryPage : DocumentationPage
+    {
+        private string _nameField;
+
+        public CategoryPage(string name)
+        {
+            _nameField = name;
+        }
+
+        public override string Name
+        {
+            get { return _nameField; }
+        }
+
+        public GenericNode Node { get; set; }
+        public override void GetContent(IDocumentationBuilder _)
+        {
+            base.GetContent(_);
+            foreach (var item in ChildPages.OfType<NodePage>())
+            {
+
+            }
+        }
+    }
+
     public class NodePage : DocumentationPage
     {
         public NodePage(GenericNode node)
@@ -1620,10 +1675,50 @@ namespace Invert.uFrame.ECS
         }
         public override string Name { get { return Node.Name; } }
         public GenericNode Node { get; set; }
+
+
         public override void GetContent(IDocumentationBuilder _)
         {
             base.GetContent(_);
-            _.Title(Node.Name);
+            //_.Title(Node.Name);
+            var r = _.EditableParagraph(Node.Comments);
+            if (r != Node.Comments)
+            {
+                Node.Comments = r;
+            }
+            foreach (var item in Node.GetMembers().OfType<PropertiesChildItem>())
+            {
+                _.Title2(item.MemberName);
+
+                var result = _.EditableParagraph(item.Description);
+                if (result != item.Description)
+                {
+                    item.Description = result;
+                }
+                _.Break();
+            }
+            var handlers = Node.Children.OfType<HandlerNode>().ToArray();
+            if (handlers.Length > 0)
+            {
+                _.Title2("Handlers");
+                foreach (var item in handlers)
+                {
+                    if (item.Meta == null) continue;
+                    _.Title3(string.Format("-> {0} -> {1}", item.Meta.Title, item.Name));
+
+                    var result = _.EditableParagraph(item.Comments);
+                    if (result != item.Comments)
+                    {
+                        item.Comments = result;
+                    }
+                    _.Break();
+
+                }
+
+            }
+
+
+
 
         }
     }
