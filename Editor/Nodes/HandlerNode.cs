@@ -467,7 +467,7 @@ namespace Invert.uFrame.ECS
             }
 
 
-            if (!Custom)
+            if (!Custom && this.Children.Any())
             {
                 // Push the context on the code template
                 var prevMethod = ctx.CurrentMethod;
