@@ -766,14 +766,14 @@ namespace Invert.uFrame.ECS
                         node.IsSelected = true;
                     }));
                 }
-                foreach (var item in contextVar.VariableType.GetMembers().OfType<IMethodMemberInfo>())
-                {
-                    var item1 = item;
-                    menu.AddItem(new SelectionMenuItem(contextVar.ShortName, item.MethodIdentifier, () =>
-                    {
+                //foreach (var item in contextVar.VariableType.GetMembers().OfType<IMethodMemberInfo>())
+                //{
+                //    var item1 = item;
+                //    menu.AddItem(new SelectionMenuItem(contextVar.ShortName, item.MethodIdentifier, () =>
+                //    {
 
-                    }));
-                }
+                //    }));
+                //}
 
             }
 
