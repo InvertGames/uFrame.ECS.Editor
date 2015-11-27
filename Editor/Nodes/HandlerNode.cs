@@ -399,10 +399,7 @@ namespace Invert.uFrame.ECS
         public override void WriteCode(ISequenceVisitor visitor, TemplateContext ctx)
         {
             VariableNode.VariableCount = 0;
-            if (!ctx.IsDesignerFile && Custom)
-            {
-                
-            }
+       
             var handlerMethod = WriteHandler(ctx);
             var filterMethod = WriteHandlerFilter(ctx, handlerMethod);
             WriteEventSubscription(ctx, filterMethod, handlerMethod);
@@ -412,15 +409,7 @@ namespace Invert.uFrame.ECS
             }
             else
             {
-
-                if (!Custom)
-                {
-                    ctx.CurrentDeclaration.Members.Remove(handlerMethod);
-                }
-                else
-                {
-                    handlerMethod.Attributes |= MemberAttributes.Override;
-                }
+                handlerMethod.Attributes |= MemberAttributes.Override;
                 ctx.CurrentDeclaration.Members.Remove(filterMethod);
             }
             
@@ -467,7 +456,7 @@ namespace Invert.uFrame.ECS
             }
 
 
-            if (!Custom && this.Children.Any())
+            if (this.Children.Any())
             {
                 // Push the context on the code template
                 var prevMethod = ctx.CurrentMethod;
@@ -489,7 +478,7 @@ namespace Invert.uFrame.ECS
                 ctx._("{0}.System = this", name);
 
                 WriteHandlerSetup(ctx, name, handlerMethod);
-                if (DebugSystem.IsDebugMode && !this.CodeHandler)
+                if (DebugSystem.IsDebugMode)
                     ctx._("StartCoroutine({0}.Execute())", name);
                 else
                     ctx._("{0}.Execute()", name);

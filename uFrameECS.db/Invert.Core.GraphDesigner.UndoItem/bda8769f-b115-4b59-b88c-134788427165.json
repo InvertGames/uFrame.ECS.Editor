@@ -1,0 +1,8 @@
+{
+	"Identifier":"bda8769f-b115-4b59-b88c-134788427165"	, 
+	"Time":"11/25/2015 10:28:56 PM"	, 
+	"Group":222856	, 
+	"DataRecordId":"be384d1b-30be-4560-a1c7-873ef94c503b"	, 
+	"Type":0	, 
+	"RecordType":"Invert.uFrame.ECS.EcsWorkspace, Assembly-CSharp-Editor-firstpass, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"	, 
+	"Data":"{\r\n\t\"Identifier\":\"be384d1b-30be-4560-a1c7-873ef94c503b\"\t, \r\n\t\"Name\":\"NewECSWorkspace\"\t, \r\n\t\"Expanded\":false}\r\n"}

@@ -396,7 +396,7 @@ namespace Invert.uFrame.ECS
                 var handler = handlerVM.Handler;
                 ui.AddCommand(new ContextMenuItem()
                 {
-                    Title = "Code Handler",
+                    Title = "Code Handler (Obsolete)",
                     Checked = handler.CodeHandler,
                     Command = new LambdaCommand(
                         "Toggle Code Handler",
@@ -407,12 +407,13 @@ namespace Invert.uFrame.ECS
                 });
                 ui.AddCommand(new ContextMenuItem()
                 {
-                    Title = "Custom",
+                    Title = "Custom (Obsolete)",
                     Checked = handler.Custom,
                     Command = new LambdaCommand(
                     "Toggle Custom Handler",
                 () =>
                 {
+
                     handler.Custom = !handler.Custom;
                 })
                 });
@@ -870,7 +871,7 @@ namespace Invert.uFrame.ECS
                     var handlerVM = firstOrDefault.ViewModelObject as HandlerNodeViewModel;
                     if (handlerVM != null)
                     {
-                        if (handlerVM.Handler.CodeHandler)
+                        if (false)
                         {
                             var config = InvertGraphEditor.Container.Resolve<IGraphConfiguration>();
                             var fileGenerators = InvertGraphEditor.GetAllFileGenerators(config, new[] { handlerVM.DataObject as IDataRecord }).ToArray();
@@ -1104,7 +1105,7 @@ namespace Invert.uFrame.ECS
             if (item.BuildNumber < 1)
             {
                 InvertApplication.Log("Updating database.  You should commit changes to any version control.");
-                if (InvertGraphEditor.Platform.MessageBox("Regenerate System Files", "This will delete all system node files and regenerate them, if you have already done this, then cancel this operation.", "OK",
+                if (InvertGraphEditor.Platform.MessageBox("Regenerate System Files", "IMPORTANT! This will delete all system node files and regenerate them, if you already have custom system code (most likely pro users only), then click no.", "OK",
                     "Nope, I've already fixed my systems."))
                 {
                     var systemNodes = item.Database.AllOf<SystemNode>().ToArray();
@@ -1117,11 +1118,11 @@ namespace Invert.uFrame.ECS
                             File.Delete(f.FullPathName);
                         }
                     }
-                    item.BuildNumber = 1;
-                    item.Repository.Commit();
-                    Execute(new SaveAndCompileCommand() { ForceCompileAll = true });
-                }
 
+                }
+                item.BuildNumber = 1;
+                item.Repository.Commit();
+                Execute(new SaveAndCompileCommand() { ForceCompileAll = true });
 
             }
         }
@@ -1140,6 +1141,7 @@ namespace Invert.uFrame.ECS
                 var item = eventIds[index];
                 item.EventId = index + 1;
             }
+
             repository.Commit();
         }
 
@@ -1151,7 +1153,7 @@ namespace Invert.uFrame.ECS
                     uFrameHelp.Instance.AllPages().OfType<NodePage>().FirstOrDefault(p => p.Node == selected.DataObject);
                 if (item == null)
                 {
-                    
+
                 }
 
                 if (item != null)
@@ -1159,7 +1161,7 @@ namespace Invert.uFrame.ECS
                     uFrameHelp.Instance.PageStack.Push(item);
                     uFrameHelp.Instance.Repaint();
                 }
-                
+
             }
         }
     }

@@ -37,22 +37,14 @@ namespace Invert.uFrame.ECS {
             get
             {
                 yield return Handler.DisplayName;
-   
-                if (Handler.Custom)
-                {
-                    yield return "Custom";
-                } else if (Handler.CodeHandler)
-                {
-                    yield return "Code Handler";
-                }
 
             }
         }
 
-        public override bool IsFilter
-        {
-            get { return !Handler.CodeHandler; }
-        }
+        //public override bool IsFilter
+        //{
+        //    get { return !Handler.CodeHandler; }
+        //}
 
         public HandlerNode HandlerNode
         {
