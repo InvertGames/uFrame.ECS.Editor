@@ -14,7 +14,7 @@ namespace Invert.uFrame.ECS {
     {
         private string _startActionId;
 
-        [JsonProperty]
+        [JsonProperty, KeyProperty]
         public string StartActionId
         {
             get

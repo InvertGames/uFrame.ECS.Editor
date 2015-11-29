@@ -72,11 +72,11 @@ namespace Invert.uFrame.ECS {
             set { _descriptionAttribute = value; }
         }
 
-        [InspectorProperty, JsonProperty, NodeFlag("Code Action")]
+        [InspectorProperty, JsonProperty]
         public bool CodeAction
         {
-            get { return _codeAction; }
-            set { this.Changed("CodeAction", ref _codeAction, value); }
+            get { return !Children.Any(); }
+            set {  }
         }
 
         [InspectorProperty, JsonProperty]
@@ -104,6 +104,7 @@ namespace Invert.uFrame.ECS {
             foreach (var item in Outputs)
             {
                 var v = item.InputFrom<IContextVariable>();
+                if (v != null)
                 ctx._("{0} = {1}", item.Name, v.VariableName);
             }
 

@@ -1097,13 +1097,11 @@ namespace Invert.uFrame.ECS
 
         public void UpgradeDatabase(uFrameDatabaseConfig item)
         {
-            if (item.BuildVersion < 1)
-            {
-                foreach (var ca in item.Database.AllOf<CustomActionNode>().ToArray())
-                    ca.CodeAction = true;
-            }
+
             if (item.BuildNumber < 1)
             {
+                item.BuildNumber = 1;
+                item.Repository.Commit();
                 InvertApplication.Log("Updating database.  You should commit changes to any version control.");
                 if (InvertGraphEditor.Platform.MessageBox("Regenerate System Files", "IMPORTANT! This will delete all system node files and regenerate them, if you already have custom system code (most likely pro users only), then click no.", "OK",
                     "Nope, I've already fixed my systems."))
@@ -1120,9 +1118,8 @@ namespace Invert.uFrame.ECS
                     }
 
                 }
-                item.BuildNumber = 1;
-                item.Repository.Commit();
-                Execute(new SaveAndCompileCommand() { ForceCompileAll = true });
+       
+                //Execute(new SaveAndCompileCommand() { ForceCompileAll = true });
 
             }
         }

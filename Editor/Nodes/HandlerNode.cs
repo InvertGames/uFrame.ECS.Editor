@@ -411,6 +411,7 @@ namespace Invert.uFrame.ECS
             {
                 handlerMethod.Attributes |= MemberAttributes.Override;
                 ctx.CurrentDeclaration.Members.Remove(filterMethod);
+                ctx.CurrentDeclaration.Members.Remove(handlerMethod);
             }
             
         }
@@ -426,7 +427,7 @@ namespace Invert.uFrame.ECS
             else
             {
                 var meta = Meta as EventMetaInfo;
-                if (meta != null)
+                if (meta != null && ctx.IsDesignerFile)
                 {
                     ctx.CurrentDeclaration.BaseTypes.Add(EventType);
                     var method = meta.SystemType.MethodFromTypeMethod(Meta.SystemEventMethod, false);
@@ -456,7 +457,7 @@ namespace Invert.uFrame.ECS
             }
 
 
-            if (this.Children.Any())
+            if (this.Children.Any() && ctx.IsDesignerFile)
             {
                 // Push the context on the code template
                 var prevMethod = ctx.CurrentMethod;

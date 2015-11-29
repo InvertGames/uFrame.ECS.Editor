@@ -538,7 +538,7 @@ namespace Invert.uFrame.ECS
             get { yield return ForIdentifier; }
         }
 
-        [JsonProperty]
+        [JsonProperty, KeyProperty]
         public string ForIdentifier
         {
             get { return _forIdentifier; }

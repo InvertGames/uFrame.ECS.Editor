@@ -38,10 +38,7 @@ namespace Invert.uFrame.ECS {
             }
         }
 
-        public override bool IsFilter
-        {
-            get { return !CustomActionNode.CodeAction; }
-        }
+
         protected override void CreateActionContent()
         {
             if (IsVisible(SectionVisibility.WhenNodeIsFilter))
