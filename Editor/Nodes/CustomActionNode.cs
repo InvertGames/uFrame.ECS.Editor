@@ -1,3 +1,4 @@
+using System.CodeDom;
 using Invert.Json;
 using uFrame.Attributes;
 
@@ -88,7 +89,35 @@ namespace Invert.uFrame.ECS {
 
         public void WriteCode(TemplateContext ctx, ActionNode node)
         {
-            
+            //base.WriteCode();
+            var varStatement = ctx.CurrentDeclaration._private_(node.Meta.FullName, node.VarName);
+            varStatement.InitExpression = new CodeObjectCreateExpression(node.Meta.FullName);
+
+            foreach (var item in node.GraphItems.OfType<IActionIn>())
+            {
+                var contextVariable = item.Item;
+                if (contextVariable == null)
+                    continue;
+                ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
+            }
+
+
+            ctx._("{0}.System = System", varStatement.Name);
+
+
+            foreach (var item in node.GraphItems.OfType<ActionBranch>())
+            {
+                var branchOutput = item.OutputTo<SequenceItemNode>();
+                if (branchOutput == null) continue;
+                if (DebugSystem.IsDebugMode)
+                    ctx._("{0}.{1} = ()=> {{ System.StartCoroutine({2}()); }}", varStatement.Name, item.Name, item.VariableName);
+                else
+                    ctx._("{0}.{1} = {2}", varStatement.Name, item.Name, item.VariableName);
+            }
+
+            ctx._("{0}.Execute()", varStatement.Name);
+
+            node.WriteActionOutputs(ctx);
         }
 
         public override void Accept(ISequenceVisitor csharpVisitor)

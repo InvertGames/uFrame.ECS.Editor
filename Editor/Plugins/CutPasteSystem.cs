@@ -161,7 +161,7 @@ namespace Invert.uFrame.ECS
                 copiedNode.Graph = InvertGraphEditor.CurrentDiagramViewModel.GraphData;
                 repository.Add(copiedNode);
 
-                foreach (var child in node.PersistedItems.ToArray())
+                foreach (var child in node.GraphItems.ToArray())
                 {
                     if (child == node) continue;
                     var childJson = InvertJsonExtensions.SerializeObject(child);
@@ -171,7 +171,7 @@ namespace Invert.uFrame.ECS
                     repository.Add(copiedChild);
                 }
 
-          
+                //item.GetPropertiesByAttribute<>()
                 InvertGraphEditor.CurrentDiagramViewModel.GraphData.CurrentFilter.ShowInFilter(copiedNode,
                     item.Position + offset);
 
