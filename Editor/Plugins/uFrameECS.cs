@@ -1715,7 +1715,29 @@ namespace Invert.uFrame.ECS
                 }
 
             }
+            var notes = Node.Children.OfType<NoteNode>().ToArray();
+            if (notes.Length > 0)
+            {
+            
+                foreach (var item in notes)
+                {
+                    var re = _.EditableParagraph(item.HeaderText);
+                    if (re != item.HeaderText)
+                    {
+                        item.HeaderText = re;
+                    }
 
+
+                    var result = _.EditableParagraph(item.Comments);
+                    if (result != item.Comments)
+                    {
+                        item.Comments = result;
+                    }
+                    _.Break();
+
+                }
+
+            }
 
 
 
