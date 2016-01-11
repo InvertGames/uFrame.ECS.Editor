@@ -1206,7 +1206,9 @@ namespace Invert.uFrame.ECS
                         };
 
                         if (!uFrameECS.SystemTypes.Contains(field.FieldType))
+                        {
                             uFrameECS.SystemTypes.Add(field.FieldType);
+                        }
 
                         fieldMetaInfo.MetaAttributes =
                             field.GetCustomAttributes(typeof(ActionAttribute), true)
@@ -1312,9 +1314,13 @@ namespace Invert.uFrame.ECS
                             IsByRef = parameter.ParameterType.IsByRef
                         };
                         if (!uFrameECS.SystemTypes.Contains(parameter.ParameterType))
+                        {
                             uFrameECS.SystemTypes.Add(parameter.ParameterType);
+                        }
 
                         //  Should these be part of the action meta info class ? - Micah Oct-15-2015
+                        //  Kind of... technically there is no difference. But I realize it's gonna look prittier, 
+                        //  when incapsulated inside action meta info. So I will fix it at some point - Sini Jan-10-2016
                         var paramDescr = parameter.GetCustomAttributes(typeof(Description), true).OfType<Description>().FirstOrDefault();
                         var paramOpt = parameter.GetCustomAttributes(typeof(Optional), true).OfType<Optional>().FirstOrDefault();
                         if (paramDescr != null) fieldMetaInfo.Description = paramDescr.Text;

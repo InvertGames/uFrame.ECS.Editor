@@ -20,6 +20,25 @@ namespace Invert.uFrame.ECS
     public class HandlerNode : HandlerNodeBase,
         ISetupCodeWriter, ICodeOutput, ISequenceNode, ISystemGroupProvider, IVariableNameProvider, IDemoVersionLimit, ITypeInfo, IClassNode
     {
+        public override IEnumerable<string> ForeignKeys
+        {
+            get
+            {
+                foreach (var foreignKey in base.ForeignKeys)
+                {
+                    yield return foreignKey;
+                }
+                var metaRecord = Meta as IDataRecord;
+                if (metaRecord != null) yield return Meta.Identifier;
+            }
+        }
+
+        public override void RecordRemoved(IDataRecord record)
+        {
+            base.RecordRemoved(record);
+            var metaRecord = Meta as IDataRecord;
+            if (metaRecord != null && metaRecord.Identifier == record.Identifier) Meta = null;
+        }
 
 
         public override string Title
@@ -130,7 +149,8 @@ namespace Invert.uFrame.ECS
 
         public virtual string EventType
         {
-            get { return Meta.FullName; }
+            get
+            { return Meta == null ? null : Meta.FullName; }
             set { MetaType = value; }
         }
 
@@ -232,8 +252,7 @@ namespace Invert.uFrame.ECS
             {
                 if (string.IsNullOrEmpty(MetaType))
                     return null;
-
-
+                
                 if (_meta != null) return _meta;
 
                 return _meta = Repository.GetSingle<EventNode>(MetaType) as IEventMetaInfo ?? (uFrameECS.Events.ContainsKey(MetaType) ? uFrameECS.Events[MetaType] : null);
@@ -241,9 +260,12 @@ namespace Invert.uFrame.ECS
             set
             {
                 _meta = value;
-                _metaType = value.FullName;
+                MetaType = _meta == null ? null : value.FullName;
             }
         }
+
+
+        
 
         [JsonProperty]
         public string MetaType
@@ -265,6 +287,14 @@ namespace Invert.uFrame.ECS
         public override void Validate(List<ErrorInfo> errors)
         {
             base.Validate(errors);
+
+
+            var metaRecord = Meta as IDataRecord;
+
+            if(string.IsNullOrEmpty(EventType)) errors.AddError("Please assign target event.", this);
+
+            if (metaRecord != null && metaRecord.IsRemoved()) errors.AddError("Selected event was removed.", this);
+
             if (Repository.All<HandlerNode>().Any(p => p != this && p.HandlerMethodName == HandlerMethodName))
             {
                 errors.AddError("This name is already being used", this, () =>
